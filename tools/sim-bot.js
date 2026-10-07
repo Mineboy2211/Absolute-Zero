@@ -83,6 +83,9 @@ function doChallenges() {
 
 // Extra per-layer strategies registered by later chapters.
 var botHooks = [];
+botHooks.push(() => { if (typeof Planck !== 'undefined') Planck.buyMax(); });
+// Fire Jets at Heat whenever possible.
+botHooks.push(() => { if (typeof Jets !== 'undefined' && Jets.canFire()) { Jets.fire('heat'); mark('first Jet'); } });
 // Feed the black hole every 30 seconds of play.
 botHooks.push(() => {
   if (typeof BlackHole === 'undefined' || !Layers.isUnlocked('singularity')) return;

@@ -15,7 +15,7 @@ const STARDUST_TREE = [
   { name: 'Gravity Well', branch: 1, row: 2, cost: 80, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(hasUpg('collapse', 8) ? 0.7 : 0.6)) },
   { name: 'Escape Velocity', branch: 1, row: 3, cost: 6e3, req: [7], desc: 'Gravity weight ×0.75 again.' },
   { name: 'Tidal Forces', branch: 1, row: 4, cost: 4e5, req: [8], desc: 'Gravity multiplies Stardust gain.', effect: () => Gravity.amount().add(1) },
-  { name: 'Slingshot', branch: 1, row: 5, cost: 5e7, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2) instead of ÷.' },
+  { name: 'Slingshot', branch: 1, row: 5, cost: 5e7, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2), up to ^1.15.' },
   // Memory
   { name: 'Afterglow', branch: 2, row: 1, cost: 1, desc: 'Every Chapter 1 currency gain ×10.' },
   { name: 'Stellar Memory', branch: 2, row: 2, cost: 25, req: [11], desc: 'Chapter 2 resets keep your Grade and Order.' },
@@ -56,6 +56,7 @@ Layers.register({
     if (Layers.map.collapse) m = m.mul(Layers.map.collapse.supernovaMult());
     if (typeof Compressors !== 'undefined') m = m.mul(Compressors.stardustMult());
     if (typeof BlackHole !== 'undefined') m = m.mul(BlackHole.stardustMult());
+    if (typeof Planck !== 'undefined') m = m.mul(Planck.stardustMult());
     return m;
   },
   heatMult() {

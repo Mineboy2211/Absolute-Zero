@@ -52,6 +52,10 @@ Chapters.register({
     { desc: 'Have 1 Million Electrons, Ions and Photons at once.', check: () => ['e', 'i', 'p'].every((k) => Layers.map.ionize.pool(k).gte(1e6)) },
     { desc: 'Synthesize Iron (Fe).', check: () => hasUpg('fusion', 26) },
   ],
+  complete: [
+    'Iron. The heaviest thing a star can forge before it dies.',
+    'Your fire has burned through every layer of combustion.',
+  ],
 });
 
 Chapters.register({
@@ -65,11 +69,15 @@ Chapters.register({
     'Every Chapter 1 layer now runs on its own, and Grade and Order no longer reset anything. Your job is the stars.',
   ],
   goals: [
-    { desc: 'Reach 1e4000 K.', check: () => player.bestT.gte('1e4000') },
+    { desc: 'Reach 1e2500 K.', check: () => player.bestT.gte('1e2500') },
     { desc: 'Learn Slingshot (Gravity becomes a bonus).', check: () => hasUpg('supernova', 10) },
     { desc: 'Complete every Stellar challenge at least 3 times.', check: () => Challenges.list.filter((c) => c.chapter === 2).every((c) => chalComps(c.id) >= 3) },
     { desc: 'Grow the black hole to 1,000 solar masses.', check: () => !!player.layers.singularity && !!player.layers.singularity.mass && player.layers.singularity.mass.gte(1000) },
-    { desc: 'Fire 50 Jets.', check: () => !!player.layers.quasar && player.layers.quasar.fired >= 50 },
+    { desc: 'Fire 500 Jets.', check: () => !!player.layers.quasar && player.layers.quasar.fired >= 500 },
     { desc: 'Break all three Heat Losses.', check: () => !!player.layers.planck && [1, 2, 3].every((n) => hasUpg('planck', n)) },
+  ],
+  complete: [
+    'Stars, remnants, a black hole, a quasar. And then the Planck limit itself, broken.',
+    'Only the universe is left to heat.',
   ],
 });

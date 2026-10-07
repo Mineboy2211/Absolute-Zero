@@ -16,6 +16,8 @@ const Gravity = {
     if (hasUpg('supernova', 6)) w *= 0.75;
     if (hasUpg('supernova', 8)) w *= 0.75;
     if (hasUpg('singularity', 7)) w *= 0.8;
+    if (hasUpg('quasar', 8)) w *= 0.8;
+    if (hasUpg('planck', 6)) w *= 0.7;
     w *= Math.max(0, 1 - Challenges.reward(9));
     if (typeof Compressors !== 'undefined') w /= Compressors.gravityDiv();
     return w;
@@ -25,7 +27,8 @@ const Gravity = {
   exponent() {
     const gw = this.amount().toNumber() * this.weight();
     if (!(gw > 0)) return 1;
-    return this.isBonus() ? 1 + gw / 2 : 1 / (1 + gw);
+    // Slingshot is capped: an exponent that grew with Temperature would run away.
+    return this.isBonus() ? 1 + Math.min(gw / 2, 0.15) : 1 / (1 + gw);
   },
   describe() {
     const e = this.exponent();
@@ -44,6 +47,7 @@ function heatExponent() {
   if (hasUpg('supernova', 1)) e *= 1.02;
   if (hasUpg('supernova', 5)) e *= 1.03;
   if (hasUpg('collapse', 9)) e *= 1.02;
+  if (hasUpg('quasar', 10)) e *= 1.02;
   if (inChal(12)) e *= 0.75;
   e *= 1 + Challenges.reward(12);
   if (typeof Planck !== 'undefined') e *= Planck.heatExp();

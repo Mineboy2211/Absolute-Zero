@@ -27,6 +27,7 @@ const BlackHole = {
     let r = m.pow(1.5).mul(20);
     if (hasUpg('singularity', 2)) r = r.mul(3);
     if (hasUpg('singularity', 6)) r = r.mul(m.pow(0.5));
+    if (Layers.map.quasar) r = r.mul(Layers.map.quasar.radiationMult());
     return r;
   },
   hawkingExp: () => (hasUpg('singularity', 9) ? 4 : 3),
@@ -71,6 +72,10 @@ Layers.register({
   data: () => player.layers.singularity,
   effectText() {
     return `Hawking Heat multiplies heat gain by ${formatMult(BlackHole.heatMult())}, Magma flow by ${formatMult(BlackHole.flowMult())} and Stardust gain by ${formatMult(BlackHole.stardustMult())}.`;
+  },
+  passive: () => (Layers.ms('quasar', 5) ? 0.1 : 0),
+  onResetBy() {
+    if (!Layers.ms('quasar', 3)) player.layers.singularity.mass = D(0);
   },
   autoReset: () => Layers.ms('quasar', 2),
   keep: () => ({ upgrades: Layers.ms('quasar', 1) }),

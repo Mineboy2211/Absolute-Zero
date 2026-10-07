@@ -209,9 +209,9 @@ const UI = {
   showChapterComplete(ch) {
     const body = h('div', { class: 'chapter-intro' },
       h('div', { class: 'chapter-num', text: `Chapter ${ch.id} complete` }),
-      h('p', { text: 'Iron. The heaviest thing a star can forge before it dies.' }),
-      h('p', { text: 'Your fire has burned through every layer of combustion. The next chapter is still being forged.' }),
-      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), 'Chapter 2, Stellar. Gravity, Supernovae and black holes.'));
+      (ch.complete || []).map((line) => h('p', { text: line })),
+      h('p', { text: 'The next chapter is still being forged.' }),
+      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), ch.id === 1 ? 'Chapter 2, Stellar.' : 'Chapter 3, Cosmic. Universes, Inflation, Entropy and the Heat Death.'));
     this.modal(`${ch.name}: complete`, body, [{ text: 'Keep burning', primary: true }]);
   },
 
@@ -275,7 +275,7 @@ function nextGoal() {
 
 function heatLossActive() {
   const raw = rawHeatGain();
-  return HeatLoss.some((hl) => raw.gt(hl.start()));
+  return HeatLoss.some((hl) => !(hl.broken && hl.broken()) && raw.gt(hl.start()));
 }
 
 function maxAll() {
@@ -359,14 +359,23 @@ const Tabs = {
         for (const [, v] of heatMultipliers()) x = x.mul(v);
         let before = x;
         for (let j = 0; j < i; j++) {
-          const s = HeatLoss[j].start();
-          if (before.gt(s)) before = s.mul(before.div(s).pow(HeatLoss[j].power()));
+          const o = HeatLoss[j];
+          if (o.broken && o.broken()) continue;
+          before = o.log ? logSoftcap(before, o.start(), o.power()) : softcap(before, o.start(), o.power());
+        }
+        if (hl.broken && hl.broken()) {
+          row.classList.remove('active');
+          setText(txt, 'broken by Planck Break. It no longer slows you down.');
+          return;
         }
         const s = hl.start();
         const active = before.gt(s);
-        const after = active ? s.mul(before.div(s).pow(hl.power())) : before;
+        const after = hl.log ? logSoftcap(before, s, hl.power()) : softcap(before, s, hl.power());
         row.classList.toggle('active', active);
-        setText(txt, `gain above ${formatK(s)}/s is raised to ^${hl.power().toFixed(2)}` + (active ? `. Currently dividing gain by ${format(before.div(after))}.` : '. Not active yet.'));
+        const rule = hl.log
+          ? `above ${formatK(s)}/s, the exponent of your gain is raised to ^${hl.power().toFixed(2)}`
+          : `gain above ${formatK(s)}/s is raised to ^${hl.power().toFixed(2)}`;
+        setText(txt, rule + (active ? `. Currently dividing gain by ${format(before.div(after))}.` : '. Not active yet.'));
       });
       return UI.showIf(row, () => i === 0 || player.bestT.gte(HeatLoss[i - 1].start()));
     });

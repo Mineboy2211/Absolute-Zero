@@ -201,6 +201,7 @@ function rawHeatGain() {
 const HeatLoss = [
   {
     name: 'Heat Loss I',
+    broken: () => hasUpg('planck', 1),
     start: () => {
       if (inChal(2)) return D(1e6);
       let s = D(1e15).div(inChal(11) ? 1e100 : 1);
@@ -217,6 +218,7 @@ const HeatLoss = [
   },
   {
     name: 'Heat Loss II',
+    broken: () => hasUpg('planck', 2),
     start: () => D(1e60).mul(Layers.map.ionize.poolEffects().lossStart).div(inChal(11) ? 1e100 : 1),
     power: () => {
       let p = 0.4;
@@ -227,21 +229,33 @@ const HeatLoss = [
   },
   {
     name: 'Heat Loss III',
-    start: () => D('1e500').mul(hasUpg('fusion', 20) ? 1e25 : 1).div(inChal(11) ? 1e100 : 1),
+    start: () => D('1e500').mul(hasUpg('fusion', 20) ? 1e25 : 1).mul(hasUpg('planck', 8) ? 1e100 : 1).div(inChal(11) ? 1e100 : 1),
     power: () => {
       let p = 0.2 + Challenges.reward(11);
       if (hasUpg('supernova', 3)) p += 0.1;
       if (hasUpg('collapse', 5)) p += 0.05;
       if (hasUpg('singularity', 8)) p += 0.05;
+      if (hasUpg('planck', 3)) p += 0.3;
       return Math.min(p, 1);
     },
   },
+  // The event horizon of heat: a logarithmic softcap that Planck Break cannot break.
+  // Above the start, the exponent of the gain is raised to `power`, so no feedback loop can run away.
+  { name: 'Heat Loss IV', log: true, start: () => D('1e1000'), power: () => 0.5 },
 ];
+
+function softcap(x, s, p) { return x.gt(s) ? s.mul(x.div(s).pow(p)) : x; }
+// Log-space softcap: 10^(log(s) × (log(x)/log(s))^p).
+function logSoftcap(x, s, p) {
+  if (!x.gt(s)) return x;
+  const ls = s.log10();
+  return Decimal.pow(10, ls.mul(x.log10().div(ls).pow(p)));
+}
 
 function applyHeatLoss(x) {
   for (const hl of HeatLoss) {
-    const s = hl.start();
-    if (x.gt(s)) x = s.mul(x.div(s).pow(hl.power()));
+    if (hl.broken && hl.broken()) continue;
+    x = hl.log ? logSoftcap(x, hl.start(), hl.power()) : softcap(x, hl.start(), hl.power());
   }
   return x;
 }

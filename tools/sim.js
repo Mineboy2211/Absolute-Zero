@@ -46,10 +46,11 @@ vm.runInContext(bot, ctx, { filename: 'sim-bot.js' });
 
 ctx.HOURS = hours;
 ctx.STEP = step;
+ctx.REPORT_EVERY = Number(process.env.REPORT_EVERY || 0);
 ctx.STOP_CHAPTER = Number(process.env.STOP_CHAPTER || 0);
 vm.runInContext(`
   const start = player.stats.timePlayed;
-  const every = HOURS > 24 ? 6 * 3600 : 3600;
+  const every = typeof REPORT_EVERY !== 'undefined' && REPORT_EVERY ? REPORT_EVERY : HOURS > 24 ? 6 * 3600 : 3600;
   let nextReport = start;
   while (player.stats.timePlayed < start + HOURS * 3600) {
     botStep(STEP);
