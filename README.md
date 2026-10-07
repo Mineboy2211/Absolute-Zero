@@ -6,7 +6,7 @@ An incremental game about heating up forever. You start at 0 K with a single spa
 
 ## Status
 
-- Base game: buyables, Tickspeed, ranks, Heat Loss softcaps
+- Base game: the Hearth (Kindling, Bellows, Furnace, Draft), automatic Degrees, Grade and Order, Heat Loss softcaps
 - Chapter 1: Combustion, layers 1 to 3 (Ignition, Meltdown, Vaporize) and 6 challenges
 - Coming next: Ionize, Fusion, chapter goals, then Chapters 2 and 3
 
