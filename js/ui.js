@@ -482,9 +482,11 @@ const Tabs = {
 
   achievements() {
     const root = h('div', { class: 'tab' });
-    root.append(h('p', { class: 'muted' }, 'Each Chapter 1 achievement multiplies heat gain by ×1.1. Total: ',
-      UI.dyn(() => formatMult(Achievements.mult())), ' (', UI.dyn(() => `${Achievements.count()} / ${Achievements.list.length}`), ').'));
+    root.append(h('p', { class: 'muted' }, 'Chapter 1 achievements multiply heat gain by ×1.1 each (total ',
+      UI.dyn(() => formatMult(Achievements.mult())), '). Chapter 2 achievements multiply Stardust gain by ×1.1 each (total ',
+      UI.dyn(() => formatMult(Achievements.stardustMult())), '). Unlocked: ', UI.dyn(() => `${Achievements.count()} / ${Achievements.list.length}`), '.'));
     for (const ch of Chapters.list) {
+      if (ch.id > player.chapters.unlocked) continue;
       const list = Achievements.list.filter((a) => a.chapter === ch.id);
       const grid = h('div', { class: 'ach-grid' });
       for (const a of list) {
@@ -900,4 +902,59 @@ Layers.map.singularity.panel = () => {
       h('p', { class: 'muted small', text: 'Feeding sets your Temperature to 0 and adds (log(T) / 1000)² solar masses. The heavier the black hole, the more Hawking Heat it radiates (mass^1.5).' }),
       feed,
       autoToggle('auto_feed')));
+};
+
+// Jet controls for Quasar.
+Layers.map.quasar.panel = () => {
+  const d = () => player.layers.quasar;
+  const select = h('select', { 'aria-label': 'Jet target' },
+    JET_TARGETS.map((t) => h('option', { value: t, text: Jets.targetName(t) })));
+  select.value = d().target;
+  select.addEventListener('change', () => { d().target = select.value; });
+  const fire = h('button', { class: 'big', onclick: () => Jets.fire(d().target) });
+  UI.bind(() => {
+    let label;
+    if (Jets.active()) label = `Jet blasting ${Jets.targetName(Jets.active())}: ${formatTime(d().remaining)} left`;
+    else if (d().cooling > 0) label = `Cooling down: ${formatTime(d().cooling)}`;
+    else if (layerPts('quasar').lt(1)) label = 'No Jets left';
+    else label = `Fire a Jet at ${Jets.targetName(d().target)}`;
+    setText(fire, label);
+    fire.classList.toggle('can', Jets.canFire());
+  });
+  // Show only targets that are unlocked.
+  UI.bind(() => {
+    for (const opt of select.options) {
+      const show = opt.value === 'heat' || Layers.isUnlocked(opt.value);
+      if (opt.hidden === show) opt.hidden = !show;
+    }
+  });
+  const fill = h('div', { class: 'fill' });
+  UI.bind(() => {
+    const w = (Math.min(1, d().recharge / Jets.rechargeTime()) * 100).toFixed(1) + '%';
+    if (fill.style.width !== w) fill.style.width = w;
+  });
+  return h('div', { class: 'panel' },
+    h('label', { class: 'option' }, 'Target: ', select),
+    UI.dyn(() => `Jet power ${Jets.power()}: the target's gain ×${format(Decimal.pow(10, Jets.power()), 0)} for ${formatTime(Jets.duration())}` +
+      ` (aimed at Heat: heat gain ${formatMult(Decimal.pow(10, Jets.power() * 20 * (hasUpg('quasar', 6) ? 2 : 1)))}).`, 'p', 'muted'),
+    fire,
+    h('p', { class: 'muted small' }, 'Next free Jet: ', UI.dyn(() => formatTime(Math.max(0, Jets.rechargeTime() - d().recharge))),
+      ' · Jets fired: ', UI.dyn(() => formatWhole(d().fired))),
+    h('div', { class: 'meter' }, fill),
+    autoToggle('auto_jet'));
+};
+
+// Planck Levels.
+Layers.map.planck.panel = () => {
+  const buy = h('button', { class: 'big', onclick: () => Planck.buy() });
+  UI.bind(() => {
+    setText(buy, `Planck Level ${formatWhole(Planck.level().add(1))} (cost ${format(Planck.cost(), 0)} Planck Shards)`);
+    buy.classList.toggle('can', Planck.canBuy());
+  });
+  return h('div', { class: 'panel' },
+    h('p', null, 'Planck Level: ', UI.dyn(() => formatWhole(Planck.level()), 'b'),
+      UI.dyn(() => ` · heat gain ^${format(Planck.heatExp(), 2)}`, 'span', 'muted')),
+    h('div', { class: 'button-row' }, buy, h('button', { onclick: () => Planck.buyMax() }, 'Max')),
+    h('p', { class: 'muted small', text: 'Each level costs ×3 more Shards and adds +0.02 to the heat exponent. The first three upgrades below break Heat Loss I, II and III. Heat Loss IV cannot be broken.' }),
+    autoToggle('buy_planck'));
 };

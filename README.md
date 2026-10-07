@@ -8,7 +8,8 @@ An incremental game about heating up forever. You start at 0 K with a single spa
 
 - Base game: the Hearth (Kindling, Bellows, Furnace, Draft), automatic Degrees, Grade and Order, Heat Loss softcaps
 - Chapter 1: Combustion, complete: Ignition (Embers), Meltdown (Magma), Vaporize (Pressure), Ionize (Plasma split), Fusion (Elements H to Fe), 8 challenges and 6 chapter goals
-- Coming next: Chapter 2 (Stellar), then Chapter 3 (Cosmic)
+- Chapter 2: Stellar, complete: the Gravity rule, Supernova (Stardust tree), Collapse (compressors), Singularity (black hole), Quasar (Jets) and Planck Break, 4 Stellar challenges and 6 chapter goals
+- Coming next: Chapter 3 (Cosmic)
 
 See [DESIGN.md](DESIGN.md) for formulas, layer plans and pacing targets.
 
@@ -25,7 +26,7 @@ npm install break_eternity.js
 node tools/sim.js 3
 ```
 
-The argument is the number of in-game hours to simulate.
+The argument is the number of in-game hours to simulate. Useful environment variables: `STEP=6` (seconds per tick), `LOAD=save.txt` (start from an exported save), `SAVE_OUT=out.txt`, `STOP_CHAPTER=2`. The bot itself lives in `tools/sim-bot.js`.
 
 ## Display
 

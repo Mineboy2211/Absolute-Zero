@@ -33,6 +33,7 @@ const Layers = {
       Automation.register({
         id: 'reset_' + def.id,
         name: def.name,
+        chapter: def.chapter,
         group: def.id,
         amount: true,
         unlocked: def.autoReset,

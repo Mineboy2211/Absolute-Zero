@@ -57,6 +57,7 @@ Layers.register({
     if (typeof Compressors !== 'undefined') m = m.mul(Compressors.stardustMult());
     if (typeof BlackHole !== 'undefined') m = m.mul(BlackHole.stardustMult());
     if (typeof Planck !== 'undefined') m = m.mul(Planck.stardustMult());
+    m = m.mul(Achievements.stardustMult());
     return m;
   },
   heatMult() {
