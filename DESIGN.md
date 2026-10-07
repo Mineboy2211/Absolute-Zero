@@ -1,6 +1,6 @@
 # Absolute Zero — Design Document
 
-> Status: **draft for review**. Numbers marked *(tune)* are starting values; they get tuned in a pacing simulation during Milestone 1/2. Chapters 2 and 3 are specified at a coarser level and will be detailed before each one is built.
+> Status: **approved; Milestone 1 implemented**. Sections 1 and 4.1–4.3 reflect the tuned values in the code. Numbers marked *(tune)* are starting values; they get tuned in a pacing simulation during Milestone 1/2. Chapters 2 and 3 are specified at a coarser level and will be detailed before each one is built.
 
 ## 1. Core loop
 
@@ -12,10 +12,9 @@
 ### 1.1 Heat gain (per second)
 
 ```
-base      = (1 + Kindling × kindlingPower)
-bellowsMul= 1 + Bellows × bellowsPower
-bellowsPower = 0.5 × (1 + 0.15 × Furnace) ^ furnaceExp       furnaceExp = 1 (raised by upgrades)
-tickMul   = tickPower ^ Tickspeed                              tickPower = 1.12 (raised by ranks/upgrades)
+base      = 1 + Kindling × kindlingPower                      kindlingPower = 1 (+ upgrades, ranks, challenge 1)
+bellowsMul= bellowsPower ^ Bellows                             bellowsPower = 1.4 + 0.012 × Furnace (+ upgrades)
+tickMul   = tickPower ^ Tickspeed                              tickPower = 1.15 (+ ranks, upgrades, Pressure, challenge 3)
 raw       = base × bellowsMul × tickMul × rankMul × layerMuls × achievementMul
 gain      = heatLoss(raw)                                      see 1.3
 ```
@@ -26,13 +25,15 @@ gain      = heatLoss(raw)                                      see 1.3
 
 | Buyable  | Cost formula (n = owned)       | Unlock              |
 |----------|--------------------------------|---------------------|
-| Kindling | `10 × 1.5^n`                   | start               |
-| Bellows  | `250 × 2.2^n`                  | Degree 1            |
-| Furnace  | `1e5 × 4^(n^1.15)`             | Degree 3            |
-| Tickspeed| `1e3 × 3^(n^1.1)`              | Degree 2            |
+| Kindling | `5 × 1.25^n`                   | start               |
+| Bellows  | `50 × 2.4^n`                   | Degree 1            |
+| Furnace  | `5e3 × 6^(n^1.1)`              | Degree 3            |
+| Tickspeed| `500 × 3^n`                    | Degree 2            |
+
+Pacing rule of thumb: a multiplicative buyable with power `p` and cost ratio `r` makes heat grow like `T^(log p / log r)`. Keeping the sum of these exponents below 1 before Heat Loss is what stops runaway growth.
 
 - At the very start, Kindling 0 still gives `1 K/s` (the `1 +` in `base`), so there is no dead-start.
-- **Cost scaling** (IMR-style "scaled" levels): past level 100 (Kindling/Bellows) or 50 (Furnace/Tickspeed) the exponent `n` is replaced by `n × (n/100)^0.5`. Shown in the UI as "Scaled". Later upgrades push the threshold back.
+- **Cost scaling** (IMR-style "scaled" levels): past level 100 (Kindling/Bellows), 25 (Furnace) or 50 (Tickspeed) the exponent `n` is replaced by `n × (n/100)^0.5`. Shown in the UI as "Scaled". Later upgrades push the threshold back.
 - "Buy max" uses the inverse cost formula (closed form; numeric bisection for scaled ranges).
 
 ### 1.3 Heat Loss (softcaps)
@@ -41,8 +42,8 @@ Applied to `raw` gain in log space, shown in a dedicated panel on the Main tab (
 
 | # | Starts at (K/s) | Effect on excess            | Weakened by |
 |---|-----------------|-----------------------------|-------------|
-| I | `1e12`          | `^0.5`                      | Pressure challenge 2, Element C, Planck |
-| II| `1e80`          | `^0.33`                     | Plasma Photons, Elements, Planck |
+| I | `1e12`          | `^0.5`                      | Ember upg 11, Pressure upg 4, Magma upg 5, challenge 2, later Elements |
+| II| `1e60`          | `^0.4`                      | Plasma Photons, Elements, Planck |
 | III| `1e400`        | `^0.2`                      | Stardust tree, Planck |
 | IV| `ee4`           | log-softcap: `log(x)^0.9`   | Planck Break, Chapter 3 |
 | V | `ee50`          | `slog`-softcap              | Absolutes |
@@ -53,26 +54,26 @@ Formula for a power softcap at start `S` with power `p`: `x > S ? S × (x/S)^p :
 
 | Rank   | Requirement for next          | Resets              |
 |--------|-------------------------------|---------------------|
-| Degree | `T ≥ 50 × 4^(d^1.25)`         | T, buyables         |
+| Degree | `T ≥ 10 × 5^(d^1.2)`          | T, buyables         |
 | Grade  | `Degree ≥ 4 + 2g`             | + Degree            |
 | Order  | `Grade ≥ 3 + o^1.3` (rounded) | + Grade             |
 
 Milestone rewards (listed in the Ranks tab, greyed until reached):
 
-- **Degree 1** unlock Bellows · **2** unlock Tickspeed · **3** unlock Furnace · **4** Kindling power ×2 · **6** heat ×(Degree+1) · **10** Bellows cost ÷ 10 · **15** tickPower +0.01 · **25** Kindling scaling starts 25 levels later
+- **Degree 1** unlock Bellows, heat ×2 · **2** unlock Tickspeed · **3** unlock Furnace, heat ×2 · **4** Kindling power ×2 · **6** heat ×(Degree+1) · **10** Bellows cost ÷ 10 · **15** tickPower +0.01 · **25** Kindling scaling starts 25 levels later
 - **Grade 1** heat ×3 · **2** Degree no longer resets Kindling · **3** auto-buy Kindling (unlocked earlier by Embers, this makes it free) · **5** tickPower +0.02 · **8** heat ×(Grade²) · **12** Furnace exponent +0.05
-- **Order 1** heat ×10 · **2** Degree req exponent 1.25 → 1.2 · **4** Grade no longer resets Degree · **6** Bellows power ×1.5 · **10** heat ×Order^Order (capped e100)
+- **Order 1** heat ×10 · **2** Degree req exponent 1.2 → 1.15 · **4** Order no longer resets Degree · **6** Bellows power +0.05 · **10** heat ×1.5^Order
 
 ## 2. Architecture (data-driven)
 
 ```
 index.html
 css/style.css
-js/lib/          (none: break_eternity loaded from cdn.jsdelivr.net)
 js/format.js     number formatting (scientific / standard / engineering), time formatting
-js/save.js       save/load/migrate, export/import (base64 JSON), hard reset, offline progress
-js/data/state.js default player object + versioned migrations
-js/core.js       heat gain, buyables, heat loss, tickspeed
+js/state.js      default player object
+js/save.js       save/load/migrations, export/import (base64 JSON), hard reset, NaN guard
+js/game.js       one game tick (pure logic) + time simulation used for offline progress
+js/core.js       heat gain, buyables, heat loss, tickspeed, automation registry
 js/ranks.js      Degree / Grade / Order
 js/chapters.js   chapter registry, goals, chapter unlock screen
 js/layers/layer.js   generic layer engine (reset, gain, upgrades, milestones, automation)
@@ -121,12 +122,14 @@ Times are for an active-ish player; "casual" ≈ 2× these. Times are cumulative
 
 | Milestone | Required T | Target time |
 |-----------|-----------|-------------|
-| First Degree | 50 K | 30 s |
-| First Grade | ~1e4 K | 3 min |
-| **First Ignition** | `1e6 K` | **~5 min** |
-| First Order | ~1e12 K | 25 min |
-| **First Meltdown** | `1e20 K` | ~35 min |
-| **First Vaporize** | `1e40 K` | **1–2 h** |
+| First Degree | 10 K | 15 s (sim: 16 s) |
+| First Grade | ~1e4 K | 2 min (sim: 1m50) |
+| **First Ignition** | `1e5 K` | **~5 min** (sim: 3 min) |
+| First Order | ~1e10 K | 20 min (sim: 17 min) |
+| **First Meltdown** | `1e20 K` | ~35 min (sim: 42 min) |
+| **First Vaporize** | `1e40 K` | **1–2 h** (sim: 1h01) |
+| All 6 challenges tier 1 | | ~2h30 (sim) |
+| Milestone 1 wall | ~`1e90 K` | ~3 h (sim); Ionize (Milestone 2) continues from there |
 | First Ionize | `1e120 K` | ~8 h |
 | First Fusion | `1e400 K` | ~1 day |
 | **Chapter 1 complete** | ~`1e2500 K` | **3–4 days** |
@@ -150,55 +153,55 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 **Rule introduced:** none (the base game). Ranks, buyables, heat loss.
 
 ### Layer 1 · Ignition → Embers
-- Unlock: best T ≥ `1e5`. Reset at `T ≥ 1e6`.
-- Gain: `E = floor( (T/1e6)^0.5 × emberMul )`
+- Unlock: best T ≥ `1e4`. Reset at `T ≥ 1e5`.
+- Gain: `E = floor( (T/1e5)^0.5 × emberMul )`
 - Resets: Temperature, buyables, ranks.
 - Upgrades (12, 3×4 grid), costs in Embers:
 
 | # | Cost | Effect |
 |---|------|--------|
-| 1 | 1 | Heat ×2 |
-| 2 | 3 | Auto-buy Kindling |
-| 3 | 8 | Embers boost heat: ×(1+E)^0.5 |
-| 4 | 20 | Kindling power +1 |
-| 5 | 50 | Auto-buy Bellows |
-| 6 | 150 | Degree does not reset buyables |
-| 7 | 500 | Tickspeed power +0.02 |
-| 8 | 2e3 | Auto-buy Tickspeed + Furnace |
-| 9 | 1e4 | Ember gain ×(Degree+1)^0.5 |
-| 10 | 1e5 | Auto Degree |
-| 11 | 1e7 | Heat Loss I starts ×1e3 later |
-| 12 | 1e9 | Auto Grade; Embers gain ×log(T) |
+| 1 | 1 | Heat ×3 |
+| 2 | 2 | Auto-buy Kindling |
+| 3 | 5 | Embers boost heat: ×(1+E)^0.4 |
+| 4 | 15 | Kindling power +1 |
+| 5 | 40 | Auto-buy Bellows |
+| 6 | 100 | Degree does not reset buyables |
+| 7 | 300 | Tickspeed power +0.02 |
+| 8 | 1e3 | Auto-buy Tickspeed + Furnace |
+| 9 | 5e3 | Ember gain ×(Degree+1)^0.75 |
+| 10 | 2e4 | Auto Degree |
+| 11 | 1e6 | Heat Loss I starts ×1e3 later |
+| 12 | 1e8 | Auto Grade; Embers gain ×log(T) |
 
-- Milestones (by total Ignitions): 1 keep Degree 1–3 unlocks · 3 start each run with 5 Kindling · 10 keep auto-buyers · 25 Kindling cost ×0.5 · 50 gain 1% of pending Embers/s.
+- Milestones (by total Ignitions): 1 Bellows/Furnace/Tickspeed stay unlocked · 3 start each run with 5 Kindling · 10 Kindling cost ÷2 · 25 heat ×2.
 
 ### Layer 2 · Meltdown → Magma
 - Unlock: best T ≥ `1e18`. Reset at `T ≥ 1e20`.
-- On reset: `Magma += (T/1e20)^0.05 × (1+Embers)^0.05 × magmaMul` and **Flow** `+= sqrt(that gain)`.
-- **Passive growth:** `dMagma/dt = Flow × flowMul` (Flow is kept until a higher layer resets it). This is the "magma grows by itself" mechanic: idle time between resets matters.
-- Effect: heat ×`(1 + Magma)^0.75`, Embers ×`(1+Magma)^0.25`.
+- On reset: `Magma += (T/1e20)^0.1 × (1 + log(1+Embers)) × magmaMul` and **Flow** `+= sqrt(that gain)`.
+- **Passive growth:** `dMagma/dt = Flow × flowMul`. Flow survives Meltdowns and is only reset by Vaporize (until a Pressure upgrade/milestone keeps it). This is the "magma grows by itself" mechanic: idle time between resets matters.
+- Effect: heat ×`(1 + Magma)^0.6`, Embers ×`(1+Magma)^0.25`.
 - Resets: everything of Ignition (Embers, Ember upgrades except those kept by milestones).
-- 10 upgrades: Flow ×2, Flow ×log(Embers), keep Ember upgrades, Furnace exponent +0.1, Magma boosts tickspeed power, auto Ignition, Heat Loss I power 0.5→0.55, Grade boosts Flow, auto Order, Magma effect exponent 0.75→0.9.
-- Milestones: 1 keep Ember upgrades 1–6 · 3 auto Ignition (gain 10% pending/s) · 10 keep all Ember upgrades · 25 Flow is not reset by Meltdown.
+- 10 upgrades: Flow ×2, Flow ×log(Embers), Furnace +0.006 power, Magma boosts tickspeed power, Heat Loss I power 0.5→0.55, Grade boosts Flow, auto Order, Magma effect exponent 0.6→0.7, Ember upg 3 ^0.4→^0.45, Flow boosts Magma gain.
+- Milestones: 1 keep Ember upgrades 1–6 · 3 gain 10% of pending Embers/s · 10 keep all Ember upgrades · 25 Flow ×2.
 
 ### Layer 3 · Vaporize → Pressure
 - Unlock: best T ≥ `1e35`. Reset at `T ≥ 1e40`.
 - Gain: `P = floor( (log(T)/40)^4 × (1+log(1+Magma)) × pressureMul )` — logarithmic in T, so Pressure grows slowly and steadily.
-- Effect: Tickspeed power `+0.01 × P^0.5`, Embers ×`(1+P)^2`.
+- Effect: Tickspeed power `+0.01 × P^0.5` (max +0.2), Embers ×`(1+P)`, Magma ×`(1+P)^0.5`.
 - **Unlocks Challenges** (Challenges tab). Entering a challenge does a Vaporize reset; completing at its goal gives a permanent tiered reward. Each has 5 tiers (goal rises).
 
 | Ch | Name | Restriction | Reward (per completion) |
 |----|------|-------------|-------------------------|
-| 1 | Damp Wood | Kindling does nothing; base is 1 + Bellows | Kindling power +0.5 |
+| 1 | Damp Wood | Kindling does nothing; base is 1 + Bellows | Kindling power ×(1+comps) |
 | 2 | Leaky Pipe | Heat Loss I starts at 1e6 | Heat Loss I power +0.03 |
 | 3 | Stagnant Air | Tickspeed disabled | tickPower +0.01 |
 | 4 | Wet Embers | Ember gain ^0.5 | Embers ×10 |
 | 5 | Cold Core | Magma Flow disabled | Flow ^1.05 |
-| 6 | No Ranks | Ranks give no rewards | Degree requirement ÷ |
-(Ch 5–6 unlock with Pressure upgrades.)
+| 6 | No Ranks | Ranks give no rewards | Degree req exponent −0.01 |
+(Ch 5–6 unlock with Pressure upgrades. Goals per tier are listed in `js/challenges.js`.)
 
-- 10 upgrades incl. keep Magma Flow, auto Meltdown, Pressure boosts Magma flow, challenge auto-complete at tier 1, Order req reduced.
-- Milestones: 1 keep Meltdown milestones · 2 auto Meltdown · 5 start with 1e3 Embers · 10 keep Magma upgrades · 20 Flow kept.
+- 10 upgrades: keep Magma Flow, Pressure boosts Flow, unlock Ch5, Heat Loss I start ×(1+P)^5, unlock Ch6, Grade/Order req −1, buyable scaling +50 levels, Order boosts Pressure, buyables stop spending T, heat ×2^(challenge completions).
+- Milestones: 1 keep all Ember upgrades · 2 auto Meltdown · 3 start with 100 Embers · 5 keep Magma upgrades · 10 Flow kept · 20 gain 10% pending Magma/s.
 
 ### Layer 4 · Ionize → Plasma
 - Unlock: best T ≥ `1e100`. Reset at `T ≥ 1e120`.
@@ -267,4 +270,4 @@ Goals (sketch): reach `ee10`, turn Gravity positive, complete Stellar challenges
 1. NaN scan (debug helper walks `player` and reports non-finite values).
 2. Dead-end test: from a fresh save at dev speed ×1000, verify every layer's first reset is reachable without buying "wrong" upgrades.
 3. Save compatibility: keep a `saves/` folder of exported saves from each version, load them in the new build.
-4. Pacing check: headless simulation script (`tools/sim.html`) runs a greedy bot and prints time to each milestone, compared with the table in §3.
+4. Pacing check: headless simulation script (`node tools/sim.js <hours>`) runs a greedy bot and prints time to each milestone, compared with the table in §3.
