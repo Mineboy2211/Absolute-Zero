@@ -42,6 +42,7 @@ function heatExponent() {
   if (hasUpg('fusion', 26)) e *= 1.05;
   if (hasUpg('supernova', 1)) e *= 1.02;
   if (hasUpg('supernova', 5)) e *= 1.03;
+  if (hasUpg('collapse', 9)) e *= 1.02;
   if (inChal(12)) e *= 0.75;
   e *= 1 + Challenges.reward(12);
   if (typeof Planck !== 'undefined') e *= Planck.heatExp();

@@ -841,3 +841,31 @@ Layers.map.supernova.card = () => {
     h('p', { class: 'muted', text: 'Each node needs the one above it. Some also cost Pressure.' }),
     h('div', { class: 'tree' }, cols));
 };
+
+// Compressors for Collapse.
+Layers.map.collapse.panel = () => {
+  const effects = {
+    embers: () => `Heat gain ${formatMult(Compressors.heatMult())}`,
+    magma: () => `Stardust gain ${formatMult(Compressors.stardustMult())}`,
+    plasma: () => `Gravity weight ÷${Compressors.gravityDiv().toFixed(2)}`,
+  };
+  const tiles = Object.entries(COMPRESSORS).map(([k, c]) => {
+    const btn = h('button', { onclick: () => Compressors.compress(k) });
+    UI.bind(() => {
+      setText(btn, Compressors.canCompress(k) ? `Compress (record → ${format(Compressors.pending(k))})` : 'Needs more to beat the record');
+      btn.classList.toggle('can', Compressors.canCompress(k));
+    });
+    const el = h('div', { class: 'pool' },
+      h('div', { class: 'pool-head' }, h('span', { class: 'pool-name', text: c.name }),
+        UI.dyn(() => 'record ' + format(Compressors.record(k)), 'span', 'pool-amount')),
+      UI.dyn(() => `You have ${format(Compressors.amount(k))} (log ${format(Compressors.pending(k))})`, 'div', 'muted small'),
+      UI.dyn(effects[k], 'div', 'effect'),
+      btn);
+    el.style.setProperty('--pool', c.color);
+    return el;
+  });
+  return h('div', { class: 'panel' },
+    h('p', { class: 'muted', text: 'Compressing sacrifices all of that currency. Each compressor keeps the best log10 you ever fed it, forever: Collapse and later layers never reset these records.' }),
+    h('div', { class: 'pools' }, tiles),
+    autoToggle('auto_compress'));
+};

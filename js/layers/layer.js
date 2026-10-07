@@ -66,6 +66,7 @@ const Layers = {
     if (!Chapters.passed(1)) return g;
     if (Layers.ms('supernova', 1)) g = g.mul(10);
     if (hasUpg('supernova', 11)) g = g.mul(10);
+    if (Layers.map.collapse) g = g.mul(Layers.map.collapse.chapter1Mult());
     if (inChal(10)) g = g.pow(0.5);
     return g;
   },

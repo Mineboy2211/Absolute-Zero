@@ -83,6 +83,11 @@ function doChallenges() {
 
 // Extra per-layer strategies registered by later chapters.
 var botHooks = [];
+// Compress whenever a record would grow tenfold.
+botHooks.push(() => {
+  if (typeof Compressors === 'undefined' || !Layers.isUnlocked('collapse')) return;
+  for (const k of Object.keys(COMPRESSORS)) if (Compressors.pending(k).gte(Compressors.record(k).add(1))) Compressors.compress(k);
+});
 
 function botStep(dt) {
   gameTick(dt);

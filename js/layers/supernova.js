@@ -12,7 +12,7 @@ const STARDUST_TREE = [
   { name: 'Core Ignition', branch: 0, row: 5, cost: 2e7, req: [4], desc: 'Heat gain ^1.03.' },
   // Gravity
   { name: 'Orbital Mechanics', branch: 1, row: 1, cost: 2, desc: 'Gravity weight ×0.75.' },
-  { name: 'Gravity Well', branch: 1, row: 2, cost: 80, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(0.6)) },
+  { name: 'Gravity Well', branch: 1, row: 2, cost: 80, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(hasUpg('collapse', 8) ? 0.7 : 0.6)) },
   { name: 'Escape Velocity', branch: 1, row: 3, cost: 6e3, req: [7], desc: 'Gravity weight ×0.75 again.' },
   { name: 'Tidal Forces', branch: 1, row: 4, cost: 4e5, req: [8], desc: 'Gravity multiplies Stardust gain.', effect: () => Gravity.amount().add(1) },
   { name: 'Slingshot', branch: 1, row: 5, cost: 5e7, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2) instead of ÷.' },
@@ -53,6 +53,7 @@ Layers.register({
     if (hasUpg('supernova', 20)) m = m.mul(upgEff('supernova', 20));
     if (Layers.ms('supernova', 10)) m = m.mul(2);
     m = m.mul(Challenges.reward(10));
+    if (Layers.map.collapse) m = m.mul(Layers.map.collapse.supernovaMult());
     if (typeof Compressors !== 'undefined') m = m.mul(Compressors.stardustMult());
     if (typeof BlackHole !== 'undefined') m = m.mul(BlackHole.stardustMult());
     return m;
@@ -67,7 +68,10 @@ Layers.register({
   effectText() {
     return `Stardust multiplies heat gain by ${formatMult(layerPts('supernova').add(1).pow(2))} and Nucleon gain by ${formatMult(this.nucleonMult())}.`;
   },
-  passive: () => (Layers.ms('supernova', 25) ? 0.1 : hasUpg('supernova', 15) ? 0.01 : 0),
+  passive: () => (Layers.ms('supernova', 25) || Layers.ms('collapse', 5) ? 0.1 : hasUpg('supernova', 15) ? 0.01 : 0),
+  onResetBy() {
+    if (Layers.ms('collapse', 3)) Layers.addPoints('supernova', D(1e4).sub(layerPts('supernova')).max(0));
+  },
   autoReset: () => Layers.ms('collapse', 2),
   keep: () => ({ upgrades: Layers.ms('collapse', 1) }),
   upgrades: STARDUST_TREE.map((n, idx) => ({
