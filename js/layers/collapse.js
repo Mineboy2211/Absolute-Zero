@@ -58,6 +58,7 @@ Layers.register({
   gain() {
     let g = Decimal.pow(10, player.T.log10().sub(556).div(25)).mul(layerPts('supernova').add(1).log10().add(1));
     if (Layers.ms('collapse', 25)) g = g.mul(2);
+    if (Layers.map.singularity) g = g.mul(Layers.map.singularity.neutroniumMult());
     return g;
   },
   heatMult: () => Compressors.heatMult(),
@@ -65,6 +66,10 @@ Layers.register({
   chapter1Mult: () => (hasUpg('collapse', 2) ? layerPts('collapse').add(1).pow(0.25) : D(1)),
   effectText() {
     return `Neutronium multiplies Stardust gain by ${formatMult(this.supernovaMult())}. Compressed Embers multiply heat gain by ${formatMult(Compressors.heatMult())}.`;
+  },
+  passive: () => (Layers.ms('singularity', 5) ? 0.1 : 0),
+  onResetBy() {
+    if (Layers.ms('singularity', 3)) Layers.addPoints('collapse', D(100).sub(layerPts('collapse')).max(0));
   },
   autoReset: () => Layers.ms('singularity', 2),
   keep: () => ({ upgrades: Layers.ms('singularity', 1) }),

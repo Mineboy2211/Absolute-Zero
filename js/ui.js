@@ -869,3 +869,26 @@ Layers.map.collapse.panel = () => {
     h('div', { class: 'pools' }, tiles),
     autoToggle('auto_compress'));
 };
+
+// Black hole panel for Singularity.
+Layers.map.singularity.panel = () => {
+  const hole = h('div', { class: 'black-hole' });
+  UI.bind(() => {
+    // The disc grows with log(mass): 40px when empty, up to 140px.
+    const size = Math.round(40 + Math.min(100, BlackHole.mass().add(1).log10().toNumber() * 25)) + 'px';
+    if (hole.style.width !== size) { hole.style.width = size; hole.style.height = size; }
+  });
+  const feed = h('button', { class: 'big', onclick: () => BlackHole.feed() });
+  UI.bind(() => {
+    setText(feed, BlackHole.canFeed() ? `Feed your Temperature (+${format(BlackHole.feedGain(), 3)} solar masses)` : 'Reach 1e100 K to feed the black hole');
+    feed.classList.toggle('can', BlackHole.canFeed());
+  });
+  return h('div', { class: 'panel bh-panel' },
+    h('div', { class: 'bh-visual' }, hole),
+    h('div', { class: 'bh-info' },
+      h('p', null, 'Mass: ', UI.dyn(() => format(BlackHole.mass(), 3) + ' solar masses', 'b')),
+      h('p', null, 'Hawking radiation: ', UI.dyn(() => '+' + format(BlackHole.radiation()) + ' Hawking Heat/s', 'b')),
+      h('p', { class: 'muted small', text: 'Feeding sets your Temperature to 0 and adds (log(T) / 1000)² solar masses. The heavier the black hole, the more Hawking Heat it radiates (mass^1.5).' }),
+      feed,
+      autoToggle('auto_feed')));
+};

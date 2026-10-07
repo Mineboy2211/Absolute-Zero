@@ -261,6 +261,18 @@ input[type=checkbox]:focus-visible { outline: 2px solid var(--accent); outline-o
 .node.bought .upg-cost::after { content: ' · owned'; }
 .node.locked { opacity: .45; }
 
+/* ---------- black hole ---------- */
+.bh-panel { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.bh-visual { flex: 0 0 160px; height: 160px; display: flex; align-items: center; justify-content: center; }
+.black-hole {
+  border-radius: 50%; background: #000;
+  box-shadow: 0 0 0 3px #b388ff55, 0 0 30px 8px #b388ff66, inset 0 0 20px #000;
+  transition: width .5s, height .5s; animation: bh-spin 6s linear infinite;
+  background-image: radial-gradient(circle at 50% 50%, #000 55%, #2a1650 70%, #000 72%);
+}
+@keyframes bh-spin { to { transform: rotate(360deg); } }
+.bh-info { flex: 1 1 260px; }
+
 /* ---------- challenges ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .chal { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }

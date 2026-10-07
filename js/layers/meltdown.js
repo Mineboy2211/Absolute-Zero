@@ -32,6 +32,7 @@ Layers.register({
     if (Layers.ms('meltdown', 25)) m = m.mul(2);
     m = m.mul(Challenges.reward(5));
     m = m.mul(Layers.map.ionize.poolEffects().flow);
+    if (typeof BlackHole !== 'undefined') m = m.mul(BlackHole.flowMult());
     return m;
   },
   flowRate() {

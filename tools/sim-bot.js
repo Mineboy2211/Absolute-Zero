@@ -83,6 +83,12 @@ function doChallenges() {
 
 // Extra per-layer strategies registered by later chapters.
 var botHooks = [];
+// Feed the black hole every 30 seconds of play.
+botHooks.push(() => {
+  if (typeof BlackHole === 'undefined' || !Layers.isUnlocked('singularity')) return;
+  const d = player.layers.singularity;
+  if (d.feedTimer >= 30 && BlackHole.feed()) d.feedTimer = 0;
+});
 // Compress whenever a record would grow tenfold.
 botHooks.push(() => {
   if (typeof Compressors === 'undefined' || !Layers.isUnlocked('collapse')) return;

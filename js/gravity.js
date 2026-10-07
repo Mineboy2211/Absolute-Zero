@@ -15,6 +15,7 @@ const Gravity = {
     let w = 0.05;
     if (hasUpg('supernova', 6)) w *= 0.75;
     if (hasUpg('supernova', 8)) w *= 0.75;
+    if (hasUpg('singularity', 7)) w *= 0.8;
     w *= Math.max(0, 1 - Challenges.reward(9));
     if (typeof Compressors !== 'undefined') w /= Compressors.gravityDiv();
     return w;

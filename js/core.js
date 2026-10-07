@@ -232,6 +232,7 @@ const HeatLoss = [
       let p = 0.2 + Challenges.reward(11);
       if (hasUpg('supernova', 3)) p += 0.1;
       if (hasUpg('collapse', 5)) p += 0.05;
+      if (hasUpg('singularity', 8)) p += 0.05;
       return Math.min(p, 1);
     },
   },
