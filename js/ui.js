@@ -91,7 +91,7 @@ const UI = {
       chip.append(h('span', { class: 'chip-name', text: def.currency }), amount);
       cur.append(chip);
       this.headerUpdaters.push(() => {
-        const show = Layers.isUnlocked(def.id);
+        const show = Layers.isUnlocked(def.id) && def.chapter === headerChapter();
         if (chip.hidden === show) chip.hidden = !show;
         if (show) setText(amount, format(layerPts(def.id)));
       });
@@ -247,6 +247,14 @@ function accentColor(q) {
   return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
 
+// The header shows the currencies of the newest chapter that has an unlocked layer.
+function headerChapter() {
+  for (let c = player.chapters.unlocked; c > 1; c--) {
+    if (Layers.list.some((l) => l.chapter === c && Layers.isUnlocked(l.id))) return c;
+  }
+  return 1;
+}
+
 // Fraction of the way from `from` to `to`, measured in orders of magnitude.
 function logProgress(x, from, to) {
   const a = D(from).max(1).log10().toNumber(), b = D(to).max(1).log10().toNumber();
@@ -288,7 +296,7 @@ function autoToggle(id) {
     row.append(' when gain ≥ ', input);
   }
   UI.bind(() => { if (box.checked !== player.auto[id].on) box.checked = player.auto[id].on; });
-  return UI.showIf(row, a.unlocked);
+  return UI.showIf(row, () => Automation.isUnlocked(id));
 }
 
 function card(title, ...kids) {
@@ -332,6 +340,16 @@ const Tabs = {
         h('button', { onclick: maxAll }, 'Max all')),
       h('div', { class: 'machines' }, tiles)));
 
+    const grav = card('Gravity',
+      h('p', { class: 'muted', text: 'Gravity grows with your Temperature above 1e450 K. Until you learn to use it, it raises your heat gain to a power below 1.' }),
+      h('div', { class: 'gravity-row' },
+        h('div', null, h('div', { class: 'muted small', text: 'Gravity' }), UI.dyn(() => format(Gravity.amount()), 'div', 'gravity-big')),
+        h('div', null, h('div', { class: 'muted small', text: 'Weight' }), UI.dyn(() => Gravity.weight().toFixed(4), 'div', 'gravity-big')),
+        h('div', null, h('div', { class: 'muted small', text: 'Heat gain exponent' }), UI.dyn(() => '^' + Gravity.exponent().toFixed(3), 'div', 'gravity-big'))),
+      UI.dyn(() => Gravity.describe(), 'p'));
+    UI.classIf(grav, 'gravity-bonus', () => Gravity.isBonus());
+    root.append(UI.showIf(grav, () => Gravity.active()));
+
     const hlRows = HeatLoss.map((hl, i) => {
       const row = h('div', { class: 'heatloss' });
       const txt = h('span');
@@ -358,7 +376,9 @@ const Tabs = {
 
   ranks() {
     const root = h('div', { class: 'tab' });
-    root.append(h('p', { class: 'muted', text: 'Degrees are earned on their own as your Temperature climbs. Grade and Order temper the fire: they reset your Temperature, buyables and the ranks below them in exchange for permanent rewards.' }));
+    root.append(h('p', { class: 'muted' }, UI.dyn(() => (Chapters.passed(1)
+      ? 'Degrees are earned on their own as your Temperature climbs. Since Chapter 2, Grade and Order no longer reset anything.'
+      : 'Degrees are earned on their own as your Temperature climbs. Grade and Order temper the fire: they reset your Temperature, buyables and the ranks below them in exchange for permanent rewards.'))));
     for (const id of Ranks.order) {
       const r = Ranks.defs[id];
       let btn;
@@ -794,4 +814,30 @@ Layers.map.fusion.card = () => {
   return card('Elements',
     h('p', { class: 'muted', text: 'Tap an Element to see it, tap again to synthesize it. Elements unlock in order.' }),
     grid, detail);
+};
+
+// Stardust skill tree: four branches, each node needs the one above it.
+Layers.map.supernova.card = () => {
+  const def = Layers.map.supernova;
+  const cols = TREE_BRANCHES.map((name, b) => {
+    const col = h('div', { class: 'branch' }, h('div', { class: 'branch-name', text: name }));
+    def.upgrades.filter((u) => u.branch === b).sort((x, y) => x.row - y.row).forEach((u) => {
+      const extra = u.extra ? u.extra.map(([lid, amt]) => ` + ${format(amt, 0)} ${Layers.map[lid].currency}`).join('') : '';
+      const node = h('button', { class: 'node', onclick: () => Layers.buyUpg('supernova', u.id) },
+        h('span', { class: 'node-name', text: u.name }),
+        h('span', { class: 'node-desc', text: u.desc }),
+        u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
+        h('span', { class: 'upg-cost', text: `${format(u.cost, 0)} Stardust${extra}` }));
+      UI.bind(() => {
+        node.classList.toggle('bought', hasUpg('supernova', u.id));
+        node.classList.toggle('can', Layers.canBuyUpg('supernova', u.id));
+        node.classList.toggle('locked', !hasUpg('supernova', u.id) && !u.unlocked());
+      });
+      col.append(node);
+    });
+    return col;
+  });
+  return card('Stardust tree',
+    h('p', { class: 'muted', text: 'Each node needs the one above it. Some also cost Pressure.' }),
+    h('div', { class: 'tree' }, cols));
 };

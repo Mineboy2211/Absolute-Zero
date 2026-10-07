@@ -85,8 +85,9 @@ Layers.register({
       points: false,
     };
   },
-  onResetBy() {
-    if (!Layers.ms('fusion', 1)) {
+  onResetBy(by) {
+    const keepSplit = by.chapter > 1 ? Layers.ms('supernova', 2) : Layers.ms('fusion', 1);
+    if (!keepSplit) {
       for (const k of Object.keys(PLASMA_POOLS)) player.layers.ionize.alloc[k] = D(0);
     }
     if (Layers.ms('fusion', 5)) Layers.addPoints('ionize', D(10));

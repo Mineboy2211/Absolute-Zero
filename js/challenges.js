@@ -3,6 +3,7 @@
 // A tier is completed as soon as Temperature reaches its goal inside the challenge.
 
 const Challenges = {
+  // Every challenge belongs to chapter 1 unless it says otherwise.
   list: [
     {
       id: 1,
@@ -84,9 +85,55 @@ const Challenges = {
       reward: (c) => D(1 + c).pow(2),
       rewardText: (r) => `Plasma gain ${formatMult(r)}`,
     },
+    // Chapter 2: Stellar challenges, unlocked by the Trials branch of the Stardust tree.
+    {
+      id: 9,
+      chapter: 2,
+      name: 'Dense Core',
+      layer: 'supernova',
+      desc: 'Gravity is 3× stronger. Entering resets like a Supernova.',
+      goals: ['1e485', '1e495', '1e505', '1e520', '1e540'],
+      unlocked: () => hasUpg('supernova', 16),
+      reward: (c) => 0.05 * c,
+      rewardText: (r) => `Gravity weight −${format(r * 100, 0)}%`,
+    },
+    {
+      id: 10,
+      chapter: 2,
+      name: 'Red Dwarf',
+      layer: 'supernova',
+      desc: 'Every Chapter 1 currency gain is square-rooted.',
+      goals: ['1e490', '1e500', '1e512', '1e526', '1e545'],
+      unlocked: () => hasUpg('supernova', 17),
+      reward: (c) => D(1 + c),
+      rewardText: (r) => `Stardust gain ${formatMult(r)}`,
+    },
+    {
+      id: 11,
+      chapter: 2,
+      name: 'Burnout',
+      layer: 'supernova',
+      desc: 'Heat Loss I, II and III start 1e100 times earlier.',
+      goals: ['1e482', '1e492', '1e505', '1e520', '1e540'],
+      unlocked: () => hasUpg('supernova', 18),
+      reward: (c) => 0.02 * c,
+      rewardText: (r) => `Heat Loss III power +${format(r, 2)}`,
+    },
+    {
+      id: 12,
+      chapter: 2,
+      name: 'Event Horizon',
+      layer: 'supernova',
+      desc: 'Heat gain ^0.75.',
+      goals: ['1e485', '1e497', '1e510', '1e525', '1e545'],
+      unlocked: () => hasUpg('supernova', 19),
+      reward: (c) => 0.01 * c,
+      rewardText: (r) => `Heat gain ^${format(1 + r, 2)}`,
+    },
   ],
   maxComps: 5,
-  get(id) { return this.list[id - 1]; },
+  init() { for (const c of this.list) c.chapter = c.chapter || 1; },
+  get(id) { return this.list.find((c) => c.id === id); },
   isUnlocked(id) { return this.get(id).unlocked(); },
   anyUnlocked() { return this.list.some((c) => c.unlocked()); },
   goal(id) {
@@ -96,7 +143,10 @@ const Challenges = {
     const g = D(c.goals[n]);
     return hasUpg('fusion', 9) && id <= 6 ? g.pow(0.9) : g;
   },
-  reward(id) { return this.get(id).reward(chalComps(id)); },
+  reward(id) {
+    const c = this.get(id);
+    return c ? c.reward(chalComps(id)) : 0;
+  },
   totalComps() { return this.list.reduce((s, c) => s + chalComps(c.id), 0); },
   enter(id) {
     if (!this.isUnlocked(id) || inChal(id)) return;
@@ -121,3 +171,5 @@ const Challenges = {
     }
   },
 };
+
+Challenges.init();

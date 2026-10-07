@@ -6,7 +6,9 @@ const Automation = {
   // def: { id, name, group, unlocked(), run(), amount: bool (has a threshold input) }
   register(def) { this.list.push(def); this.map[def.id] = def; },
   ids() { return this.list.map((a) => a.id); },
-  isOn(id) { const a = this.map[id]; return a.unlocked() && player.auto[id] && player.auto[id].on; },
+  // Autobuyers of finished chapters are always available.
+  isUnlocked(id) { const a = this.map[id]; return a.unlocked() || Chapters.passed(a.chapter || 1); },
+  isOn(id) { return this.isUnlocked(id) && player.auto[id] && player.auto[id].on; },
   amount(id) {
     try { const v = D(player.auto[id].amount); return Number.isNaN(v.mag) ? D(1) : v; } catch (e) { return D(1); }
   },
@@ -150,6 +152,7 @@ function bellowsPower() {
   if (rankReward('order', 6)) p = p.add(0.05);
   if (hasUpg('ionize', 8)) p = p.add(0.1);
   if (hasUpg('fusion', 14)) p = p.add(0.1);
+  if (hasUpg('supernova', 4)) p = p.add(0.25);
   p = p.add(Challenges.reward(7));
   return p;
 }
@@ -188,7 +191,8 @@ function heatMultipliers() {
 function rawHeatGain() {
   let g = heatBase();
   for (const [, v] of heatMultipliers()) g = g.mul(v);
-  if (hasUpg('fusion', 26)) g = g.pow(1.05);
+  const e = heatExponent();
+  if (e !== 1) g = g.pow(e);
   return g;
 }
 
@@ -199,7 +203,7 @@ const HeatLoss = [
     name: 'Heat Loss I',
     start: () => {
       if (inChal(2)) return D(1e6);
-      let s = D(1e15);
+      let s = D(1e15).div(inChal(11) ? 1e100 : 1);
       if (hasUpg('ignition', 11)) s = s.mul(1e3);
       if (hasUpg('vaporize', 4)) s = s.mul(upgEff('vaporize', 4));
       return s.mul(Layers.map.ionize.poolEffects().lossStart);
@@ -213,7 +217,7 @@ const HeatLoss = [
   },
   {
     name: 'Heat Loss II',
-    start: () => D(1e60).mul(Layers.map.ionize.poolEffects().lossStart),
+    start: () => D(1e60).mul(Layers.map.ionize.poolEffects().lossStart).div(inChal(11) ? 1e100 : 1),
     power: () => {
       let p = 0.4;
       if (hasUpg('ionize', 3)) p += 0.05;
@@ -221,7 +225,15 @@ const HeatLoss = [
       return Math.min(p, 1);
     },
   },
-  { name: 'Heat Loss III', start: () => D('1e500').mul(hasUpg('fusion', 20) ? 1e25 : 1), power: () => 0.2 },
+  {
+    name: 'Heat Loss III',
+    start: () => D('1e500').mul(hasUpg('fusion', 20) ? 1e25 : 1).div(inChal(11) ? 1e100 : 1),
+    power: () => {
+      let p = 0.2 + Challenges.reward(11);
+      if (hasUpg('supernova', 3)) p += 0.1;
+      return Math.min(p, 1);
+    },
+  },
 ];
 
 function applyHeatLoss(x) {

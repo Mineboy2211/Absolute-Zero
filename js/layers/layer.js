@@ -12,7 +12,7 @@
 //   effectText()       short description of the currency's effect
 //   passive()          fraction of pending gain earned per second
 //   tick(dt)           per-tick logic
-//   upgrades[]         { cost, desc, effect?, effectText?, unlocked? }
+//   upgrades[]         { cost, extra?: [[layerId, amount]], desc, effect?, effectText?, unlocked? }
 //   milestones[]       { req (number of resets), desc }
 //   autoReset()        when the "auto reset" automation is unlocked
 //   panel(el)          optional custom UI block for the layer tab
@@ -55,8 +55,25 @@ const Layers = {
   gain(id) {
     const def = this.map[id];
     if (player.T.lt(def.req())) return D(0);
-    const g = def.gain();
+    let g = def.gain();
+    if (def.chapter === 1) g = this.chapter1Boost(g);
+    if (typeof Jets !== 'undefined') g = g.mul(Jets.layerMult(id));
     return Number.isNaN(g.mag) ? D(0) : g.floor();
+  },
+
+  // Chapter 2 effects on every Chapter 1 currency gain.
+  chapter1Boost(g) {
+    if (!Chapters.passed(1)) return g;
+    if (Layers.ms('supernova', 1)) g = g.mul(10);
+    if (hasUpg('supernova', 11)) g = g.mul(10);
+    if (inChal(10)) g = g.pow(0.5);
+    return g;
+  },
+
+  // Fraction of pending gain earned per second: the layer's own passive, or 100% once its chapter is behind you.
+  passiveRate(def) {
+    const own = def.passive ? def.passive() : 0;
+    return Chapters.passed(def.chapter) ? Math.max(own, 1) : own;
   },
 
   canReset(id) {
@@ -91,14 +108,18 @@ const Layers = {
   resetBelow(byDef) {
     const lower = this.list.filter((l) => l.chapter < byDef.chapter || (l.chapter === byDef.chapter && l.order < byDef.order));
     for (let i = lower.length - 1; i >= 0; i--) this.resetLayer(lower[i], byDef);
-    Ranks.reset();
+    Ranks.reset(byDef);
     resetCore();
   },
 
   resetLayer(def, byDef) {
     const d = player.layers[def.id];
-    const keep = def.keep ? def.keep(byDef) : {};
-    if (!keep.points) d.points = D(0);
+    const keep = def.keep ? Object.assign({}, def.keep(byDef)) : {};
+    // A later chapter never takes away the upgrades of an earlier one.
+    const crossChapter = byDef.chapter > def.chapter;
+    if (crossChapter) keep.upgrades = true;
+    if (crossChapter && def.chapter === 1 && hasUpg('supernova', 13)) d.points = d.points.mul(0.01);
+    else if (!keep.points) d.points = D(0);
     if (keep.upgrades !== true) {
       const kept = keep.upgrades || [];
       d.upgrades = d.upgrades.filter((u) => kept.includes(u));
@@ -108,18 +129,27 @@ const Layers = {
   },
 
   // ----- milestones & upgrades -----
-  ms(id, req) { return player.layers[id].resets >= req; },
+  ms(id, req) { const d = player.layers[id]; return !!d && d.resets >= req; },
 
   canBuyUpg(id, uid) {
     const u = this.map[id].upgMap[uid];
-    return this.isUnlocked(id) && (!u.unlocked || u.unlocked()) && !hasUpg(id, uid) && player.layers[id].points.gte(u.cost);
+    if (!this.isUnlocked(id) || (u.unlocked && !u.unlocked()) || hasUpg(id, uid)) return false;
+    if (!player.layers[id].points.gte(u.cost)) return false;
+    return !u.extra || u.extra.every(([lid, amt]) => player.layers[lid].points.gte(amt));
   },
   buyUpg(id, uid) {
     if (!this.canBuyUpg(id, uid)) return false;
     const d = player.layers[id];
-    d.points = d.points.sub(this.map[id].upgMap[uid].cost);
+    const u = this.map[id].upgMap[uid];
+    d.points = d.points.sub(u.cost);
+    if (u.extra) for (const [lid, amt] of u.extra) player.layers[lid].points = player.layers[lid].points.sub(amt);
     d.upgrades.push(uid);
     return true;
+  },
+  // Buy every affordable upgrade of a layer, cheapest first.
+  buyAllUpgs(id) {
+    const def = this.map[id];
+    for (const u of [...def.upgrades].sort((a, b) => a.cost.cmp(b.cost))) this.buyUpg(id, u.id);
   },
 
   tick(dt) {
@@ -131,13 +161,13 @@ const Layers = {
       }
       if (!d.unlocked) continue;
       d.time += dt;
-      if (def.passive) {
-        const rate = def.passive();
-        if (rate > 0) {
-          const g = this.gain(def.id);
-          if (g.gt(0)) this.addPoints(def.id, g.mul(rate * dt));
-        }
+      const rate = this.passiveRate(def);
+      if (rate > 0) {
+        const g = this.gain(def.id);
+        if (g.gt(0)) this.addPoints(def.id, g.mul(rate * dt));
       }
+      // Layers of finished chapters buy their own upgrades.
+      if (Chapters.passed(def.chapter)) this.buyAllUpgs(def.id);
       if (def.tick) def.tick(dt);
     }
   },

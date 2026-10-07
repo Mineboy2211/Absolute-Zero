@@ -55,8 +55,8 @@ Layers.register({
     if (Layers.ms('vaporize', 5)) return { upgrades: true };
     return {};
   },
-  onResetBy() {
-    const keepFlow = hasUpg('vaporize', 1) || Layers.ms('vaporize', 10);
+  onResetBy(by) {
+    const keepFlow = by.chapter > 1 ? Layers.ms('supernova', 5) : hasUpg('vaporize', 1) || Layers.ms('vaporize', 10);
     if (!keepFlow) player.layers.meltdown.flow = D(0);
   },
   autoReset: () => Layers.ms('vaporize', 2),

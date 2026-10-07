@@ -113,7 +113,8 @@ const Ranks = {
     const t = def.target();
     if (t.lte(player.ranks[id])) return false;
     player.ranks[id] = t;
-    def.doReset();
+    // From Chapter 2 on, tempering no longer resets anything.
+    if (!Chapters.passed(1)) def.doReset();
     return true;
   },
   // Degrees follow Temperature on their own.
@@ -121,8 +122,14 @@ const Ranks = {
     const t = this.defs.degree.target();
     if (t.gt(player.ranks.degree)) player.ranks.degree = t;
   },
-  reset() {
-    for (const id of this.order) player.ranks[id] = D(0);
+  reset(byDef) {
+    // Stellar Memory: Chapter 2 resets keep Grade and Order.
+    const keepHigh = byDef && byDef.chapter >= 2 && hasUpg('supernova', 12);
+    for (const id of this.order) if (!keepHigh || id === 'degree') player.ranks[id] = D(0);
+    if (byDef && byDef.chapter >= 2 && Layers.ms('supernova', 3)) {
+      player.ranks.grade = player.ranks.grade.max(5);
+      player.ranks.order = player.ranks.order.max(3);
+    }
   },
 };
 

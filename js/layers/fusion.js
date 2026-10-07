@@ -52,6 +52,7 @@ Layers.register({
     if (hasUpg('fusion', 23)) g = g.mul(Elements.eff(23));
     if (hasUpg('fusion', 24)) g = g.mul(Elements.eff(24));
     if (Layers.ms('fusion', 25)) g = g.mul(2);
+    if (Layers.map.supernova) g = g.mul(Layers.map.supernova.nucleonMult());
     return g;
   },
   heatMult: () => (hasUpg('fusion', 1) ? Elements.eff(1) : D(1)),
