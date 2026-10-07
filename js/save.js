@@ -7,6 +7,12 @@ const migrations = {
     if (s.auto) delete s.auto.rank_degree;
     return s;
   },
+  // v3: new notations; the old scientific default becomes Named.
+  2: (s) => {
+    if (s.options && (s.options.notation === 'scientific' || !s.options.notation)) s.options.notation = 'named';
+    if (s.options && s.options.notation === 'standard') s.options.notation = 'short';
+    return s;
+  },
 };
 
 function isBadDecimal(d) {

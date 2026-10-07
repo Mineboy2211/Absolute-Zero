@@ -35,12 +35,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- header ---------- */
 #top {
-  position: fixed; inset: 0 0 auto 0; height: var(--header-h);
-  display: flex; align-items: center; gap: 16px; padding: 0 16px;
+  position: fixed; inset: 0 0 auto 0;
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, var(--panel)), var(--panel));
   border-bottom: 2px solid var(--accent);
   z-index: 20;
 }
+#top-row { display: flex; align-items: center; gap: 16px; padding: 0 16px; min-height: 64px; }
 #temp-wrap { min-width: 0; flex-shrink: 0; }
 #gauge { flex: 1; min-width: 120px; max-width: 520px; }
 #gauge-label { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
@@ -69,7 +69,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: 20px; padding: 2px 10px; cursor: pointer;
 }
 #chal-banner {
-  position: fixed; top: var(--header-h); left: 0; right: 0; z-index: 15;
   background: #3a1f12; color: #ffc48a; padding: 4px 16px; font-size: 13px; text-align: center;
 }
 
@@ -87,8 +86,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .nav-btn:hover { background: var(--panel-2); }
 .nav-btn.active { background: var(--panel-2); border-left-color: var(--tab, var(--accent)); color: var(--tab, var(--accent)); font-weight: 600; }
 #content { flex: 1; overflow-y: auto; padding: 20px; }
-body:has(#chal-banner:not([hidden])) #content,
-body:has(#chal-banner:not([hidden])) #sidebar { padding-top: 36px; }
 
 .tab { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
@@ -112,6 +109,8 @@ button {
   padding: 7px 12px; cursor: pointer; color: var(--text);
 }
 button:hover { border-color: var(--muted); }
+button, .nav-btn, .chip { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+@media (hover: none) { button:hover { border-color: var(--line); } }
 button.can { border-color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent); }
 button.primary { background: color-mix(in srgb, var(--accent) 30%, var(--panel-2)); border-color: var(--accent); }
 button.danger { border-color: var(--danger); color: #ffb3b3; }
@@ -215,23 +214,55 @@ table.stats td:last-child { text-align: right; }
 
 /* ---------- mobile ---------- */
 @media (max-width: 760px) {
-  :root { --header-h: 92px; }
-  #top { gap: 10px; padding: 0 12px; }
+  #top-row {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "menu temp" "chips chips" "gauge gauge";
+    gap: 6px 10px; padding: 8px 12px; min-height: 0;
+  }
+  #menu-toggle { display: block; grid-area: menu; align-self: center; }
+  #temp-wrap { grid-area: temp; flex-shrink: 1; }
+  #temp { font-size: clamp(17px, 5.4vw, 22px); overflow: hidden; text-overflow: ellipsis; }
+  #gain { font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+  #currencies { grid-area: chips; margin-left: 0; }
+  #currencies:not(:has(.chip:not([hidden]))) { display: none; }
+  #gauge { grid-area: gauge; max-width: none; min-width: 0; }
+  #gauge-label { font-size: 11px; margin-bottom: 3px; }
+  .chip { padding: 1px 8px; flex-shrink: 0; }
+  .card { padding: 12px; }
+  .card h2 { font-size: 17px; }
+  .upg-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .upg { min-height: 0; padding: 8px; font-size: 13px; }
+  .grid { grid-template-columns: 1fr; }
+  .ach-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .hearth-top { margin-bottom: 8px; }
+  button.big { font-size: 15px; padding: 10px; }
+  #toasts { left: 12px; right: 12px; bottom: 12px; align-items: stretch; }
+  .toast { max-width: none; }
+  .modal { padding: 16px; }
+  table.stats td, table.stats th { padding: 4px 4px; font-size: 13px; }
+  #content { padding: 16px; }
+  .machines { grid-template-columns: 1fr; }
+}
+
+/* Phones (any orientation) and short screens: the sidebar slides in from the left. */
+@media (max-width: 760px), (max-height: 520px) {
   #menu-toggle { display: block; }
-  #temp { font-size: 20px; }
-  #gain { font-size: 11px; }
-  .chip { padding: 1px 8px; }
   #sidebar {
     position: fixed; top: var(--header-h); bottom: 0; left: 0; z-index: 30;
     transform: translateX(-100%); transition: transform .2s; width: 220px;
     box-shadow: 4px 0 20px #0008;
   }
   body.nav-open #sidebar { transform: none; }
-  #content { padding: 16px; }
-  .machines { grid-template-columns: 1fr; }
-  #top { flex-wrap: wrap; align-content: center; padding: 6px 12px; row-gap: 6px; }
-  #gauge { order: 5; flex-basis: 100%; max-width: none; }
-  .upg-grid { grid-template-columns: 1fr 1fr; }
+  #content::after {
+    content: ''; position: fixed; inset: var(--header-h) 0 0 0; background: #0009;
+    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 25;
+  }
+  body.nav-open #content::after { opacity: 1; pointer-events: auto; }
+}
+@media (max-height: 520px) and (min-width: 761px) {
+  #top-row { min-height: 52px; }
+  #temp { font-size: 22px; }
+  #content { padding: 14px; }
 }
 @media (max-width: 420px) {
   #currencies .chip-name { display: none; }

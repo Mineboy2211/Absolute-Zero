@@ -52,6 +52,12 @@ const UI = {
     document.getElementById('menu-toggle').addEventListener('click', () => document.body.classList.toggle('nav-open'));
     document.getElementById('content').addEventListener('click', () => document.body.classList.remove('nav-open'));
     this.buildHeader();
+    // Keep the layout below the header, whatever height it wraps to.
+    const top = document.getElementById('top');
+    const syncHeader = () => document.documentElement.style.setProperty('--header-h', top.offsetHeight + 'px');
+    if (window.ResizeObserver) new ResizeObserver(syncHeader).observe(top);
+    window.addEventListener('resize', syncHeader);
+    syncHeader();
     this.updateSidebar(true);
     this.switchTab(player.options.tab || 'main');
     document.addEventListener('keydown', (ev) => {
@@ -138,6 +144,9 @@ const UI = {
       nav.append(b);
     }
   },
+
+  // Rebuild the current tab (e.g. after a display setting changed).
+  refresh() { this.switchTab(this.currentTab); },
 
   switchTab(id) {
     if (!this.tabs().some((t) => t.id === id)) id = 'main';
@@ -473,9 +482,14 @@ const Tabs = {
   options() {
     const root = h('div', { class: 'tab' });
     const select = h('select', { 'aria-label': 'Number notation' },
-      ['scientific', 'standard', 'engineering'].map((n) => h('option', { value: n, text: n[0].toUpperCase() + n.slice(1) })));
-    select.value = player.options.notation;
-    select.addEventListener('change', () => { player.options.notation = select.value; });
+      Object.entries(NOTATIONS).map(([id, n]) => h('option', { value: id, text: n.label })));
+    select.value = notation();
+    select.addEventListener('change', () => { player.options.notation = select.value; UI.refresh(); });
+    const unit = h('select', { 'aria-label': 'Temperature unit' },
+      h('option', { value: 'K', text: 'K' }), h('option', { value: 'kelvin', text: 'Kelvin' }));
+    unit.value = player.options.unit === 'kelvin' ? 'kelvin' : 'K';
+    unit.addEventListener('change', () => { player.options.unit = unit.value; UI.refresh(); });
+    const samples = ['12345', '6.78e15', '4.2e48', '1e400', '3e5000'];
 
     const check = (key, label) => {
       const box = h('input', { type: 'checkbox' });
@@ -485,7 +499,9 @@ const Tabs = {
     };
 
     root.append(card('Display',
-      h('label', { class: 'option' }, 'Notation: ', select)));
+      h('label', { class: 'option' }, 'Notation: ', select),
+      h('label', { class: 'option' }, 'Temperature unit: ', unit),
+      h('p', { class: 'muted small' }, 'Preview: ', UI.dyn(() => samples.map((x) => formatK(x)).join(' · ')))));
 
     root.append(card('Saving',
       check('autosave', 'Autosave every 30 seconds'),

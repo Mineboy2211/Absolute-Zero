@@ -123,7 +123,7 @@ Chapters are `{id, name, rule, layers:[...], goals:[{id, desc, check()}], intro:
 - **Offline progress**: on load, `Δt = now − lastSave` (cap 24 h, raised by upgrades), simulated in ≤ 1000 ticks of `Δt/1000` with automation running, then a summary popup ("You were away 3h 12m: +1e45 K, +2e9 Embers").
 
 ### Options
-Notation (scientific default / standard / engineering), autosave toggle, offline toggle, tab-hide confirmations, theme accent lock, **Debug: dev speed ×1/×10/×100/×1000** (hidden behind a toggle, flagged in the save so stats show it was used).
+Notation (Named default: 12.3 Million / Short: 12.3 M / Letters / Scientific / Engineering / Logarithm; -illion names go up to 10^3003, then `10^4,500` style), temperature unit (K or Kelvin), autosave toggle, offline toggle, tab-hide confirmations, theme accent lock, **Debug: dev speed ×1/×10/×100/×1000** (hidden behind a toggle, flagged in the save so stats show it was used).
 
 ## 3. Pacing targets
 

@@ -1,7 +1,7 @@
 // Player state: default values and small shared helpers.
 
 const SAVE_KEY = 'absoluteZeroSave';
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 
 let player = null;
 
@@ -21,7 +21,8 @@ function getDefaultPlayer() {
     chapters: { unlocked: 1, seenIntro: 0 },
     auto: {},
     options: {
-      notation: 'scientific',
+      notation: 'named',
+      unit: 'K',
       autosave: true,
       offline: true,
       devMode: false,

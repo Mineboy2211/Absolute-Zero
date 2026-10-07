@@ -27,6 +27,10 @@ node tools/sim.js 3
 
 The argument is the number of in-game hours to simulate.
 
+## Display
+
+Numbers default to named notation (12.3 Million K). Options also offers short suffixes, letters, scientific, engineering and logarithm, and the temperature unit can be K or Kelvin. The layout adapts to phones (portrait and landscape), tablets and desktops.
+
 ## Developer mode
 
 Options → Debug → Developer mode lets you speed up game time (×2 up to ×1000) to test pacing. Saves remember if it was used.

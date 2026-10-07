@@ -15,7 +15,7 @@ const bePath = process.argv[3] || require.resolve('break_eternity.js/dist/break_
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 // Logic scripts are every local script before ui.js in index.html.
-const scripts = [...html.matchAll(/<script src="(js\/[^"]+)"/g)].map((m) => m[1]);
+const scripts = [...html.matchAll(/<script src="(js\/[^"?]+)/g)].map((m) => m[1]);
 const logic = scripts.slice(0, scripts.indexOf('js/ui.js'));
 
 const ctx = { console, Date, Math, Number, String, Object, Array, JSON };
