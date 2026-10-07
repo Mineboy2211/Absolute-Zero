@@ -238,21 +238,81 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 5. Have 1 Million Electrons, Ions and Photons at the same time.
 6. Synthesize Iron (Fe).
 
-## 5. Chapter 2 — Stellar *(coarse)*
+## 5. Chapter 2 — Stellar
 
-**New rule — Gravity `G`:** `G = max(0, log(T) − 2500)^0.6`, recalculated live. It applies a penalty `gain → gain^(1/(1 + G/100))`. Early Chapter 2 is about pushing against it; Stardust skills and Neutronium later let you *harvest* gravity: "Gravity Well" converts it into a multiplier `×10^(G^0.5)` and finally flips the penalty into a bonus.
+> Numbers marked *(tune)* are set by the pacing simulator, which starts from a "Chapter 1 complete" save.
 
-Starting Chapter 2 grants: all Chapter 1 resets automated and passive, ranks fully automatic, Elements auto-buy.
+**Unlock:** complete the 6 Chapter 1 goals. Players who finished Chapter 1 before Chapter 2 existed unlock it on their next load.
 
-| # | Layer → currency | Mechanic | Cross-chapter use |
-|---|------------------|----------|-------------------|
-| 6 | Supernova → Stardust | Skill tree (~30 nodes, branches: Heat / Gravity / Automation / Challenges). Harder challenges 9–12 (Stellar challenges) | Nodes cost Stardust + Pressure |
-| 7 | Collapse → Neutronium | "Compress": sacrifice Embers / Magma / Plasma for permanent multipliers that scale with amount sacrificed (log-based, never reset by later layers) | Directly spends Ch1 currencies |
-| 8 | Singularity → Hawking Heat | Black hole: feed it a % of T; it grows mass `M_bh`; it radiates Hawking Heat over time `∝ M_bh^0.5`, which multiplies heat exponentially | Hawking Heat boosts Magma Flow |
-| 9 | Quasar → Jets | Charge a Jet over time; fire it at one chosen layer (1–8) for ×(huge) gain for 60 s; cooldown | Aimed at Ch1 layers to supercharge them |
-| 10 | Planck Break → Planck Shards | Breaks Heat Loss I–III (removes or raises powers); new scaling: "Planck Levels" buyable with super-scaled cost | Shards upgrade Elements beyond max |
+**Starting Chapter 2 grants (rule: never grind old resets by hand):**
+- Every Chapter 1 autobuyer is unlocked and switched on (buyables, Grade/Order, Meltdown/Vaporize/Ionize auto-resets, Plasma auto-split).
+- Chapter 1 layers (Ignition → Fusion) passively gain 100% of their pending currency every second.
+- Chapter 1 upgrades and Elements are never lost to Chapter 2 resets. Chapter 2 resets clear Chapter 1 currencies, the Plasma split, Magma flow, ranks, buyables and Temperature, which the passive gains rebuild in seconds to minutes.
 
-Goals (sketch): reach `ee10`, turn Gravity positive, complete Stellar challenges, black hole mass threshold, fire 100 Jets, break all three early heat losses.
+### New rule — Gravity
+- `G = ((log(T) − 450) / 50)^0.8` when `T > 1e450`, else 0 (×3 in the Dense Core challenge).
+- Gravity weight `w = 0.05`, reduced by Stardust skills, compressed Plasma and challenge 9.
+- **Penalty:** heat gain (before Heat Loss) is raised to `1 / (1 + G·w)`. The hotter you are, the harder Gravity pulls.
+- **Learning to use it:** the Gravity branch of the Stardust tree reduces `w`, adds *Gravity Well* (heat ×10^(G^0.6)) and finally *Slingshot*, which turns the exponent into `1 + G·w/2`, a bonus.
+- Shown on the Main tab with its current effect.
+
+### Layer 6 · Supernova → Stardust
+- Unlock at `1e500 K` (Chapter 2 only). Reset at `T ≥ 1e520` *(tune)*.
+- Gain: `SD = floor( 10^((log(T) − 520)/40) × (1 + log(1 + Nucleons)) )` *(tune)*.
+- Stardust multiplies heat by `(1+SD)^2` and Nucleon gain by `(1+SD)`.
+- **Skill tree** (20 nodes, 4 branches, each node needs its parent). Some nodes also cost Pressure, so Chapter 1 currencies keep mattering:
+  - *Heat:* Stellar Wind (heat ^1.02) → Fusion Shells (Heat Loss III power 0.2 → 0.3) → Core Ignition (heat ^1.03); Red Giant (heat ×SD^3) → Hypergiant (Bellows power +0.25).
+  - *Gravity:* Orbital Mechanics (w ×0.75) → Gravity Well (heat ×10^(G^0.6)) → Escape Velocity (w ×0.75) / Tidal Forces (Stardust ×(1+G)) → Slingshot (Gravity becomes a bonus).
+  - *Memory:* Afterglow (Chapter 1 gains ×10) → Stellar Memory (ranks survive Supernova) → Remnant (keep 1% of Chapter 1 currencies) → Pulsar (gain 1% of pending Stardust/s).
+  - *Trials:* unlock Stellar challenges 9, 10, 11, 12 in sequence; Trial Mastery (goals of challenges 1–8 ^0.8).
+- **Stellar challenges** (reset at the Supernova level, 5 tiers each):
+  - 9 Dense Core: Gravity ×3 → Gravity weight −5% per completion.
+  - 10 Red Dwarf: Chapter 1 currency gains ^0.5 → Stardust ×(1+c).
+  - 11 Burnout: Heat Loss I–III start 1e100× earlier → Heat Loss III power +0.02 per completion.
+  - 12 Event Horizon: heat gain ^0.75 → heat gain ^(1 + 0.01c).
+- Milestones: 1 Chapter 1 gains ×10 · 2 keep Plasma split · 3 start with Grade 5 and Order 3 · 5 Magma flow never reset · 10 Stardust ×2 · 25 gain 10% pending Stardust/s.
+
+### Layer 7 · Collapse → Neutronium
+- Reset at `T ≥ 1e800` *(tune)*. Gain `NT = 10^((log(T) − 800)/60) × (1 + log(1 + SD))`.
+- **Compressors:** sacrifice *all* your Embers, Magma or Plasma. Each compressor remembers the best `log10` ever sacrificed (`cE`, `cM`, `cP`). These records are permanent and never reset.
+  - Embers: heat ×10^(cE^0.75) · Magma: Stardust ×(1 + cM/10) · Plasma: Gravity weight ÷(1 + cP/200).
+- Neutronium multiplies Supernova gain by `(1 + NT)^0.5`. 10 upgrades (compressor exponents, Supernova autobuyer, keep skill tree…), 5 milestones.
+
+### Layer 8 · Singularity → Hawking Heat
+- Reset at `T ≥ 1e1200` *(tune)*; gives a lump of Hawking Heat.
+- **Black hole:** "Feed" consumes your current Temperature and adds `(log(T)/100)²` solar masses. It radiates Hawking Heat continuously: `dHH/dt = M^1.5 × rate`.
+- Hawking Heat: heat ×10^(HH^0.4), Magma flow ×(1 + HH) (a Chapter 1 currency boosted again), Stardust ×(1 + log(1+HH)).
+- 10 upgrades (auto-feed, radiation rate, mass growth…), milestones automate Collapse.
+
+### Layer 9 · Quasar → Jets
+- Reset at `T ≥ 1e1800` *(tune)*; gives Jets.
+- **Fire a Jet** (costs 1 Jet) at one target: Heat or any layer from Ignition to Singularity. For 60 seconds that target's gain is multiplied by `10^power` (Heat: `×10^(power × 20)`). One Jet active at a time, 30 s cooldown. Jets also recharge slowly over time.
+- 10 upgrades (power, duration, recharge, auto-fire at a chosen target), milestones automate Singularity.
+
+### Layer 10 · Planck Break → Planck Shards
+- Reset at `T ≥ 1e2600` *(tune)*.
+- **Break** Heat Loss I, II and III (one-time Shard upgrades: I and II are removed, III's power becomes 0.6).
+- **Planck Levels:** a buyable paid in Shards with a super-scaled cost `10^(level^1.5)`; each level raises heat gain ^1.02 (compounding) and boosts every Element effect.
+- Milestones automate Quasar and Jets.
+
+### Chapter 2 goals
+1. Reach the final temperature of the chapter *(tune, around 1e4000)*.
+2. Learn Slingshot (Gravity becomes a bonus).
+3. Complete every Stellar challenge at least 3 times.
+4. Grow the black hole to 1,000 solar masses.
+5. Fire 50 Jets.
+6. Break all three Heat Losses.
+
+### Pacing targets (perfect bot; casual ≈ 2×)
+| Milestone | Bot time | Casual |
+|---|---|---|
+| Chapter 2 unlock | 3.5 d | ~1 week |
+| Supernova | 4 d | |
+| Collapse | 5.5 d | |
+| Singularity | 7 d | |
+| Quasar | 8.5 d | |
+| Planck Break | 10 d | |
+| Chapter 2 complete | ~11 d | ~3 weeks |
 
 ## 6. Chapter 3 — Cosmic *(coarse)*
 
