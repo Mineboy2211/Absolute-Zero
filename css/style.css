@@ -207,6 +207,38 @@ input[type=checkbox]:focus-visible { outline: 2px solid var(--accent); outline-o
 .upg.bought .upg-cost { color: var(--good); }
 .upg.bought .upg-cost::after { content: ' · owned'; }
 
+/* ---------- plasma split ---------- */
+.pools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+.pool { padding: 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); border-top: 3px solid var(--pool); display: flex; flex-direction: column; gap: 6px; }
+.pool-head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.pool-name { font-family: var(--display); font-weight: 700; color: var(--pool); }
+.pool-amount { font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.pool-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: auto; }
+.pool-buttons button { padding: 6px 4px; font-size: 13px; }
+
+/* ---------- elements ---------- */
+.elements { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; margin: 10px 0; }
+.element {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  aspect-ratio: 1; padding: 4px; border-radius: 6px; background: var(--panel-2); line-height: 1.1;
+}
+.el-num { position: absolute; top: 3px; left: 5px; font-size: 10px; color: var(--muted); }
+.el-sym { font-family: var(--display); font-size: 22px; font-weight: 700; }
+.el-name { font-size: 9px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.element.can { border-color: var(--layer); box-shadow: 0 0 10px color-mix(in srgb, var(--layer) 40%, transparent); }
+.element.owned { background: color-mix(in srgb, var(--layer) 22%, var(--panel-2)); border-color: color-mix(in srgb, var(--layer) 60%, transparent); }
+.element.owned .el-sym { color: var(--layer); }
+.element.locked { opacity: .3; }
+.element.locked .el-sym, .element.locked .el-name { visibility: hidden; }
+.element.selected { outline: 2px solid var(--text); outline-offset: 1px; }
+.el-detail { padding: 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); min-height: 110px; }
+.el-detail h3 { margin: 0 0 6px; color: var(--layer); font-family: var(--display); }
+@media (min-width: 1100px) {
+  .elements { grid-template-columns: repeat(18, minmax(0, 1fr)); gap: 4px; }
+  .element { grid-row: var(--row); grid-column: var(--col); }
+  .el-sym { font-size: 18px; }
+}
+
 /* ---------- challenges ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .chal { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
@@ -273,6 +305,9 @@ table.stats td:last-child { text-align: right; }
   table.stats td, table.stats th { padding: 4px 4px; font-size: 13px; }
   #content { padding: 16px; }
   .machines { grid-template-columns: 1fr; }
+  .pools { grid-template-columns: 1fr; }
+  .elements { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); }
+  .el-sym { font-size: 18px; }
 }
 
 /* Phones (any orientation) and short screens: the sidebar slides in from the left. */

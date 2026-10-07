@@ -13,19 +13,23 @@ Layers.register({
   gain() {
     let g = player.T.log10().div(48).pow(4).mul(layerPts('meltdown').add(1).log10().add(1));
     if (hasUpg('vaporize', 8)) g = g.mul(upgEff('vaporize', 8));
+    if (hasUpg('ionize', 1)) g = g.mul(3);
+    if (hasUpg('fusion', 4)) g = g.mul(2);
+    g = g.mul(Layers.map.ionize.poolEffects().pressure);
     return g;
   },
   effect() {
     const p = layerPts('vaporize');
     return {
-      tick: p.pow(0.5).mul(0.01).min(0.2),
+      tick: p.pow(0.5).mul(0.01).min(this.tickCap()),
       embers: p.add(1),
       magma: p.add(1).pow(0.5),
     };
   },
+  tickCap: () => (hasUpg('fusion', 15) ? 0.3 : 0.2),
   effectText() {
     const e = this.effect();
-    return `Pressure adds +${format(e.tick, 3)} Draft power (max +0.2), multiplies Ember gain by ${formatMult(e.embers)} and Magma gain by ${formatMult(e.magma)}.`;
+    return `Pressure adds +${format(e.tick, 3)} Draft power (max +${this.tickCap()}), multiplies Ember gain by ${formatMult(e.embers)} and Magma gain by ${formatMult(e.magma)}.`;
   },
   upgrades: [
     { cost: D(1), desc: 'Magma flow is no longer reset by Vaporize.' },
@@ -60,6 +64,16 @@ Layers.register({
     },
   ],
   heatMult: () => (hasUpg('vaporize', 10) ? upgEff('vaporize', 10) : D(1)),
+  passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('ionize', 10) ? 0.1 : 0),
+  autoReset: () => Layers.ms('ionize', 2),
+  keep() {
+    if (Layers.ms('ionize', 5) || hasUpg('ionize', 4)) return { upgrades: true };
+    if (Layers.ms('ionize', 1)) return { upgrades: [1, 3, 5] };
+    return {};
+  },
+  onResetBy() {
+    if (Layers.ms('ionize', 1)) Layers.addPoints('vaporize', D(5).sub(layerPts('vaporize')).max(0));
+  },
   milestones: [
     { req: 1, desc: 'Keep all Ember upgrades.' },
     { req: 2, desc: 'Unlock the Meltdown autobuyer.' },

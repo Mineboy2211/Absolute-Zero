@@ -29,7 +29,7 @@ const Buyables = {
       base: () => D(10),
       ratio: () => D(1.35),
       exp: () => 1,
-      scaleStart: () => 100 + (rankReward('degree', 25) ? 25 : 0) + (hasUpg('vaporize', 7) ? 50 : 0),
+      scaleStart: () => 100 + (rankReward('degree', 25) ? 25 : 0) + (hasUpg('vaporize', 7) ? 50 : 0) + (hasUpg('fusion', 3) ? 100 : 0),
       costDiv: () => (Layers.ms('ignition', 10) ? D(2) : D(1)),
       effectText: () => `+${format(kindlingPower())} K/s base each`,
     },
@@ -51,7 +51,7 @@ const Buyables = {
       base: () => D(1e5),
       ratio: () => D(8),
       exp: () => 1.1,
-      scaleStart: () => 25,
+      scaleStart: () => 25 + (hasUpg('fusion', 19) ? 25 : 0),
       costDiv: () => D(1),
       effectText: () => `+${format(furnacePerLevel(), 3)} Bellows power each`,
     },
@@ -62,7 +62,7 @@ const Buyables = {
       base: () => D(2e3),
       ratio: () => D(4),
       exp: () => 1,
-      scaleStart: () => 50,
+      scaleStart: () => 50 + (hasUpg('ionize', 9) ? 50 : 0),
       costDiv: () => D(1),
       effectText: () => `${formatMult(tickPower(), 3)} each (total ${formatMult(tickMult())})`,
     },
@@ -145,8 +145,12 @@ function furnacePerLevel() {
 }
 
 function bellowsPower() {
+  if (inChal(7)) return D(1.1);
   let p = D(1.3).add(furnacePerLevel().mul(player.buyables.furnace));
   if (rankReward('order', 6)) p = p.add(0.05);
+  if (hasUpg('ionize', 8)) p = p.add(0.1);
+  if (hasUpg('fusion', 14)) p = p.add(0.1);
+  p = p.add(Challenges.reward(7));
   return p;
 }
 function bellowsMult() { return bellowsPower().pow(player.buyables.bellows); }
@@ -159,6 +163,8 @@ function tickPower() {
   if (hasUpg('meltdown', 4)) p = p.add(upgEff('meltdown', 4));
   p = p.add(Challenges.reward(3));
   p = p.add(Layers.map.vaporize.effect().tick);
+  if (hasUpg('fusion', 8)) p = p.add(0.05);
+  p = p.add(Layers.map.ionize.poolEffects().draft);
   return p;
 }
 function tickMult() {
@@ -182,6 +188,7 @@ function heatMultipliers() {
 function rawHeatGain() {
   let g = heatBase();
   for (const [, v] of heatMultipliers()) g = g.mul(v);
+  if (hasUpg('fusion', 26)) g = g.pow(1.05);
   return g;
 }
 
@@ -195,16 +202,26 @@ const HeatLoss = [
       let s = D(1e15);
       if (hasUpg('ignition', 11)) s = s.mul(1e3);
       if (hasUpg('vaporize', 4)) s = s.mul(upgEff('vaporize', 4));
-      return s;
+      return s.mul(Layers.map.ionize.poolEffects().lossStart);
     },
     power: () => {
       let p = 0.5 + Challenges.reward(2);
       if (hasUpg('meltdown', 5)) p += 0.05;
+      if (hasUpg('fusion', 6)) p += 0.05;
       return Math.min(p, 1);
     },
   },
-  { name: 'Heat Loss II', start: () => D(1e60), power: () => 0.4 },
-  { name: 'Heat Loss III', start: () => D('1e400'), power: () => 0.2 },
+  {
+    name: 'Heat Loss II',
+    start: () => D(1e60).mul(Layers.map.ionize.poolEffects().lossStart),
+    power: () => {
+      let p = 0.4;
+      if (hasUpg('ionize', 3)) p += 0.05;
+      if (hasUpg('fusion', 13)) p += 0.1;
+      return Math.min(p, 1);
+    },
+  },
+  { name: 'Heat Loss III', start: () => D('1e500').mul(hasUpg('fusion', 20) ? 1e25 : 1), power: () => 0.2 },
 ];
 
 function applyHeatLoss(x) {

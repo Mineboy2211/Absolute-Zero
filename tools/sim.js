@@ -10,6 +10,7 @@ const path = require('path');
 const vm = require('vm');
 
 const hours = Number(process.argv[2] || 3);
+const step = Number(process.env.STEP || 1);
 const debugAfter = process.env.DEBUG_AFTER;
 const bePath = process.argv[3] || require.resolve('break_eternity.js/dist/break_eternity.cjs.js', { paths: [process.cwd(), __dirname] });
 const root = path.join(__dirname, '..');
@@ -41,6 +42,15 @@ function botStep(dt) {
       if (opts.length) { Layers.buyUpg(def.id, opts[0].id); bought = true; }
     }
   }
+  if (player.layers.ionize.unlocked && layerPts('ionize').gt(0)) {
+    const next = Layers.map.ionize.upgrades.find(u => !hasUpg('ionize', u.id));
+    if (!next || next.cost.gt(layerPts('ionize').mul(20))) {
+      const d = player.layers.ionize, amt = d.points;
+      d.alloc.e = d.alloc.e.add(amt.mul(0.4)); d.alloc.i = d.alloc.i.add(amt.mul(0.3)); d.alloc.p = d.alloc.p.add(amt.mul(0.3)); d.points = D(0);
+    }
+  }
+  Chapters.current().goals.forEach((g, i) => { if (g.check()) mark('chapter goal ' + (i + 1)); });
+  if (Elements.count() > 0 && Elements.count() % 5 === 0) mark('elements ' + Elements.count());
   for (const id of ['tickspeed', 'furnace', 'bellows', 'kindling']) Buyables.buyMax(id);
   for (const def of [...Layers.list].reverse()) {
     const d = player.layers[def.id];
@@ -48,7 +58,8 @@ function botStep(dt) {
     const g = Layers.gain(def.id);
     const passive = def.passive && def.passive() > 0;
     if (passive) continue;
-    if (g.gte(d.points.max(1)) || (d.time > 600 && g.gte(d.points.mul(0.1)))) {
+    const have = def.id === 'ionize' ? Layers.map.ionize.totalPlasma() : d.points;
+    if (g.gte(have.max(1)) || (d.time > 600 && g.gte(have.mul(0.1)))) {
       Layers.doReset(def.id);
       mark('first ' + def.name);
       mark(def.name + ' x' + d.resets);
@@ -63,7 +74,7 @@ function botStep(dt) {
       const fails = (player.challenges.fails || {})[c.id] || 0;
       if (c.unlocked() && goal && player.T.gte(goal.pow(1.1 + 0.15 * fails))) { Challenges.enter(c.id); player.challenges.started = player.stats.timePlayed; break; }
     }
-  } else if (player.challenges.active && player.stats.timePlayed - player.challenges.started > 900) {
+  } else if (player.challenges.active && player.stats.timePlayed - player.challenges.started > 1800) {
     player.challenges.fails = player.challenges.fails || {};
     player.challenges.fails[player.challenges.active] = (player.challenges.fails[player.challenges.active] || 0) + 1;
     Challenges.exit();
@@ -72,15 +83,15 @@ function botStep(dt) {
     if (!player.challenges.lastComps) player.challenges.lastComps = {};
     if ((player.challenges.lastComps[id] || 0) < chalComps(id)) { player.challenges.lastComps[id] = chalComps(id); mark('chal ' + id + ' tier ' + chalComps(id)); Challenges.exit(); }
   }
-  for (const e of [1e3, 1e6, 1e10, 1e15, 1e20, 1e25, 1e30, 1e40, 1e50, 1e60, 1e80, 1e100]) if (player.bestT.gte(e)) mark('T >= ' + format(e, 0));
+  for (const e of [1e3, 1e6, 1e10, 1e20, 1e40, 1e60, 1e80, 1e100, 1e150, 1e200, '1e300', '1e400', '1e600', '1e450', '1e500']) if (player.bestT.gte(e)) mark('T >= ' + format(e, 0));
 }
 `;
 vm.runInContext(bot + (debugAfter ? ';var DEBUG_AFTER = ' + Number(debugAfter) + ';' : ''), ctx);
 vm.runInContext(`
-  for (let t = 0; t < ${hours} * 3600; t++) {
-    botStep(1);
+  for (let t = 0; t < ${hours} * 3600; t += ${step}) {
+    botStep(${step});
     if (typeof DEBUG_AFTER !== 'undefined' && t > DEBUG_AFTER && t % 300 === 0) console.log('  dbg chal=' + player.challenges.active + ' T=' + format(player.T) + ' gain=' + format(heatGain()) + ' embers=' + format(layerPts('ignition')) + ' pendE=' + format(Layers.gain('ignition')) + ' passive=' + Layers.map.ignition.passive() + ' upgI=' + player.layers.ignition.upgrades.length + ' upgM=' + player.layers.meltdown.upgrades.length + ' ranks=' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order + ' buy=' + Buyables.order.map(b => player.buyables[b].toString()).join('/'));
-    if (t % 1800 === 0) console.log('--- ' + formatTime(t) + ': T=' + format(player.T) + ' best=' + format(player.bestT) + ' Embers=' + format(layerPts('ignition')) + ' Magma=' + format(layerPts('meltdown')) + ' flow=' + format(player.layers.meltdown.flow) + ' P=' + format(layerPts('vaporize')) + ' ranks ' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order + ' buy ' + Buyables.order.map(b => player.buyables[b].toString()).join('/'));
+    if (t % (3600 * (${hours} > 24 ? 6 : 1)) === 0) console.log('--- ' + formatTime(t) + ': T=' + format(player.T) + ' best=' + format(player.bestT) + ' Embers=' + format(layerPts('ignition')) + ' Magma=' + format(layerPts('meltdown')) + ' flow=' + format(player.layers.meltdown.flow) + ' P=' + format(layerPts('vaporize')) + ' Pl=' + format(Layers.map.ionize.totalPlasma()) + ' N=' + format(layerPts('fusion')) + ' El=' + Elements.count() + ' comps=' + Challenges.totalComps() + ' ranks ' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order + ' buy ' + Buyables.order.map(b => player.buyables[b].toString()).join('/'));
   }
   console.log('Final: T=' + format(player.T) + ' best=' + format(player.bestT) + ' NaN check: ' + Number.isNaN(player.T.mag));
 `, ctx);

@@ -53,7 +53,7 @@ Applied to `raw` gain in log space, shown in a dedicated panel on the Main tab (
 |---|-----------------|-----------------------------|-------------|
 | I | `1e15`          | `^0.5`                      | Ember upg 11, Pressure upg 4, Magma upg 5, challenge 2, later Elements |
 | II| `1e60`          | `^0.4`                      | Plasma Photons, Elements, Planck |
-| III| `1e400`        | `^0.2`                      | Stardust tree, Planck |
+| III| `1e500`        | `^0.2`                      | Stardust tree, Planck |
 | IV| `ee4`           | log-softcap: `log(x)^0.9`   | Planck Break, Chapter 3 |
 | V | `ee50`          | `slog`-softcap              | Absolutes |
 
@@ -138,10 +138,10 @@ Times are for an active-ish player; "casual" ≈ 2× these. Times are cumulative
 | **First Meltdown** | `1e22 K` | **~1h45** (sim: 1h41) |
 | **First Vaporize** | `1e48 K` | **4–6 h** (sim: 4h32) |
 | All 6 challenges tier 1 | | ~6h30 (sim) |
-| Milestone 1 wall | ~`1e85 K` | ~7 h+ (sim); Ionize (Milestone 2) continues from there |
-| First Ionize | ~`1e100 K` | ~15 h |
-| First Fusion | ~`1e400 K` | ~2 days |
-| **Chapter 1 complete** | ~`1e2500 K` | **~1 week** |
+| First Ionize | `1e84 K` | ~15 h (sim: 14.5 h) |
+| First Fusion | `1e125 K` | ~1.5 days (sim: 1d 6h) |
+| All 26 Elements | | sim: ~2d 9h |
+| **Chapter 1 complete** | `1e500 K` + goals | **~1 week casual** (sim, perfect bot: ~3.5 days) |
 | Supernova | `1e3000` | +0.5 day |
 | Collapse | `e1e4` | day 6 |
 | Singularity | `e1e5` | day 8 |
@@ -213,30 +213,30 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 - Milestones: 1 keep all Ember upgrades · 2 auto Meltdown · 3 start with 100 Embers · 5 keep Magma upgrades · 10 Flow kept · 20 gain 10% pending Magma/s.
 
 ### Layer 4 · Ionize → Plasma
-- Unlock: best T ≥ `1e100`. Reset at `T ≥ 1e120`.
-- Gain: `Pl = floor( 10^((log(T)−120)/40) × (1+P)^0.5 × plasmaMul )`.
-- **Split**: Plasma is *allocated* (not spent) into 3 pools; respec button refunds all (forces an Ionize reset).
-  - Electrons `e`: heat ×`(1+e)^1.5`
-  - Ions `i`: Magma Flow ×`(1+i)`, Pressure ×`(1+log(1+i))`
-  - Photons `γ`: Heat Loss I/II start ×`(1+γ)^2`, Draft power `+0.005 × log(1+γ)`
-  - Allocate buttons: +1 / +10% / +50% / max; ratio presets.
-- 10 upgrades (cost Plasma, unspent Plasma only): unlock Ch5–6, auto Vaporize, Electrons also boost Embers, etc.
-- Milestones: 1 keep challenges completions · 3 auto Vaporize · 10 auto-allocate by last ratio · 25 keep Pressure upgrades.
+- Unlock: best T ≥ `1e76`. Reset at `T ≥ 1e84`.
+- Gain: `Pl = floor( 10^((log(T) − 84)/15) × (1 + log(1+Pressure)) × plasmaMul )`.
+- **Split**: Plasma is moved (not spent) into 3 pools with +10% / +50% / All buttons. Upgrades are paid with unsplit Plasma. Respec returns everything and forces an Ionize reset (until milestone 25).
+  - Electrons `e`: heat ×`(1+e)^1.5` (^1.75 with upgrade 7)
+  - Ions `i`: Magma flow ×`(1+i)`, Pressure ×`(1 + log(1+i))`
+  - Photons `γ`: Heat Loss I and II start ×`(1+γ)^2`, Draft power `+0.005 × log(1+γ)`
+- 10 upgrades (1 → 5e4 Plasma): Pressure ×3, Electrons boost Embers, Heat Loss II +0.05, keep Pressure upgrades, Ions boost Plasma, Plasma ×1.1^completions, Electron exponent 1.75, Bellows +0.1, Draft scaling +50, total Plasma boosts heat.
+- Milestones: 1 keep Pressure upgrades 1/3/5 and start with 5 Pressure · 2 Vaporize autobuyer · 5 keep all Pressure upgrades · 10 gain 10% pending Pressure/s · 25 respec without reset.
 
 ### Layer 5 · Fusion → Nucleons (spent on Elements)
-- Unlock: best T ≥ `1e350`. Reset at `T ≥ 1e400`.
-- Gain: `N = floor( (log(T)/400)^6 × (1+Plasma)^0.1 )`.
-- **Element grid** (periodic-table layout), each a one-time purchase with a unique effect. Elements unlock in order (H, He, Li, Be, B, C, N, O, …) — 20 in Chapter 1, rows extended later (Chapter 3 Inflation).
-  - H: heat ×Nucleons+1 · He: Embers ^1.05 · Li: Kindling scaling starts later · Be: Pressure ×2 · B: keep Plasma split on Fusion · C: Heat Loss I power +0.05 · N: Magma Flow ^1.1 · O: tickspeed power ×1.05 · F: Challenge 1–3 goals reduced · Ne: all auto-resets free & passive · Na … Ca: mixed boosts, unlock challenges 7–8, Heat Loss II weakened, Degree/Grade/Order bulk.
-- Milestones: 1 keep Pressure milestones · 2 auto Ionize · 5 keep Plasma upgrades · 15 Plasma 10%/s passive.
+- Unlock: best T ≥ `1e110`. Reset at `T ≥ 1e125`.
+- Gain: `N = floor( 10^((log(T) − 125)/30) × (1 + log(1+totalPlasma))^1.5 × nucleonMul )`.
+- **Elements**: 26 one-time upgrades from H to Fe, bought in order, shown as a periodic table (compact grid on phones). Element k (0-based) costs `10^(0.35k + 0.008k²)` Nucleons, from 1 (H) to ~6e13 (Fe).
+  - Highlights: H heat ×total Nucleons · Ne 100% passive Embers/Magma/Pressure · Na/S unlock challenges 7/8 · C, Al weaken Heat Loss I/II · Ca delays Heat Loss III · Fe raw heat gain ^1.05.
+- Milestones: 1 keep Plasma upgrades and split · 2 Ionize autobuyer · 3 Plasma auto-split (last ratio) · 5 start with 10 Plasma · 10 gain 10% pending Plasma/s · 25 Nucleons ×2.
+- Challenges 7 (Thin Air: Bellows stuck at ×1.1 → Bellows power +0.05/completion) and 8 (Plasma Storm: pools do nothing → Plasma ×(1+c)²) reset at the Ionize level.
 
-### Chapter 1 goals (complete all → Chapter 2 unlock screen)
-1. Reach `1e1000 K`.
-2. Complete every Pressure challenge (1–8) at least 3 times.
+### Chapter 1 goals (complete all → Chapter 1 complete screen; Chapter 2 unlocks once it exists)
+1. Reach `1e500 K` (Heat Loss III starts at `1e500`, so this is the edge of Chapter 1).
+2. Complete every challenge (1–8) at least 3 times.
 3. Own 20 Elements.
 4. Reach Order 10.
-5. Have 1e6 Electrons, Ions and Photons at the same time.
-6. Buy the Element **Fe** (iron: "Stars die when they make iron").
+5. Have 1 Million Electrons, Ions and Photons at the same time.
+6. Synthesize Iron (Fe).
 
 ## 5. Chapter 2 — Stellar *(coarse)*
 

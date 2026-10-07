@@ -206,6 +206,15 @@ const UI = {
     return close;
   },
 
+  showChapterComplete(ch) {
+    const body = h('div', { class: 'chapter-intro' },
+      h('div', { class: 'chapter-num', text: `Chapter ${ch.id} complete` }),
+      h('p', { text: 'Iron. The heaviest thing a star can forge before it dies.' }),
+      h('p', { text: 'Your fire has burned through every layer of combustion. The next chapter is still being forged.' }),
+      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), 'Chapter 2, Stellar. Gravity, Supernovae and black holes.'));
+    this.modal(`${ch.name}: complete`, body, [{ text: 'Keep burning', primary: true }]);
+  },
+
   showChapterIntro(ch) {
     player.chapters.seenIntro = Math.max(player.chapters.seenIntro, ch.id);
     const body = h('div', { class: 'chapter-intro' },
@@ -582,7 +591,9 @@ function renderLayerTab(def) {
     def.autoReset ? autoToggle('reset_' + def.id) : null,
     def.panel ? def.panel() : null));
 
-  if (def.upgrades.length) {
+  if (def.card) root.append(def.card());
+
+  if (def.upgrades.length && def.upgradeGrid !== false) {
     const grid = h('div', { class: 'upg-grid' });
     for (const u of def.upgrades) {
       const btn = h('button', { class: 'upg', onclick: () => Layers.buyUpg(def.id, u.id) },
@@ -697,4 +708,90 @@ const DevUnlock = {
     notify('Developer mode unlocked. See Options.');
     if (UI.currentTab === 'options') UI.refresh();
   },
+};
+
+// Plasma split panel.
+Layers.map.ionize.panel = () => {
+  const L = Layers.map.ionize;
+  const effText = {
+    e: () => `Heat gain ${formatMult(L.poolEffects().heat)}`,
+    i: () => `Magma flow ${formatMult(L.poolEffects().flow)}, Pressure gain ${formatMult(L.poolEffects().pressure)}`,
+    p: () => `Heat Loss I and II start ${formatMult(L.poolEffects().lossStart)} later, Draft power +${format(L.poolEffects().draft, 3)}`,
+  };
+  const pools = Object.entries(PLASMA_POOLS).map(([k, pool]) => {
+    const btn = (label, frac) => {
+      const b = h('button', { onclick: () => L.allocate(k, frac) }, label);
+      UI.bind(() => b.classList.toggle('can', layerPts('ionize').gte(1)));
+      return b;
+    };
+    const el = h('div', { class: 'pool' },
+      h('div', { class: 'pool-head' },
+        h('span', { class: 'pool-name', text: pool.name }),
+        UI.dyn(() => format(L.pool(k)), 'span', 'pool-amount')),
+      UI.dyn(effText[k], 'div', 'muted small'),
+      h('div', { class: 'pool-buttons' }, btn('+10%', 0.1), btn('+50%', 0.5), btn('All', 1)));
+    el.style.setProperty('--pool', pool.color);
+    return el;
+  });
+  return h('div', { class: 'panel' },
+    h('p', null, 'Unsplit Plasma: ', UI.dyn(() => format(layerPts('ionize')), 'b'),
+      h('span', { class: 'muted' }, ' (upgrades are paid with unsplit Plasma)')),
+    UI.showIf(h('p', { class: 'warn', text: 'Electrons, Ions and Photons do nothing in Plasma Storm.' }), () => inChal(8)),
+    h('div', { class: 'pools' }, pools),
+    h('div', { class: 'button-row' },
+      h('button', { onclick: () => L.respec() }, 'Respec split'),
+      UI.dyn(() => (Layers.ms('ionize', 25) ? 'Respec returns all split Plasma.' : 'Respec returns all split Plasma and performs an Ionize reset.'), 'span', 'muted small')),
+    autoToggle('split_plasma'));
+};
+
+// Element table for Fusion.
+Layers.map.fusion.card = () => {
+  const def = Layers.map.fusion;
+  const grid = h('div', { class: 'elements' });
+  def.upgrades.forEach((u, idx) => {
+    const tile = h('button', {
+      class: 'element',
+      onclick: () => {
+        if (Elements.selected === u.id) Layers.buyUpg('fusion', u.id);
+        Elements.selected = u.id;
+      },
+    },
+      h('span', { class: 'el-num', text: String(idx + 1) }),
+      h('span', { class: 'el-sym', text: u.sym }),
+      h('span', { class: 'el-name', text: u.name }));
+    tile.style.setProperty('--row', u.row);
+    tile.style.setProperty('--col', u.col);
+    tile.addEventListener('mouseenter', () => Elements.selected = u.id);
+    tile.addEventListener('focus', () => Elements.selected = u.id);
+    UI.bind(() => {
+      const owned = hasUpg('fusion', u.id);
+      const visible = owned || u.unlocked();
+      tile.classList.toggle('owned', owned);
+      tile.classList.toggle('can', Layers.canBuyUpg('fusion', u.id));
+      tile.classList.toggle('locked', !visible);
+      tile.classList.toggle('selected', Elements.selected === u.id);
+    });
+    grid.append(tile);
+  });
+  const detail = h('div', { class: 'el-detail' });
+  const dTitle = h('h3');
+  const dDesc = h('p');
+  const dEff = h('p', { class: 'effect' });
+  const dCost = h('p', { class: 'muted small' });
+  detail.append(dTitle, dDesc, dEff, dCost);
+  UI.bind(() => {
+    if (!Elements.selected) {
+      const next = def.upgrades.find((u) => !hasUpg('fusion', u.id));
+      Elements.selected = next ? next.id : def.upgrades[def.upgrades.length - 1].id;
+    }
+    const u = def.upgMap[Elements.selected];
+    const visible = hasUpg('fusion', u.id) || u.unlocked();
+    setText(dTitle, visible ? `${u.sym} · ${u.name}` : '???');
+    setText(dDesc, visible ? u.desc : 'Synthesize the previous Element first.');
+    setText(dEff, visible && u.effect ? 'Currently: ' + u.effectText(u.effect()) : '');
+    setText(dCost, hasUpg('fusion', u.id) ? 'Synthesized.' : `Cost: ${format(u.cost, 0)} Nucleons`);
+  });
+  return card('Elements',
+    h('p', { class: 'muted', text: 'Tap an Element to see it, tap again to synthesize it. Elements unlock in order.' }),
+    grid, detail);
 };

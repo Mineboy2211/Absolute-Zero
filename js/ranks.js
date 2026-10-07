@@ -15,6 +15,7 @@ const Ranks = {
       degreeExp: () => {
         let e = rankReward('order', 2) ? 1.15 : 1.2;
         e -= Challenges.reward(6);
+        if (hasUpg('fusion', 21)) e -= 0.02;
         return e;
       },
       // Temperature needed for Degree lvl + 1.
@@ -42,11 +43,11 @@ const Ranks = {
     },
     grade: {
       name: 'Grade',
-      req(lvl) { return D(lvl).mul(2).add(5).sub(hasUpg('vaporize', 6) ? 1 : 0); },
+      req(lvl) { return D(lvl).mul(2).add(5).sub(Ranks.reqCut()); },
       reqText(lvl) { return 'Degree ' + formatWhole(this.req(lvl)); },
       can() { return player.ranks.degree.gte(this.req(player.ranks.grade)); },
       target() {
-        const x = player.ranks.degree.add(hasUpg('vaporize', 6) ? 1 : 0).sub(5);
+        const x = player.ranks.degree.add(Ranks.reqCut()).sub(5);
         if (x.lt(0)) return D(0);
         return x.div(2).floor().add(1);
       },
@@ -68,7 +69,7 @@ const Ranks = {
     },
     order: {
       name: 'Order',
-      req(lvl) { return D(3).add(D(lvl).pow(1.3).floor()).sub(hasUpg('vaporize', 6) ? 1 : 0); },
+      req(lvl) { return D(3).add(D(lvl).pow(1.3).floor()).sub(Ranks.reqCut()).max(1); },
       reqText(lvl) { return 'Grade ' + formatWhole(this.req(lvl)); },
       can() { return player.ranks.grade.gte(this.req(player.ranks.order)); },
       target() {
@@ -91,6 +92,7 @@ const Ranks = {
       ],
     },
   },
+  reqCut: () => (hasUpg('vaporize', 6) ? 1 : 0) + (hasUpg('fusion', 22) ? 1 : 0),
   orderMult() { return Decimal.pow(1.5, player.ranks.order); },
   heatMult() {
     let m = D(1);

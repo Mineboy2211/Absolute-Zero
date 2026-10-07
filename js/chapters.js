@@ -9,11 +9,14 @@ const Chapters = {
   isComplete(ch) { return ch.goals.every((g) => g.check()); },
   tick() {
     const ch = this.current();
-    if (!ch || !this.isComplete(ch)) return;
+    if (!ch || !this.isComplete(ch) || player.chapters.completed >= ch.id) return;
+    player.chapters.completed = ch.id;
     const next = this.get(ch.id + 1);
-    if (!next) return;
-    player.chapters.unlocked = next.id;
-    if (typeof UI !== 'undefined') UI.showChapterIntro(next);
+    if (next) player.chapters.unlocked = next.id;
+    if (typeof UI !== 'undefined') {
+      if (next) UI.showChapterIntro(next);
+      else UI.showChapterComplete(ch);
+    }
   },
 };
 
@@ -28,11 +31,11 @@ Chapters.register({
     'Feed it. Fan it. Make it burn hotter than anything has ever burned.',
   ],
   goals: [
-    { desc: 'Reach 1e1000 K.', check: () => player.bestT.gte('1e1000') },
-    { desc: 'Complete every Pressure challenge at least 3 times.', check: () => Challenges.list.every((c) => chalComps(c.id) >= 3) },
-    { desc: 'Own 20 Elements.', check: () => false },
+    { desc: 'Reach 1e500 K.', check: () => player.bestT.gte('1e500'), text: () => `Reach ${formatK('1e500')}.` },
+    { desc: 'Complete every challenge at least 3 times.', check: () => Challenges.list.every((c) => chalComps(c.id) >= 3) },
+    { desc: 'Own 20 Elements.', check: () => Elements.count() >= 20 },
     { desc: 'Reach Order 10.', check: () => player.ranks.order.gte(10) },
-    { desc: 'Have 1e6 Electrons, Ions and Photons at once.', check: () => false },
-    { desc: 'Synthesize Iron (Fe).', check: () => false },
+    { desc: 'Have 1 Million Electrons, Ions and Photons at once.', check: () => ['e', 'i', 'p'].every((k) => Layers.map.ionize.pool(k).gte(1e6)) },
+    { desc: 'Synthesize Iron (Fe).', check: () => hasUpg('fusion', 26) },
   ],
 });

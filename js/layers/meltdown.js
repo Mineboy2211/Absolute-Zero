@@ -31,11 +31,14 @@ Layers.register({
     if (hasUpg('vaporize', 2)) m = m.mul(upgEff('vaporize', 2));
     if (Layers.ms('meltdown', 25)) m = m.mul(2);
     m = m.mul(Challenges.reward(5));
+    m = m.mul(Layers.map.ionize.poolEffects().flow);
     return m;
   },
   flowRate() {
     if (inChal(5)) return D(0);
-    return player.layers.meltdown.flow.mul(this.flowMult());
+    let r = player.layers.meltdown.flow.mul(this.flowMult());
+    if (hasUpg('fusion', 7)) r = r.pow(1.1);
+    return r;
   },
   tick(dt) {
     const r = this.flowRate();
@@ -47,7 +50,7 @@ Layers.register({
   effectText() {
     return `Magma multiplies heat gain by ${formatMult(this.heatMult())} and Ember gain by ${formatMult(this.emberMult())}.`;
   },
-  passive: () => (Layers.ms('vaporize', 20) ? 0.1 : 0),
+  passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('vaporize', 20) ? 0.1 : 0),
   keep() {
     if (Layers.ms('vaporize', 5)) return { upgrades: true };
     return {};

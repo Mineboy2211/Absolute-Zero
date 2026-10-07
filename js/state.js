@@ -18,7 +18,7 @@ function getDefaultPlayer() {
     layers: {},
     challenges: { active: 0, comps: {} },
     achievements: [],
-    chapters: { unlocked: 1, seenIntro: 0 },
+    chapters: { unlocked: 1, seenIntro: 0, completed: 0 },
     auto: {},
     options: {
       notation: 'named',

@@ -7,8 +7,8 @@ An incremental game about heating up forever. You start at 0 K with a single spa
 ## Status
 
 - Base game: the Hearth (Kindling, Bellows, Furnace, Draft), automatic Degrees, Grade and Order, Heat Loss softcaps
-- Chapter 1: Combustion, layers 1 to 3 (Ignition, Meltdown, Vaporize) and 6 challenges
-- Coming next: Ionize, Fusion, chapter goals, then Chapters 2 and 3
+- Chapter 1: Combustion, complete: Ignition (Embers), Meltdown (Magma), Vaporize (Pressure), Ionize (Plasma split), Fusion (Elements H to Fe), 8 challenges and 6 chapter goals
+- Coming next: Chapter 2 (Stellar), then Chapter 3 (Cosmic)
 
 See [DESIGN.md](DESIGN.md) for formulas, layer plans and pacing targets.
 

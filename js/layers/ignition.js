@@ -14,6 +14,7 @@ Layers.register({
     let g = player.T.div(1e7).pow(0.5);
     g = g.mul(this.gainMult());
     if (inChal(4)) g = g.pow(0.5);
+    if (hasUpg('fusion', 2)) g = g.pow(1.05);
     return g;
   },
   gainMult() {
@@ -23,6 +24,7 @@ Layers.register({
     m = m.mul(Layers.map.meltdown.emberMult());
     m = m.mul(Layers.map.vaporize.effect().embers);
     m = m.mul(Challenges.reward(4));
+    if (hasUpg('ionize', 2)) m = m.mul(upgEff('ionize', 2));
     return m;
   },
   heatMult() {
@@ -33,7 +35,7 @@ Layers.register({
     return m;
   },
   effectText: () => `Your Ember upgrades multiply heat gain by ${formatMult(Layers.map.ignition.heatMult())}.`,
-  passive: () => (Layers.ms('meltdown', 3) ? 0.1 : 0),
+  passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('meltdown', 3) ? 0.1 : 0),
   keep(by) {
     if (Layers.ms('vaporize', 1) || Layers.ms('meltdown', 10)) return { upgrades: true };
     if (Layers.ms('meltdown', 1)) return { upgrades: [1, 2, 3, 4, 5, 6] };

@@ -64,6 +64,26 @@ const Challenges = {
       reward: (c) => 0.01 * c,
       rewardText: (r) => `Degree requirement exponent −${format(r, 2)}`,
     },
+    {
+      id: 7,
+      name: 'Thin Air',
+      layer: 'ionize',
+      desc: 'Bellows power is stuck at ×1.1. Entering resets like an Ionize.',
+      goals: ['1e70', '1e90', '1e115', '1e145', '1e180'],
+      unlocked: () => hasUpg('fusion', 11),
+      reward: (c) => 0.05 * c,
+      rewardText: (r) => `Bellows power +${format(r, 2)}`,
+    },
+    {
+      id: 8,
+      name: 'Plasma Storm',
+      layer: 'ionize',
+      desc: 'Electrons, Ions and Photons do nothing. Entering resets like an Ionize.',
+      goals: ['1e95', '1e120', '1e150', '1e190', '1e240'],
+      unlocked: () => hasUpg('fusion', 16),
+      reward: (c) => D(1 + c).pow(2),
+      rewardText: (r) => `Plasma gain ${formatMult(r)}`,
+    },
   ],
   maxComps: 5,
   get(id) { return this.list[id - 1]; },
@@ -72,7 +92,9 @@ const Challenges = {
   goal(id) {
     const c = this.get(id);
     const n = chalComps(id);
-    return n >= this.maxComps ? null : D(c.goals[n]);
+    if (n >= this.maxComps) return null;
+    const g = D(c.goals[n]);
+    return hasUpg('fusion', 9) && id <= 6 ? g.pow(0.9) : g;
   },
   reward(id) { return this.get(id).reward(chalComps(id)); },
   totalComps() { return this.list.reduce((s, c) => s + chalComps(c.id), 0); },
