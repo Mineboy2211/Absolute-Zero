@@ -10,12 +10,17 @@ function snapshot() {
   return s;
 }
 
+// The open "Welcome back" popup, if any. Further offline catch-ups merge into it instead of stacking.
+let offlineSummary = null;
+
 function runOffline(seconds) {
   seconds = Math.min(seconds, OFFLINE_CAP);
-  const before = snapshot();
+  const before = offlineSummary ? offlineSummary.before : snapshot();
   simulateTime(seconds, 1000, 1);
   const after = snapshot();
-  const lines = [h('p', { text: `You were away for ${formatTime(seconds)}.` })];
+  const total = (offlineSummary ? offlineSummary.seconds : 0) + seconds;
+  if (offlineSummary) offlineSummary.close();
+  const lines = [h('p', { text: `You were away for ${formatTime(total)}.` })];
   lines.push(h('p', { text: `Temperature: ${formatK(before.T)} → ${formatK(after.T)}` }));
   if (after.best.gt(before.best)) lines.push(h('p', { text: `Best temperature: ${formatK(before.best)} → ${formatK(after.best)}` }));
   for (const def of Layers.list) {
@@ -23,7 +28,8 @@ function runOffline(seconds) {
       lines.push(h('p', { text: `${def.currency}: ${format(before[def.id])} → ${format(after[def.id])}` }));
     }
   }
-  UI.modal('Welcome back', lines);
+  const close = UI.modal('Welcome back', lines, [{ text: 'Close', action: () => { offlineSummary = null; } }]);
+  offlineSummary = { before, seconds: total, close };
 }
 
 function gameLoop() {
