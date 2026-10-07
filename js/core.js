@@ -26,8 +26,8 @@ const Buyables = {
       name: 'Kindling',
       desc: 'Adds to your base heat gain.',
       unlocked: () => true,
-      base: () => D(5),
-      ratio: () => D(1.25),
+      base: () => D(10),
+      ratio: () => D(1.35),
       exp: () => 1,
       scaleStart: () => 100 + (rankReward('degree', 25) ? 25 : 0) + (hasUpg('vaporize', 7) ? 50 : 0),
       costDiv: () => (Layers.ms('ignition', 10) ? D(2) : D(1)),
@@ -37,8 +37,8 @@ const Buyables = {
       name: 'Bellows',
       desc: 'Multiplies Kindling output.',
       unlocked: () => player.ranks.degree.gte(1) || player.ranks.grade.gte(1) || player.ranks.order.gte(1) || anyLayerReset(),
-      base: () => D(50),
-      ratio: () => D(2.4),
+      base: () => D(200),
+      ratio: () => D(2.8),
       exp: () => 1,
       scaleStart: () => 100 + (hasUpg('vaporize', 7) ? 50 : 0),
       costDiv: () => (rankReward('degree', 10) ? D(10) : D(1)),
@@ -48,19 +48,19 @@ const Buyables = {
       name: 'Furnace',
       desc: 'Raises the power of each Bellows.',
       unlocked: () => player.ranks.degree.gte(3) || player.ranks.grade.gte(1) || player.ranks.order.gte(1) || anyLayerReset(),
-      base: () => D(5e3),
-      ratio: () => D(6),
+      base: () => D(1e5),
+      ratio: () => D(8),
       exp: () => 1.1,
       scaleStart: () => 25,
       costDiv: () => D(1),
       effectText: () => `+${format(furnacePerLevel(), 3)} Bellows power each`,
     },
     tickspeed: {
-      name: 'Tickspeed',
-      desc: 'Multiplies all heat gain.',
+      name: 'Draft',
+      desc: 'Air feeding the fire. Multiplies all heat gain.',
       unlocked: () => player.ranks.degree.gte(2) || player.ranks.grade.gte(1) || player.ranks.order.gte(1) || anyLayerReset(),
-      base: () => D(500),
-      ratio: () => D(3),
+      base: () => D(2e3),
+      ratio: () => D(4),
       exp: () => 1,
       scaleStart: () => 50,
       costDiv: () => D(1),
@@ -145,14 +145,14 @@ function furnacePerLevel() {
 }
 
 function bellowsPower() {
-  let p = D(1.4).add(furnacePerLevel().mul(player.buyables.furnace));
+  let p = D(1.3).add(furnacePerLevel().mul(player.buyables.furnace));
   if (rankReward('order', 6)) p = p.add(0.05);
   return p;
 }
 function bellowsMult() { return bellowsPower().pow(player.buyables.bellows); }
 
 function tickPower() {
-  let p = D(1.15);
+  let p = D(1.12);
   if (rankReward('degree', 15)) p = p.add(0.01);
   if (rankReward('grade', 5)) p = p.add(0.02);
   if (hasUpg('ignition', 7)) p = p.add(0.02);
@@ -170,7 +170,7 @@ function tickMult() {
 function heatMultipliers() {
   const m = [];
   m.push(['Bellows', bellowsMult()]);
-  m.push(['Tickspeed', tickMult()]);
+  m.push(['Draft', tickMult()]);
   m.push(['Ranks', Ranks.heatMult()]);
   for (const def of Layers.list) {
     if (def.heatMult) m.push([def.currency, def.heatMult()]);
@@ -192,7 +192,7 @@ const HeatLoss = [
     name: 'Heat Loss I',
     start: () => {
       if (inChal(2)) return D(1e6);
-      let s = D(1e12);
+      let s = D(1e15);
       if (hasUpg('ignition', 11)) s = s.mul(1e3);
       if (hasUpg('vaporize', 4)) s = s.mul(upgEff('vaporize', 4));
       return s;

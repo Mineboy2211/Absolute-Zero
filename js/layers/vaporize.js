@@ -8,10 +8,10 @@ Layers.register({
   currency: 'Pressure',
   verb: 'Vaporize',
   color: '#9fd8ff',
-  unlocked: () => player.bestT.gte(1e35),
-  req: () => D(1e40),
+  unlocked: () => player.bestT.gte(1e42),
+  req: () => D(1e48),
   gain() {
-    let g = player.T.log10().div(40).pow(4).mul(layerPts('meltdown').add(1).log10().add(1));
+    let g = player.T.log10().div(48).pow(4).mul(layerPts('meltdown').add(1).log10().add(1));
     if (hasUpg('vaporize', 8)) g = g.mul(upgEff('vaporize', 8));
     return g;
   },
@@ -25,7 +25,7 @@ Layers.register({
   },
   effectText() {
     const e = this.effect();
-    return `Pressure adds +${format(e.tick, 3)} tickspeed power (max +0.2), multiplies Ember gain by ${formatMult(e.embers)} and Magma gain by ${formatMult(e.magma)}.`;
+    return `Pressure adds +${format(e.tick, 3)} Draft power (max +0.2), multiplies Ember gain by ${formatMult(e.embers)} and Magma gain by ${formatMult(e.magma)}.`;
   },
   upgrades: [
     { cost: D(1), desc: 'Magma flow is no longer reset by Vaporize.' },

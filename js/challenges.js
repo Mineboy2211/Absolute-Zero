@@ -28,11 +28,11 @@ const Challenges = {
       id: 3,
       name: 'Stagnant Air',
       layer: 'vaporize',
-      desc: 'Tickspeed does nothing.',
+      desc: 'Draft does nothing.',
       goals: ['1e18', '1e24', '1e30', '1e38', '1e48'],
       unlocked: () => player.layers.vaporize.resets > 0,
       reward: (c) => 0.01 * c,
-      rewardText: (r) => `Tickspeed power +${format(r, 2)}`,
+      rewardText: (r) => `Draft power +${format(r, 2)}`,
     },
     {
       id: 4,

@@ -8,10 +8,10 @@ Layers.register({
   currency: 'Embers',
   verb: 'Ignite',
   color: '#ff7a3d',
-  unlocked: () => player.bestT.gte(1e4),
-  req: () => D(1e5),
+  unlocked: () => player.bestT.gte(1e6),
+  req: () => D(1e7),
   gain() {
-    let g = player.T.div(1e5).pow(0.5);
+    let g = player.T.div(1e7).pow(0.5);
     g = g.mul(this.gainMult());
     if (inChal(4)) g = g.pow(0.5);
     return g;
@@ -48,31 +48,31 @@ Layers.register({
     {
       cost: D(5),
       desc: 'Embers multiply heat gain.',
-      effect: () => layerPts('ignition').add(1).pow(hasUpg('meltdown', 9) ? 0.45 : 0.4),
+      effect: () => layerPts('ignition').add(1).pow(hasUpg('meltdown', 9) ? 0.55 : 0.5),
       effectText: (e) => formatMult(e),
     },
     { cost: D(15), desc: 'Kindling power +1.' },
     { cost: D(40), desc: 'Unlock the Bellows autobuyer.' },
-    { cost: D(100), desc: 'Degree no longer resets buyables.' },
-    { cost: D(300), desc: 'Tickspeed power +0.02.' },
-    { cost: D(1e3), desc: 'Unlock the Furnace and Tickspeed autobuyers.' },
+    { cost: D(100), desc: 'Grade and Order no longer reset buyables.' },
+    { cost: D(300), desc: 'Draft power +0.02.' },
+    { cost: D(1e3), desc: 'Unlock the Furnace and Draft autobuyers.' },
     {
       cost: D(5e3),
       desc: 'Ember gain is multiplied by Degree.',
       effect: () => player.ranks.degree.add(1).pow(0.75),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(2e4), desc: 'Unlock the Degree autobuyer.' },
+    { cost: D(2e4), desc: 'Unlock the Grade autobuyer.' },
     { cost: D(1e6), desc: 'Heat Loss I starts 1,000× later.' },
     {
       cost: D(1e8),
-      desc: 'Unlock the Grade autobuyer. Ember gain is multiplied by log(Temperature).',
+      desc: 'Ember gain is multiplied by log(Temperature).',
       effect: () => player.T.add(10).log10().max(1),
       effectText: (e) => formatMult(e),
     },
   ],
   milestones: [
-    { req: 1, desc: 'Bellows, Furnace and Tickspeed stay unlocked.' },
+    { req: 1, desc: 'Bellows, Furnace and Draft stay unlocked.' },
     { req: 3, desc: 'Start every run with 5 Kindling.' },
     { req: 10, desc: 'Kindling is 2× cheaper.' },
     { req: 25, desc: 'Heat gain ×2.' },

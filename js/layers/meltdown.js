@@ -9,10 +9,10 @@ Layers.register({
   verb: 'Melt down',
   color: '#ff4b2b',
   extraData: () => ({ flow: D(0) }),
-  unlocked: () => player.bestT.gte(1e18),
-  req: () => D(1e20),
+  unlocked: () => player.bestT.gte(1e19),
+  req: () => D(1e22),
   gain() {
-    let g = player.T.div(1e20).pow(0.1).mul(layerPts('ignition').add(1).log10().add(1));
+    let g = player.T.div(1e22).pow(0.1).mul(layerPts('ignition').add(1).log10().add(1));
     if (hasUpg('meltdown', 10)) g = g.mul(upgEff('meltdown', 10));
     g = g.mul(Layers.map.vaporize.effect().magma);
     return g;
@@ -41,7 +41,7 @@ Layers.register({
     const r = this.flowRate();
     if (r.gt(0)) Layers.addPoints('meltdown', r.mul(dt));
   },
-  heatExp: () => (hasUpg('meltdown', 8) ? 0.7 : 0.6),
+  heatExp: () => (hasUpg('meltdown', 8) ? 0.6 : 0.5),
   heatMult() { return layerPts('meltdown').add(1).pow(this.heatExp()); },
   emberMult() { return layerPts('meltdown').add(1).pow(0.25); },
   effectText() {
@@ -60,30 +60,30 @@ Layers.register({
   upgrades: [
     { cost: D(1), desc: 'Magma flow ×2.' },
     {
-      cost: D(3),
+      cost: D(4),
       desc: 'Embers boost Magma flow.',
       effect: () => layerPts('ignition').add(1).log10().add(1),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(10), desc: 'Each Furnace gives +0.006 more Bellows power.' },
+    { cost: D(20), desc: 'Each Furnace gives +0.006 more Bellows power.' },
     {
-      cost: D(30),
-      desc: 'Magma raises tickspeed power.',
+      cost: D(100),
+      desc: 'Magma raises Draft power.',
       effect: () => layerPts('meltdown').add(1).log10().mul(0.004),
       effectText: (e) => '+' + format(e, 3),
     },
-    { cost: D(100), desc: 'Heat Loss I is weaker: power 0.5 → 0.55.' },
+    { cost: D(800), desc: 'Heat Loss I is weaker: power 0.5 → 0.55.' },
     {
-      cost: D(300),
+      cost: D(5e3),
       desc: 'Grade boosts Magma flow.',
-      effect: () => player.ranks.grade.add(1),
+      effect: () => player.ranks.grade.add(1).pow(0.5),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(1e3), desc: 'Unlock the Order autobuyer.' },
-    { cost: D(5e3), desc: 'Magma heat effect exponent 0.6 → 0.7.' },
-    { cost: D(2e4), desc: 'The 3rd Ember upgrade uses ^0.45 instead of ^0.4.' },
+    { cost: D(3e4), desc: 'Unlock the Order autobuyer.' },
+    { cost: D(2e5), desc: 'Magma heat effect exponent 0.5 → 0.6.' },
+    { cost: D(1.5e6), desc: 'The 3rd Ember upgrade uses ^0.55 instead of ^0.5.' },
     {
-      cost: D(1e5),
+      cost: D(1e7),
       desc: 'Magma flow boosts Magma gained on Meltdown.',
       effect: () => player.layers.meltdown.flow.add(1).pow(0.25),
       effectText: (e) => formatMult(e),

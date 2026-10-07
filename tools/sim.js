@@ -10,6 +10,7 @@ const path = require('path');
 const vm = require('vm');
 
 const hours = Number(process.argv[2] || 3);
+const debugAfter = process.env.DEBUG_AFTER;
 const bePath = process.argv[3] || require.resolve('break_eternity.js/dist/break_eternity.cjs.js', { paths: [process.cwd(), __dirname] });
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -28,7 +29,9 @@ const bot = `
 var events = {};
 function mark(name) { if (!(name in events)) { events[name] = player.stats.timePlayed; console.log(formatTime(player.stats.timePlayed).padStart(12) + '  ' + name + '   (T=' + format(player.T) + ', gain=' + format(heatGain()) + '/s)'); } }
 function botStep(dt) {
+  const deg = player.ranks.degree;
   gameTick(dt);
+  if (player.ranks.degree.gt(deg) && (player.ranks.degree.lte(3) || player.ranks.degree.toNumber() % 5 === 0)) mark('Degree ' + formatWhole(player.ranks.degree));
   for (const def of Layers.list) {
     if (!player.layers[def.id].unlocked) continue;
     let bought = true;
@@ -52,14 +55,17 @@ function botStep(dt) {
       break;
     }
   }
-  for (const id of ['order', 'grade', 'degree']) if (Ranks.rankUp(id) && (player.ranks[id].lte(3) || player.ranks[id].toNumber() % 5 === 0)) mark(Ranks.defs[id].name + ' ' + formatWhole(player.ranks[id]));
+  for (const id of ['order', 'grade']) if (Ranks.rankUp(id) && (player.ranks[id].lte(3) || player.ranks[id].toNumber() % 5 === 0)) mark(Ranks.defs[id].name + ' ' + formatWhole(player.ranks[id]));
   // Challenges: try the cheapest uncompleted tier when the last Vaporize run reached far enough.
   if (!player.challenges.active && player.layers.vaporize.resets > 0) {
     for (const c of Challenges.list) {
       const goal = Challenges.goal(c.id);
-      if (c.unlocked() && goal && player.bestT.gte(goal.pow(1.15))) { Challenges.enter(c.id); player.challenges.started = player.stats.timePlayed; break; }
+      const fails = (player.challenges.fails || {})[c.id] || 0;
+      if (c.unlocked() && goal && player.T.gte(goal.pow(1.1 + 0.15 * fails))) { Challenges.enter(c.id); player.challenges.started = player.stats.timePlayed; break; }
     }
   } else if (player.challenges.active && player.stats.timePlayed - player.challenges.started > 900) {
+    player.challenges.fails = player.challenges.fails || {};
+    player.challenges.fails[player.challenges.active] = (player.challenges.fails[player.challenges.active] || 0) + 1;
     Challenges.exit();
   } else if (player.challenges.active) {
     const id = player.challenges.active;
@@ -69,10 +75,11 @@ function botStep(dt) {
   for (const e of [1e3, 1e6, 1e10, 1e15, 1e20, 1e25, 1e30, 1e40, 1e50, 1e60, 1e80, 1e100]) if (player.bestT.gte(e)) mark('T >= ' + format(e, 0));
 }
 `;
-vm.runInContext(bot, ctx);
+vm.runInContext(bot + (debugAfter ? ';var DEBUG_AFTER = ' + Number(debugAfter) + ';' : ''), ctx);
 vm.runInContext(`
   for (let t = 0; t < ${hours} * 3600; t++) {
     botStep(1);
+    if (typeof DEBUG_AFTER !== 'undefined' && t > DEBUG_AFTER && t % 300 === 0) console.log('  dbg chal=' + player.challenges.active + ' T=' + format(player.T) + ' gain=' + format(heatGain()) + ' embers=' + format(layerPts('ignition')) + ' pendE=' + format(Layers.gain('ignition')) + ' passive=' + Layers.map.ignition.passive() + ' upgI=' + player.layers.ignition.upgrades.length + ' upgM=' + player.layers.meltdown.upgrades.length + ' ranks=' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order + ' buy=' + Buyables.order.map(b => player.buyables[b].toString()).join('/'));
     if (t % 1800 === 0) console.log('--- ' + formatTime(t) + ': T=' + format(player.T) + ' best=' + format(player.bestT) + ' Embers=' + format(layerPts('ignition')) + ' Magma=' + format(layerPts('meltdown')) + ' flow=' + format(player.layers.meltdown.flow) + ' P=' + format(layerPts('vaporize')) + ' ranks ' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order + ' buy ' + Buyables.order.map(b => player.buyables[b].toString()).join('/'));
   }
   console.log('Final: T=' + format(player.T) + ' best=' + format(player.bestT) + ' NaN check: ' + Number.isNaN(player.T.mag));

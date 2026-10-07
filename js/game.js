@@ -5,6 +5,7 @@ function gameTick(dt) {
   player.stats.timePlayed += dt;
   player.T = player.T.add(heatGain().mul(dt));
   player.bestT = player.bestT.max(player.T);
+  Ranks.tick();
   Layers.tick(dt);
   Automation.run();
   Challenges.tick();

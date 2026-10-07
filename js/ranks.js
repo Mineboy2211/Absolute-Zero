@@ -1,4 +1,6 @@
-// Ranks: Degree -> Grade -> Order. Each rank-up resets Temperature, buyables and lower ranks.
+// Ranks: Degree -> Grade -> Order.
+// Degrees are earned automatically as Temperature crosses each threshold (no reset).
+// Grade and Order are "tempering" resets: they reset Temperature, buyables and the ranks below them.
 
 function rankReward(rank, at) {
   return !inChal(6) && player.ranks[rank].gte(at);
@@ -9,12 +11,13 @@ const Ranks = {
   defs: {
     degree: {
       name: 'Degree',
+      auto: true,
       degreeExp: () => {
         let e = rankReward('order', 2) ? 1.15 : 1.2;
         e -= Challenges.reward(6);
         return e;
       },
-      // Temperature needed for the next Degree.
+      // Temperature needed for Degree lvl + 1.
       req(lvl) { return D(10).mul(D(5).pow(D(lvl).pow(this.degreeExp()))); },
       reqText(lvl) { return formatK(this.req(lvl)); },
       can() { return player.T.gte(this.req(player.ranks.degree)); },
@@ -26,42 +29,39 @@ const Ranks = {
         while (t.gt(0) && this.req(t.sub(1)).gt(player.T)) t = t.sub(1);
         return t;
       },
-      doReset() {
-        const keep = hasUpg('ignition', 6)
-          ? { kindling: true, bellows: true, furnace: true, tickspeed: true }
-          : { kindling: rankReward('grade', 2) };
-        resetCore(keep);
-      },
       rewards: [
         [1, 'Unlock Bellows. Heat gain ×2.'],
-        [2, 'Unlock Tickspeed.'],
+        [2, 'Unlock Draft.'],
         [3, 'Unlock Furnace. Heat gain ×2.'],
         [4, 'Kindling power ×2.'],
         [6, () => `Heat gain ×(Degree + 1). Currently ${formatMult(player.ranks.degree.add(1))}.`],
         [10, 'Bellows are 10× cheaper.'],
-        [15, 'Tickspeed power +0.01.'],
+        [15, 'Draft power +0.01.'],
         [25, 'Kindling cost scaling starts 25 levels later.'],
       ],
     },
     grade: {
       name: 'Grade',
-      req(lvl) { return D(lvl).mul(2).add(4).sub(hasUpg('vaporize', 6) ? 1 : 0); },
+      req(lvl) { return D(lvl).mul(2).add(5).sub(hasUpg('vaporize', 6) ? 1 : 0); },
       reqText(lvl) { return 'Degree ' + formatWhole(this.req(lvl)); },
       can() { return player.ranks.degree.gte(this.req(player.ranks.grade)); },
       target() {
-        const x = player.ranks.degree.add(hasUpg('vaporize', 6) ? 1 : 0).sub(4);
+        const x = player.ranks.degree.add(hasUpg('vaporize', 6) ? 1 : 0).sub(5);
         if (x.lt(0)) return D(0);
         return x.div(2).floor().add(1);
       },
       doReset() {
-        resetCore();
+        const keep = hasUpg('ignition', 6)
+          ? { kindling: true, bellows: true, furnace: true, tickspeed: true }
+          : { kindling: rankReward('grade', 2) };
+        resetCore(keep);
         player.ranks.degree = D(0);
       },
       rewards: [
         [1, 'Heat gain ×3.'],
-        [2, 'Degree no longer resets Kindling.'],
+        [2, 'Grade no longer resets Kindling.'],
         [3, 'Unlock the Kindling autobuyer.'],
-        [5, 'Tickspeed power +0.02.'],
+        [5, 'Draft power +0.02.'],
         [8, () => `Heat gain ×Grade². Currently ${formatMult(player.ranks.grade.pow(2).max(1))}.`],
         [12, 'Furnace effect ×1.25.'],
       ],
@@ -77,7 +77,8 @@ const Ranks = {
         return t;
       },
       doReset() {
-        resetCore();
+        const keep = hasUpg('ignition', 6) ? { kindling: true, bellows: true, furnace: true, tickspeed: true } : {};
+        resetCore(keep);
         if (!rankReward('order', 4)) player.ranks.degree = D(0);
         player.ranks.grade = D(0);
       },
@@ -106,26 +107,30 @@ const Ranks = {
   // Rank up as far as possible in one go.
   rankUp(id) {
     const def = this.defs[id];
-    if (!def.can()) return false;
+    if (def.auto || !def.can()) return false;
     const t = def.target();
     if (t.lte(player.ranks[id])) return false;
     player.ranks[id] = t;
     def.doReset();
     return true;
   },
+  // Degrees follow Temperature on their own.
+  tick() {
+    const t = this.defs.degree.target();
+    if (t.gt(player.ranks.degree)) player.ranks.degree = t;
+  },
   reset() {
     for (const id of this.order) player.ranks[id] = D(0);
   },
 };
 
-for (const id of Ranks.order) {
+for (const id of ['grade', 'order']) {
   Automation.register({
     id: 'rank_' + id,
     name: Ranks.defs[id].name,
     group: 'ranks',
     unlocked: () => ({
-      degree: hasUpg('ignition', 10),
-      grade: hasUpg('ignition', 12),
+      grade: hasUpg('ignition', 10),
       order: hasUpg('meltdown', 7),
     })[id],
     run: () => Ranks.rankUp(id),
