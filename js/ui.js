@@ -62,6 +62,7 @@ const UI = {
     this.switchTab(player.options.tab || 'main');
     document.addEventListener('keydown', (ev) => {
       if (ev.target && (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'SELECT')) return;
+      DevUnlock.key(ev.key);
       if (ev.key === 'm' || ev.key === 'M') maxAll();
     });
   },
@@ -120,6 +121,7 @@ const UI = {
         t.push({ id: def.id, name: def.name, group: `Chapter ${ch.id}: ${ch.name}`, show: Layers.isUnlocked(def.id), color: def.color });
       }
     }
+    t.push({ id: 'news', name: 'News', group: 'Other', show: true, badge: News.hasUnread() });
     t.push({ id: 'achievements', name: 'Achievements', group: 'Other', show: true });
     t.push({ id: 'stats', name: 'Stats', group: 'Other', show: true });
     t.push({ id: 'options', name: 'Options', group: 'Other', show: true });
@@ -128,7 +130,7 @@ const UI = {
 
   updateSidebar(force) {
     const tabs = this.tabs();
-    const key = tabs.map((t) => t.id).join(',') + '|' + this.currentTab;
+    const key = tabs.map((t) => t.id + (t.badge ? '*' : '')).join(',') + '|' + this.currentTab;
     if (!force && key === this.sidebarKey) return;
     this.sidebarKey = key;
     const nav = document.getElementById('sidebar');
@@ -139,7 +141,8 @@ const UI = {
         group = t.group;
         nav.append(h('div', { class: 'nav-group', text: group }));
       }
-      const b = h('button', { class: 'nav-btn' + (t.id === this.currentTab ? ' active' : ''), onclick: () => this.switchTab(t.id) }, t.name);
+      const b = h('button', { class: 'nav-btn' + (t.id === this.currentTab ? ' active' : ''), onclick: () => this.switchTab(t.id) }, t.name,
+        t.badge ? h('span', { class: 'badge', text: 'new' }) : null);
       if (t.color) b.style.setProperty('--tab', t.color);
       nav.append(b);
     }
@@ -424,6 +427,21 @@ const Tabs = {
     return root;
   },
 
+  news() {
+    const root = h('div', { class: 'tab' });
+    News.markRead();
+    for (const n of News.list) {
+      root.append(h('section', { class: 'card news' },
+        h('div', { class: 'news-head' },
+          h('span', { class: 'news-version', text: 'v' + n.version }),
+          h('h2', { text: n.title }),
+          h('span', { class: 'muted small', text: n.date })),
+        h('ul', null, n.notes.map((x) => h('li', { text: x })))));
+    }
+    root.append(h('p', { class: 'muted small', text: 'Only major updates are listed here.' }));
+    return root;
+  },
+
   achievements() {
     const root = h('div', { class: 'tab' });
     root.append(h('p', { class: 'muted' }, 'Each Chapter 1 achievement multiplies heat gain by ×1.1. Total: ',
@@ -491,11 +509,13 @@ const Tabs = {
     unit.addEventListener('change', () => { player.options.unit = unit.value; UI.refresh(); });
     const samples = ['12345', '6.78e15', '4.2e48', '1e400', '3e5000'];
 
-    const check = (key, label) => {
-      const box = h('input', { type: 'checkbox' });
+    const check = (key, label, hint) => {
+      const box = h('input', { type: 'checkbox', class: 'switch' });
       box.checked = !!player.options[key];
-      box.addEventListener('change', () => { player.options[key] = box.checked; if (key === 'devMode') UI.switchTab('options'); });
-      return h('label', { class: 'option' }, box, ' ' + label);
+      box.addEventListener('change', () => { player.options[key] = box.checked; });
+      return h('label', { class: 'option-row' },
+        h('span', { class: 'option-text' }, h('span', { text: label }), hint ? h('span', { class: 'muted small', text: hint }) : null),
+        box);
     };
 
     root.append(card('Display',
@@ -504,18 +524,17 @@ const Tabs = {
       h('p', { class: 'muted small' }, 'Preview: ', UI.dyn(() => samples.map((x) => formatK(x)).join(' · ')))));
 
     root.append(card('Saving',
-      check('autosave', 'Autosave every 30 seconds'),
-      check('offline', 'Offline progress (up to 24 hours)'),
+      check('autosave', 'Autosave', 'Saves every 30 seconds and when you close the page.'),
+      check('offline', 'Offline progress', 'Keep heating while the game is closed, up to 24 hours.'),
       h('div', { class: 'button-row' },
         h('button', { onclick: () => { if (Save.save()) notify('Game saved.'); } }, 'Save now'),
         h('button', { onclick: showExport }, 'Export'),
         h('button', { onclick: showImport }, 'Import'),
         h('button', { class: 'danger', onclick: showHardReset }, 'Hard reset'))));
 
-    const dev = card('Debug',
-      check('devMode', 'Developer mode'),
-      h('p', { class: 'muted', text: 'Speeds up game time to test pacing. Saves record that it was used.' }));
     if (player.options.devMode) {
+      const dev = card('Developer',
+        h('p', { class: 'muted', text: 'Speeds up game time to test pacing.' }));
       const speed = h('select', { 'aria-label': 'Developer speed' }, [1, 2, 5, 10, 100, 1000].map((n) => h('option', { value: n, text: '×' + n })));
       speed.value = String(player.options.devSpeed);
       speed.addEventListener('change', () => {
@@ -523,10 +542,15 @@ const Tabs = {
         if (player.options.devSpeed > 1) player.stats.devUsed = true;
       });
       dev.append(h('label', { class: 'option' }, 'Game speed: ', speed));
-      dev.append(h('button', { onclick: () => { const f = fixNaN(); notify(f.length ? 'Fixed: ' + f.join(', ') : 'No NaN found.'); } }, 'Scan for NaN'));
+      dev.append(h('div', { class: 'button-row' },
+        h('button', { onclick: () => { const f = fixNaN(); notify(f.length ? 'Fixed: ' + f.join(', ') : 'No NaN found.'); } }, 'Scan for NaN'),
+        h('button', { onclick: () => { player.options.devMode = false; player.options.devSpeed = 1; UI.refresh(); } }, 'Close developer mode')));
+      root.append(dev);
     }
-    root.append(dev);
-    root.append(h('p', { class: 'muted small', text: `Absolute Zero · save version ${SAVE_VERSION}` }));
+    // Tapping the version line 7 times (or the Konami code) opens developer mode.
+    const footer = h('p', { class: 'muted small version-line', text: `Absolute Zero v${GAME_VERSION} · save ${SAVE_VERSION}${player.stats.devUsed ? '·' : ''}` });
+    footer.addEventListener('click', () => DevUnlock.tap());
+    root.append(footer);
     return root;
   },
 };
@@ -650,3 +674,27 @@ function showHardReset() {
     { text: 'Cancel' },
   ]);
 }
+
+// Hidden developer mode: Konami code on a keyboard, or 7 quick taps on the version line.
+const DevUnlock = {
+  seq: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'],
+  pos: 0,
+  taps: [],
+  key(k) {
+    k = k.length === 1 ? k.toLowerCase() : k;
+    this.pos = k === this.seq[this.pos] ? this.pos + 1 : (k === this.seq[0] ? 1 : 0);
+    if (this.pos === this.seq.length) { this.pos = 0; this.open(); }
+  },
+  tap() {
+    const now = Date.now();
+    this.taps = this.taps.filter((t) => now - t < 3000);
+    this.taps.push(now);
+    if (this.taps.length >= 7) { this.taps = []; this.open(); }
+  },
+  open() {
+    if (player.options.devMode) return;
+    player.options.devMode = true;
+    notify('Developer mode unlocked. See Options.');
+    if (UI.currentTab === 'options') UI.refresh();
+  },
+};

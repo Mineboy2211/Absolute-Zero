@@ -28,6 +28,7 @@ function getDefaultPlayer() {
       devMode: false,
       devSpeed: 1,
       tab: 'main',
+      newsSeen: '',
     },
     stats: { timePlayed: 0, created: Date.now(), devUsed: false },
     lastTick: Date.now(),
