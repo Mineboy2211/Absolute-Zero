@@ -89,6 +89,15 @@ const UI = {
         if (show) setText(amount, format(layerPts(def.id)));
       });
     }
+    const gLabel = document.getElementById('gauge-label');
+    const gFill = document.getElementById('gauge-fill');
+    this.headerUpdaters.push(() => {
+      const g = nextGoal();
+      const pct = logProgress(player.T, g.from, g.target);
+      setText(gLabel, `${g.name} · ${formatK(g.target)} · ${(pct * 100).toFixed(1)}%`);
+      const w = (pct * 100).toFixed(2) + '%';
+      if (gFill.style.width !== w) gFill.style.width = w;
+    });
   },
 
   // ---------- sidebar ----------
@@ -217,6 +226,24 @@ function accentColor(q) {
   return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
 
+// Fraction of the way from `from` to `to`, measured in orders of magnitude.
+function logProgress(x, from, to) {
+  const a = D(from).max(1).log10().toNumber(), b = D(to).max(1).log10().toNumber();
+  const v = D(x).max(1).log10().toNumber();
+  if (!(b > a)) return v >= b ? 1 : 0;
+  return Math.min(1, Math.max(0, (v - a) / (b - a)));
+}
+
+// What the header gauge tracks: the first layer never reset, otherwise the next Degree.
+function nextGoal() {
+  for (const def of Layers.list) {
+    if (player.layers[def.id].resets === 0) return { name: `Next: ${def.name}`, from: D(1), target: def.req() };
+  }
+  const deg = Ranks.defs.degree;
+  const d = player.ranks.degree;
+  return { name: `Next: Degree ${formatWhole(d.add(1))}`, from: d.gt(0) ? deg.req(d.sub(1)) : D(1), target: deg.req(d) };
+}
+
 function heatLossActive() {
   const raw = rawHeatGain();
   return HeatLoss.some((hl) => raw.gt(hl.start()));
@@ -252,30 +279,37 @@ function card(title, ...kids) {
 const Tabs = {
   main() {
     const root = h('div', { class: 'tab' });
-    const rows = Buyables.order.map((id) => {
+    const tiles = Buyables.order.map((id) => {
       const b = Buyables.defs[id];
       const buyBtn = h('button', { class: 'buy', onclick: () => Buyables.buy(id) });
-      const maxBtn = h('button', { class: 'buy', onclick: () => Buyables.buyMax(id) }, 'Max');
+      const maxBtn = h('button', { class: 'buy max', onclick: () => Buyables.buyMax(id) }, 'Max');
+      const fill = h('div', { class: 'fill' });
       UI.bind(() => {
-        setText(buyBtn, 'Cost: ' + formatK(Buyables.cost(id)));
+        const cost = Buyables.cost(id);
+        setText(buyBtn, formatK(cost));
         const can = Buyables.canBuy(id);
         buyBtn.classList.toggle('can', can);
         maxBtn.classList.toggle('can', can);
+        const w = (logProgress(player.T, 1, cost) * 100).toFixed(1) + '%';
+        if (fill.style.width !== w) fill.style.width = w;
       });
-      const row = h('div', { class: 'buyable' },
-        h('div', { class: 'buyable-info' },
-          h('div', { class: 'buyable-title' }, h('b', { text: b.name }), ' ',
-            UI.dyn(() => '[' + formatWhole(Buyables.level(id)) + ']', 'span', 'level'),
-            UI.showIf(h('span', { class: 'tag', text: 'Scaled' }), () => Buyables.isScaled(id))),
-          h('div', { class: 'muted', text: b.desc }),
-          UI.dyn(() => b.effectText(), 'div', 'effect')),
-        h('div', { class: 'buyable-buttons' }, buyBtn, maxBtn, autoToggle('buy_' + id)));
-      return UI.showIf(row, b.unlocked);
+      const tile = h('div', { class: 'machine', 'data-kind': id },
+        h('div', { class: 'machine-head' },
+          h('span', { class: 'machine-name', text: b.name }),
+          UI.dyn(() => formatWhole(Buyables.level(id)), 'span', 'machine-level')),
+        h('div', { class: 'muted small', text: b.desc }),
+        UI.dyn(() => b.effectText(), 'div', 'effect'),
+        UI.showIf(h('span', { class: 'tag', text: 'Cost scaling' }), () => Buyables.isScaled(id)),
+        h('div', { class: 'meter' }, fill),
+        h('div', { class: 'machine-buttons' }, buyBtn, maxBtn),
+        autoToggle('buy_' + id));
+      return UI.showIf(tile, b.unlocked);
     });
-    root.append(card('Heat sources',
-      h('p', { class: 'muted' }, 'Base heat: ', UI.dyn(() => formatK(heatBase()) + '/s'), '. Press M to buy max of everything.'),
-      h('button', { class: 'wide', onclick: maxAll }, 'Max all'),
-      rows));
+    root.append(card('The Hearth',
+      h('div', { class: 'hearth-top' },
+        h('p', { class: 'muted' }, 'Base heat ', UI.dyn(() => formatK(heatBase()) + '/s', 'b'), ' · Press M to max everything.'),
+        h('button', { onclick: maxAll }, 'Max all')),
+      h('div', { class: 'machines' }, tiles)));
 
     const hlRows = HeatLoss.map((hl, i) => {
       const row = h('div', { class: 'heatloss' });
@@ -303,14 +337,27 @@ const Tabs = {
 
   ranks() {
     const root = h('div', { class: 'tab' });
-    root.append(h('p', { class: 'muted', text: 'Ranking up resets your Temperature and buyables. Grade also resets Degree, and Order resets Grade and Degree.' }));
+    root.append(h('p', { class: 'muted', text: 'Degrees are earned on their own as your Temperature climbs. Grade and Order temper the fire: they reset your Temperature, buyables and the ranks below them in exchange for permanent rewards.' }));
     for (const id of Ranks.order) {
       const r = Ranks.defs[id];
-      const btn = h('button', { class: 'big', onclick: () => Ranks.rankUp(id) });
-      UI.bind(() => {
-        setText(btn, `Rank up (requires ${r.reqText(player.ranks[id])})`);
-        btn.classList.toggle('can', Ranks.can(id));
-      });
+      let btn;
+      if (r.auto) {
+        const fill = h('div', { class: 'fill' });
+        btn = h('div', { class: 'degree-progress' },
+          UI.dyn(() => `Next Degree at ${r.reqText(player.ranks.degree)}`, 'div', 'muted small'),
+          h('div', { class: 'meter' }, fill));
+        UI.bind(() => {
+          const d = player.ranks.degree;
+          const w = (logProgress(player.T, d.gt(0) ? r.req(d.sub(1)) : 1, r.req(d)) * 100).toFixed(1) + '%';
+          if (fill.style.width !== w) fill.style.width = w;
+        });
+      } else {
+        btn = h('button', { class: 'big', onclick: () => Ranks.rankUp(id) });
+        UI.bind(() => {
+          setText(btn, `Temper into ${r.name} ${formatWhole(r.target().max(player.ranks[id].add(1)))} (requires ${r.reqText(player.ranks[id])})`);
+          btn.classList.toggle('can', Ranks.can(id));
+        });
+      }
       const rewards = r.rewards.map(([at, d]) => {
         const li = h('li', null, h('b', { text: `${r.name} ${at}: ` }), UI.dyn(() => (typeof d === 'function' ? d() : d)));
         UI.classIf(li, 'done', () => player.ranks[id].gte(at));
@@ -318,7 +365,7 @@ const Tabs = {
       });
       const c = card(null,
         h('h2', null, r.name + ' ', UI.dyn(() => formatWhole(player.ranks[id]), 'span', 'level')),
-        btn, autoToggle('rank_' + id),
+        btn, Automation.map['rank_' + id] ? autoToggle('rank_' + id) : null,
         UI.showIf(h('p', { class: 'warn', text: 'Rank rewards are disabled in this challenge.' }), () => inChal(6)),
         h('ul', { class: 'rewards' }, rewards));
       root.append(id === 'degree' ? c : UI.showIf(c, () => id === 'grade' ? (player.ranks.degree.gte(3) || player.ranks.grade.gt(0) || player.ranks.order.gt(0) || anyLayerReset()) : (player.ranks.grade.gte(2) || player.ranks.order.gt(0) || player.layers.meltdown.resets > 0)));

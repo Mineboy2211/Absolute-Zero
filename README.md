@@ -1,8 +1,8 @@
 # Absolute Zero
 
-An incremental game about heating up forever. You start at 0 K with a single spark, then feed it with Kindling, Bellows and Furnaces, climb through Degrees, Grades and Orders, and break through layer after layer of resets: Ignition, Meltdown, Vaporize and beyond. The temperature goes to absurd numbers.
+An incremental game about heating up forever. You start at 0 K with a single spark, then feed the Hearth with Kindling, Bellows, Furnaces and Draft, earn Degrees as the fire climbs, temper it into Grades and Orders, and break through layer after layer of resets: Ignition, Meltdown, Vaporize and beyond. The temperature goes to absurd numbers.
 
-**Play it:** https://YOUR-GITHUB-NAME.github.io/YOUR-REPO-NAME/ *(replace once GitHub Pages is enabled)*
+**Play it:** https://mineboy2211.github.io/Absolute-Zero/
 
 ## Status
 

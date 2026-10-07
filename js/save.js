@@ -1,7 +1,13 @@
 // Saving, loading, migrations, export/import, NaN protection.
 
 // migrations[v] turns a version-v save into a version-(v+1) save.
-const migrations = {};
+const migrations = {
+  // v2: Degrees became automatic, so the Degree autobuyer no longer exists.
+  1: (s) => {
+    if (s.auto) delete s.auto.rank_degree;
+    return s;
+  },
+};
 
 function isBadDecimal(d) {
   return Number.isNaN(d.mag) || Number.isNaN(d.layer) || !Number.isFinite(d.mag) || !Number.isFinite(d.layer);
