@@ -75,7 +75,8 @@ const UI = {
     const banner = document.getElementById('chal-banner');
     this.headerUpdaters.push(() => {
       setText(temp, formatK(player.T));
-      setText(gain, '+' + formatK(heatGain()) + '/s' + (heatLossActive() ? '  (heat loss active)' : ''));
+      if (typeof HeatDeath !== 'undefined' && HeatDeath.running()) setText(gain, `Heat Death: cooling ${format(HeatDeath.rate())} orders of magnitude/s`);
+      else setText(gain, '+' + formatK(heatGain()) + '/s' + (heatLossActive() ? '  (heat loss active)' : ''));
       const id = player.challenges.active;
       if (banner.hidden === !!id) banner.hidden = !id;
       if (id) {
@@ -211,7 +212,7 @@ const UI = {
       h('div', { class: 'chapter-num', text: `Chapter ${ch.id} complete` }),
       (ch.complete || []).map((line) => h('p', { text: line })),
       h('p', { text: 'The next chapter is still being forged.' }),
-      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), ch.id === 1 ? 'Chapter 2, Stellar.' : 'Chapter 3, Cosmic. Universes, Inflation, Entropy and the Heat Death.'));
+      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), ch.id === 1 ? 'Chapter 2, Stellar.' : ch.id === 2 ? 'Chapter 3, Cosmic.' : 'Chapter 4.'));
     this.modal(`${ch.name}: complete`, body, [{ text: 'Keep burning', primary: true }]);
   },
 
@@ -484,7 +485,8 @@ const Tabs = {
     const root = h('div', { class: 'tab' });
     root.append(h('p', { class: 'muted' }, 'Chapter 1 achievements multiply heat gain by ×1.1 each (total ',
       UI.dyn(() => formatMult(Achievements.mult())), '). Chapter 2 achievements multiply Stardust gain by ×1.1 each (total ',
-      UI.dyn(() => formatMult(Achievements.stardustMult())), '). Unlocked: ', UI.dyn(() => `${Achievements.count()} / ${Achievements.list.length}`), '.'));
+      UI.dyn(() => formatMult(Achievements.stardustMult())), '). Chapter 3 achievements multiply Universe, Expansion, Entropy and Absolute gain and cooling speed by ×1.1 each (total ',
+      UI.dyn(() => formatMult(Achievements.universeMult())), '). Unlocked: ', UI.dyn(() => `${Achievements.count()} / ${Achievements.list.length}`), '.'));
     for (const ch of Chapters.list) {
       if (ch.id > player.chapters.unlocked) continue;
       const list = Achievements.list.filter((a) => a.chapter === ch.id);
@@ -617,7 +619,7 @@ function renderLayerTab(def) {
     h('h2', { class: 'layer-title', text: `${def.name}` }),
     h('p', { class: 'amount' }, 'You have ', UI.dyn(() => format(d().points), 'b'), ` ${def.currency}.`),
     UI.dyn(() => def.effectText(), 'p'),
-    resetBtn,
+    def.manual ? null : resetBtn,
     h('p', { class: 'muted small', text: `${def.name} resets ${resetsWhat}.` }),
     UI.showIf(UI.dyn(() => `Passively gaining ${format((def.passive ? def.passive() : 0) * 100, 0)}% of pending ${def.currency} per second.`, 'p', 'muted'), () => def.passive && def.passive() > 0),
     def.autoReset ? autoToggle('reset_' + def.id) : null,
@@ -629,9 +631,11 @@ function renderLayerTab(def) {
     const grid = h('div', { class: 'upg-grid' });
     for (const u of def.upgrades) {
       const btn = h('button', { class: 'upg', onclick: () => Layers.buyUpg(def.id, u.id) },
+        u.name ? h('span', { class: 'node-name', text: u.name }) : null,
         h('span', { class: 'upg-desc', text: u.desc }),
         u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
-        h('span', { class: 'upg-cost', text: `Cost: ${format(u.cost, 0)} ${def.currency}` }));
+        h('span', { class: 'upg-cost', text: `Cost: ${format(u.cost, 0)} ${def.currency}` +
+          (u.extra ? u.extra.map(([lid, amt]) => ` + ${format(amt, 0)} ${Layers.map[lid].currency}`).join('') : '') }));
       UI.bind(() => {
         btn.classList.toggle('bought', hasUpg(def.id, u.id));
         btn.classList.toggle('can', Layers.canBuyUpg(def.id, u.id));
@@ -1029,6 +1033,39 @@ Layers.map.entropy.panel = () => {
     h('p', null, 'Work: ', UI.dyn(() => format(Thermo.work()), 'b'),
       UI.dyn(() => ` · heat gain exponent ×${format(Thermo.workExp(), 3)}`, 'span', 'muted')),
     h('div', { class: 'button-row' }, buy, h('button', { onclick: () => Thermo.buyMaxEngines() }, 'Max')),
-    h('p', { class: 'muted small', text: 'Disorder rises with the square root of your Entropy and faster the longer this Entropy run lasts. Engines turn it into Work, which is never lost. Unprocessed Disorder lowers heat gain (at most ×0.92) but is turned into extra Entropy when you reset.' }),
+    h('p', { class: 'muted small', text: 'Disorder rises with the square root of your Entropy and faster the longer this Entropy run lasts. Engines turn it into Work, which is never lost. Unprocessed Disorder lowers heat gain (at most ×0.96) but is turned into extra Entropy when you reset.' }),
     autoToggle('auto_engine'));
+};
+
+// Heat Death runs.
+Layers.map.heatdeath.panel = () => {
+  const d = () => player.layers.heatdeath;
+  const btn = h('button', { class: 'big reset', onclick: () => (HeatDeath.running() ? HeatDeath.end() : HeatDeath.start()) });
+  UI.bind(() => {
+    let label;
+    if (HeatDeath.running()) label = `End the Heat Death for +${formatWhole(HeatDeath.pending())} Void`;
+    else if (HeatDeath.canStart()) label = `Begin the Heat Death at ${formatK(player.T)}`;
+    else label = `Reach ${formatK(Layers.map.heatdeath.req())} to begin the Heat Death`;
+    setText(btn, label);
+    btn.classList.toggle('can', HeatDeath.running() ? HeatDeath.pending().gt(0) : HeatDeath.canStart());
+  });
+  const cooler = h('button', { onclick: () => HeatDeath.buyCooler() });
+  UI.bind(() => {
+    setText(cooler, `Buy Cooler ${d().coolers + 1} (${format(HeatDeath.coolerCost(), 0)} Void)`);
+    cooler.classList.toggle('can', HeatDeath.canBuyCooler());
+  });
+  const run = h('div', null,
+    h('p', null, 'Cooled: ', UI.dyn(() => format(d().depth) + ' orders of magnitude', 'b'),
+      UI.dyn(() => ` in ${formatTime(d().time)}`, 'span', 'muted')),
+    h('p', null, 'Cooling speed: ', UI.dyn(() => format(HeatDeath.rate()) + ' orders of magnitude/s', 'b'),
+      UI.dyn(() => ` (base ${format(HeatDeath.baseRate())}, slowing as you go deeper)`, 'span', 'muted')),
+    UI.showIf(h('p', { class: 'effect', text: 'Below 1 K. Every Void you earn now is multiplied.' }), () => HeatDeath.belowOne()));
+  return h('div', { class: 'panel' },
+    h('p', { text: 'A Heat Death resets everything below it, then turns your fire around: Temperature stops rising and falls toward absolute zero. Nothing else can reset until you end it. Void depends on how many orders of magnitude you cooled, with a big bonus below 1 K.' }),
+    btn,
+    UI.showIf(run, () => HeatDeath.running()),
+    h('p', { class: 'muted small' }, 'Coldest Temperature ever reached: ', UI.dyn(() => (d().bestLow < 1e9 ? formatK(Decimal.pow(10, d().bestLow)) : 'none yet'))),
+    h('div', { class: 'button-row' }, cooler, h('button', { onclick: () => HeatDeath.buyMaxCoolers() }, 'Max')),
+    h('p', { class: 'muted small', text: 'Each Cooler multiplies cooling speed by 1.5. Coolers are never reset.' }),
+    autoToggle('auto_cooler'));
 };

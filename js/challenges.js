@@ -150,6 +150,7 @@ const Challenges = {
   totalComps() { return this.list.reduce((s, c) => s + chalComps(c.id), 0); },
   enter(id) {
     if (!this.isUnlocked(id) || inChal(id)) return;
+    if (typeof HeatDeath !== 'undefined' && HeatDeath.running()) return;
     player.challenges.active = 0;
     Layers.doReset(this.get(id).layer, { force: true, noGain: true });
     player.challenges.active = id;

@@ -15,7 +15,7 @@ const Planck = {
   },
   buyMax() { let n = 0; while (this.canBuy() && n < 1000) { this.buy(); n++; } return n > 0; },
   heatExp() {
-    let e = 1 + 0.02 * this.level().toNumber();
+    let e = 1 + (hasUpg('absolute', 8) ? 0.025 : 0.02) * this.level().toNumber();
     if (hasUpg('planck', 10)) e *= 1.05;
     return e;
   },

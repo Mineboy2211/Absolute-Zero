@@ -81,6 +81,8 @@ const Layers = {
 
   canReset(id) {
     const def = this.map[id];
+    // Manual layers have their own buttons; nothing else resets during a Heat Death.
+    if (def.manual || (typeof HeatDeath !== 'undefined' && HeatDeath.running())) return false;
     return this.isUnlocked(id) && player.T.gte(def.req()) && this.gain(id).gte(1);
   },
 

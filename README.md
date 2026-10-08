@@ -9,7 +9,8 @@ An incremental game about heating up forever. You start at 0 K with a single spa
 - Base game: the Hearth (Kindling, Bellows, Furnace, Draft), automatic Degrees, Grade and Order, Heat Loss softcaps
 - Chapter 1: Combustion, complete: Ignition (Embers), Meltdown (Magma), Vaporize (Pressure), Ionize (Plasma split), Fusion (Elements H to Fe), 8 challenges and 6 chapter goals
 - Chapter 2: Stellar, complete: the Gravity rule, Supernova (Stardust tree), Collapse (compressors), Singularity (black hole), Quasar (Jets) and Planck Break, 4 Stellar challenges and 6 chapter goals
-- Coming next: Chapter 3 (Cosmic)
+- Chapter 3: Cosmic, complete: the cosmic constants rule, Big Bang (Universes), Inflation (Stretch), Entropy (Disorder and Heat Engines), Heat Death (cooling runs for Void) and Absolute (the final tree), and 6 chapter goals
+- Coming next: Chapter 4 (ideas in DESIGN.md)
 
 See [DESIGN.md](DESIGN.md) for formulas, layer plans and pacing targets.
 
@@ -26,7 +27,7 @@ npm install break_eternity.js
 node tools/sim.js 3
 ```
 
-The argument is the number of in-game hours to simulate. Useful environment variables: `STEP=6` (seconds per tick), `LOAD=save.txt` (start from an exported save), `SAVE_OUT=out.txt`, `STOP_CHAPTER=2`. The bot itself lives in `tools/sim-bot.js`.
+The argument is the number of in-game hours to simulate. Useful environment variables: `STEP=6` (seconds per tick), `LOAD=save.txt` (start from an exported save), `SAVE_OUT=out.txt`, `STOP_CHAPTER=2`, `PRE='code'` (run code before the bot starts), `BOT_CONSTS=frozen,dim` (cosmic constants the bot arms), `HD_HOURS=2` (length of the bot's Heat Death runs). The bot itself lives in `tools/sim-bot.js`.
 
 ## Display
 
@@ -34,4 +35,4 @@ Numbers default to named notation (12.3 Million K). Options also offers short su
 
 ## Developer mode
 
-Options → Debug → Developer mode lets you speed up game time (×2 up to ×1000) to test pacing. Saves remember if it was used.
+A hidden developer mode (Konami code, or 7 taps on the version line) lets you speed up game time (×2 up to ×1000) to test pacing. Saves remember if it was used. On desktop, the right-click menu and the developer-tools shortcuts are blocked as a light deterrent against editing the game from the console.

@@ -23,7 +23,7 @@ const Gravity = {
     return w;
   },
   isBonus() { return hasUpg('supernova', 10); },
-  slingCap() { return 0.15 + (typeof Cosmos !== 'undefined' ? Cosmos.slingCap() : 0) + (hasUpg('inflation', 8) ? 0.03 : 0); },
+  slingCap() { return 0.15 + (typeof Cosmos !== 'undefined' ? Cosmos.slingCap() : 0) + (hasUpg('inflation', 8) ? 0.03 : 0) + (hasUpg('absolute', 7) ? 0.05 : 0); },
   // Exponent applied to heat gain before Heat Loss.
   exponent() {
     const gw = this.amount().toNumber() * this.weight();
@@ -56,5 +56,7 @@ function heatExponent() {
   if (hasUpg('inflation', 4)) e *= 1.03;
   if (hasUpg('inflation', 10)) e *= 1.04;
   if (typeof Thermo !== 'undefined') e *= Thermo.heatExp();
+  if (typeof HeatDeath !== 'undefined') e *= HeatDeath.heatExp();
+  if (typeof Absolute !== 'undefined') e *= Absolute.heatExp();
   return e;
 }

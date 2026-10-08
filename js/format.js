@@ -67,8 +67,12 @@ function format(x, dp = 2) {
   if (!Number.isFinite(x.mag) || !Number.isFinite(x.layer)) return 'Infinity';
   if (x.eq(0)) return (0).toFixed(dp);
   if (x.lt(1e-3)) {
-    const e = Math.floor(x.log10().toNumber());
-    return (x.toNumber() / Math.pow(10, e)).toFixed(dp) + 'e' + e;
+    // Tiny numbers (a Heat Death can cool far below 1 K): mantissa from the logarithm, so 1e-500 still works.
+    const lg = x.log10().toNumber();
+    let e = Math.floor(lg);
+    let m = Math.pow(10, lg - e);
+    if (m >= 10 - Math.pow(10, -dp) / 2) { m = 1; e += 1; }
+    return m.toFixed(dp) + 'e' + (e < -1e6 ? format(e, dp) : e.toLocaleString('en-US'));
   }
   if (x.lt(1e3)) return x.toNumber().toFixed(dp);
   if (x.layer >= 4) return 'F' + x.slog().toNumber().toFixed(3);

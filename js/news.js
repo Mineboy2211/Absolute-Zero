@@ -1,9 +1,23 @@
 // Release notes. Only major updates get an entry here; small fixes are not listed.
 
-const GAME_VERSION = '2.0';
+const GAME_VERSION = '3.0';
 
 const News = {
   list: [
+    {
+      version: '3.0',
+      title: 'Cosmic',
+      date: '2026-10-08',
+      notes: [
+        'Chapter 3 is here: five new layers, from Big Bang to Absolute.',
+        'New rule, cosmic constants: before each Big Bang, choose which laws of physics to break. Every broken law makes the next universe richer.',
+        'Inflation: spend Expansion to Stretch whole groups of heat multipliers.',
+        'Entropy: Disorder rises on its own. Build Heat Engines to turn it into Work.',
+        'Heat Death: turn the fire around and cool toward absolute zero, and below 1 K, for Void.',
+        'Absolute: the final tree of the chapter, priced in currencies from every layer.',
+        'Heat Loss IV can now be weakened. Every Chapter 2 layer runs on its own once Chapter 3 begins. 15 new achievements.',
+      ],
+    },
     {
       version: '2.0',
       title: 'Stellar',

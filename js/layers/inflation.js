@@ -14,6 +14,7 @@ const Stretch = {
     let p = 0.02;
     if (hasUpg('inflation', 5)) p = 0.025;
     if (hasUpg('entropy', 7)) p += 0.005;
+    if (hasUpg('absolute', 5)) p += 0.01;
     return p;
   },
   ratio(k) { return STRETCH_GROUPS[k].ratio - (hasUpg('inflation', 2) ? 0.3 : 0); },

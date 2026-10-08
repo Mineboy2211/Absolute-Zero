@@ -14,6 +14,7 @@ function report() {
   for (const def of Layers.list) if (player.layers[def.id].unlocked) parts.push(def.currency + '=' + format(def.id === 'ionize' ? Layers.map.ionize.totalPlasma() : layerPts(def.id)));
   parts.push('El=' + Elements.count(), 'comps=' + Challenges.totalComps(), 'ranks ' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order);
   if (typeof Thermo !== 'undefined' && Thermo.active()) parts.push('Dis=' + format(Thermo.disorder()) + ' Work=' + format(Thermo.work()) + ' eng=' + Thermo.engines());
+  if (typeof HeatDeath !== 'undefined' && HeatDeath.data() && Layers.isUnlocked('heatdeath')) parts.push('HD=' + (HeatDeath.running() ? 'run depth ' + format(player.layers.heatdeath.depth) : 'off') + ' coolers=' + player.layers.heatdeath.coolers + ' low=' + format(player.layers.heatdeath.bestLow));
   if (typeof Stretch !== 'undefined' && Stretch.data()) parts.push('str=' + JSON.stringify(Stretch.data().stretch));
   if (typeof Gravity !== 'undefined' && player.chapters.unlocked >= 2) parts.push('G=' + format(Gravity.amount()) + ' gexp=' + Gravity.exponent().toFixed(3));
   console.log(parts.join(' '));
@@ -120,7 +121,7 @@ function botStep(dt) {
 // Arm cosmic constants before each Big Bang (BOT_CONSTS=comma list, default: the ones that do not touch heat).
 botHooks.push(() => {
   if (typeof Cosmos === 'undefined' || !player.layers.bigbang || !Layers.isUnlocked('bigbang')) return;
-  const want = (typeof BOT_CONSTS !== 'undefined' ? BOT_CONSTS : 'frozen,dim,short,heavy').split(',');
+  const want = (typeof BOT_CONSTS !== 'undefined' ? BOT_CONSTS : 'frozen,dim,short,heavy,decay').split(',');
   for (const c of COSMIC_CONSTANTS) if (want.includes(c.id) && Cosmos.isUnlocked(c) && !Cosmos.armed(c.id)) Cosmos.toggle(c.id);
 });
 // Buy Stretch levels, cheapest first.
@@ -134,3 +135,16 @@ botHooks.push(() => {
 });
 // Buy Heat Engines whenever affordable.
 botHooks.push(() => { if (typeof Thermo !== 'undefined' && Layers.isUnlocked('entropy')) Thermo.buyMaxEngines(); });
+// Heat Death: start whenever possible, end after HD_HOURS (default 2) or when cooling has nearly stopped.
+botHooks.push(() => {
+  if (typeof HeatDeath === 'undefined' || !Layers.isUnlocked('heatdeath')) return;
+  HeatDeath.buyMaxCoolers();
+  const d = player.layers.heatdeath;
+  const hours = typeof HD_HOURS !== 'undefined' ? HD_HOURS : 2;
+  if (HeatDeath.running()) {
+    if (d.time > hours * 3600) { mark('first Heat Death ended (depth ' + format(d.depth) + ')'); HeatDeath.end(); }
+  } else if (HeatDeath.canStart() && (botState.hdNext || 0) <= player.stats.timePlayed) {
+    HeatDeath.start();
+    botState.hdNext = player.stats.timePlayed + 3 * 3600;
+  }
+});

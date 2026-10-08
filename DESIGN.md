@@ -299,17 +299,60 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 | Planck Break | 8d 16h |
 | **Chapter 2 complete** | **8d 16h** (≈ 2.5 weeks casual in total) |
 
-## 6. Chapter 3 — Cosmic *(coarse)*
+## 6. Chapter 3 — Cosmic (implemented in v3.0)
 
-**New rule — Universes:** before each Big Bang run you pick modifiers (e.g. "Thin Vacuum: heat ^0.9 → Universes ×3", "Fast Decay: Entropy ×5 → ×2", …). Harder combos = more Universes. Modifiers persist across lower resets until the next Big Bang.
+**Unlock:** complete the 6 Chapter 2 goals. Starting Chapter 3 switches on every Chapter 2 autobuyer (not the auto-resets), gives Chapter 2 layers 100% passive gain, and feeding the black hole no longer costs Temperature.
 
-| # | Layer → currency | Mechanic |
-|---|------------------|----------|
-| 11 | Big Bang → Universes | Meta layer, permanent multipliers to every earlier currency; modifier selection screen |
-| 12 | Inflation → Expansion | Global speed multiplier for Ch1–2; adds new upgrade rows to Ember/Magma/Pressure/Stardust grids and new Elements (rows 4–5) |
-| 13 | Entropy → Entropy | Rises on its own and divides gain; convert with "Engines" into power at a rate set by upgrades |
-| 14 | Heat Death → Void | Reverse runs: start at a huge T and cool toward 0 K by buying cooling buyables; Void gain = how close to 0 K you get in log space |
-| 15 | Absolute → Absolutes | Final upgrade tree; each node costs a mix of every currency in the game |
+### New rule — cosmic constants
+Before each Big Bang you *arm* constants (laws you break). Armed constants become active at the next Big Bang and stay until the one after. Each active constant multiplies Universe gain:
+Thin Vacuum (heat exponent ×0.95, ×2), Frozen Stars (Stardust ^0.5, ×1.5), Dim Light (Jets 5× slower recharge, −2 power, ×1.5), Short Memory (Chapter 1 gains ^0.5, ×1.5), Heavy Vacuum (Hawking radiation ^0.5, ×1.5), Cold Start (Heat Loss IV power −0.03, ×2.5), False Vacuum (Big Bang upgrade 4: heat exponent ×0.9, ×4), Fast Decay (with Entropy: Disorder ×3, ×2).
+
+### Heat Loss IV in Chapter 3
+Most Chapter 3 layers weaken Heat Loss IV a little (power +0.01 to +0.02, or start +5–10% in orders of magnitude). With the log softcap the equilibrium is roughly `L = S·(e·c)^(p/(1−p))` (S = start in orders of magnitude, e = heat exponent, c = sum of log-multipliers per order of magnitude), so the power `p` is by far the strongest lever. It is capped at **0.6**.
+
+### Layer 11 · Big Bang → Universes
+- Reset at `1e3300`. `U = (log T / 1000)^4 / 10 × constants × mults` (polynomial, so penalties stay affordable).
+- Universes: heat exponent ×(1 + 0.03·log(1+U)) (0.045, 0.06 with upgrades); Stardust, Neutronium and Hawking Heat ×(1+U)² (Jets and Planck Shards are left out on purpose: Planck Levels turn any multiplier into an exponent).
+- 10 upgrades (1 → 2e7 Universes), milestones 1/2/5/10/25.
+
+### Layer 12 · Inflation → Expansion
+- Reset at `1e4150`. `E = ((log T − 4150)/200 + 1)² × sqrt(1 + log U)`.
+- **Stretch:** three groups of heat multipliers (Fire = Bellows + Draft; Ash = Ranks + Chapter 1 currencies; Stars = Chapter 2 currencies). Each level raises every multiplier of its group to +0.02 power (up to +0.04 with upgrades). Cost `base × 3^level` Expansion. Never reset.
+- Expansion speeds up Jet recharge and Hawking radiation ×sqrt(1+E).
+
+### Layer 13 · Entropy → Entropy
+- Reset at `1e8000`. `S = ((log T − 8000)/300 + 1)² × (1 + log E) × (1 + log Disorder)`.
+- **Disorder** rises at `sqrt(1+S) × (1 + t/600)` per second (t = time in this Entropy run) and lowers the heat exponent ×1/(1 + 0.02·log D), never below ×0.96. **Heat Engines** (cost `4^n` Entropy, later 3^n) process `3^n − 1` Disorder/s into **Work** (never lost): heat exponent ×(1 + 0.01·log W).
+
+### Layer 14 · Heat Death → Void
+- Begin at `1e15000`: resets everything below, then Temperature only falls. Depth grows as `d(depth)/dt = R / (1 + depth/1000)²` (solved exactly each tick), `R = 10 × 1.5^Coolers × mults` orders of magnitude per second.
+- End any time: `Void = (depth/500)²`, ×10 if you ended below 1 K (×30 with an upgrade). Coolers cost `4^n` Void. Void is kept by Absolute.
+- Void: Heat Loss IV power +0.003·log V (max +0.02), heat exponent ×(1 + 0.01·log V).
+
+### Layer 15 · Absolute → Absolutes
+- Reset at `1e28000`. `A = ((log T − 28000)/2000 + 1)^1.5 × (1 + log Void)`.
+- 12 nodes, each priced in Absolutes **plus** currencies from earlier layers (Embers, Magma, Pressure, Stardust, Neutronium, Hawking Heat, Nucleons, Jets, Planck Shards, Universes, Expansion, Entropy, Void). The last one is **Absolute Zero**.
+
+### Chapter 3 goals
+1. Reach `1e70000 K`. 2. Start a universe with 5 cosmic constants active. 3. Stretch every group to level 20. 4. Produce 1e10 Work. 5. Cool below 1 K in a Heat Death. 6. Own the Absolute Zero node.
+
+## 6b. Chapter 4 — ideas *(draft, nothing built yet)*
+
+Chapter 3 ends near `1e67000 K` with Heat Loss IV weakened as far as it goes (power capped at 0.6). Chapter 4 should move the game into a new number regime (towards `ee6` = 1e1,000,000 and beyond) and introduce **Heat Loss V** (an `slog` softcap) as its wall. Three directions, to pick one before building:
+
+**A. Inversion (recommended).** Real physics: a system with a population inversion has a *negative* absolute temperature, and it is hotter than any positive temperature. Having touched absolute zero from both sides, the only way further is through the far side of infinity.
+- New rule — **Inversion:** Temperature gains a second, inverted track (−K). Pushing it toward −0 K counts as hotter than anything positive; the two tracks feed each other but every layer has to choose which one it boosts.
+- 16 Laser → Coherence: pump energy levels; beams permanently link two older currencies (one boosts the other).
+- 17 Spin Lattice → Spin: a small Ising-style grid; aligning neighbouring spins gives multipliers, frustration gives penalties (a light puzzle layer).
+- 18 Negative Kelvin → Inversions: the inverted track itself, with its own buyables mirroring the Hearth.
+- 19 Tachyon → Tachyons: time runs backwards; bank offline time and spend it to fast-forward any layer.
+- 20 Beyond → Hyperheat: the final tree, priced in both tracks.
+
+**B. Quantum.** New rule — **Uncertainty:** every multiplier wobbles inside a band; *Observing* locks the current roll for a while. Layers: Decoherence → Qubits, Entanglement (two currencies share their best value), Tunneling (skip a softcap for a limited time), Superposition (run two branches of the same run and keep the better), Collapse → Observations.
+
+**C. Multiverse.** New rule — **Trade:** the Universes from Chapter 3 become separate economies with different constants; you move currencies between them at exchange rates that drift. Layers: Wormhole, Brane, Bulk, String, Omniverse.
+
+Shared Chapter 4 plans whatever the theme: 15 achievements, 6 goals, a new challenge set (Chapter 3 has none, so Chapter 4 brings "Cosmic challenges" that run inside a constrained universe), and full automation of Chapter 3 (Heat Death runs on a timer, auto-arming of constants).
 
 ## 7. Systems shared across chapters
 

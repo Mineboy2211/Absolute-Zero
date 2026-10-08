@@ -254,13 +254,18 @@ const cosmicHL4 = {
     if (typeof Cosmos !== 'undefined') p += Cosmos.hl4Power();
     if (hasUpg('inflation', 6)) p += 0.01;
     if (hasUpg('entropy', 6)) p += 0.01;
-    return Math.min(p, 0.75);
+    if (typeof HeatDeath !== 'undefined') p += HeatDeath.hl4Power();
+    if (hasUpg('heatdeath', 7)) p += 0.01;
+    if (typeof Absolute !== 'undefined') p += Absolute.hl4Power();
+    return Math.min(p, 0.6);
   },
   startMult() {
     let m = 1;
     if (typeof Cosmos !== 'undefined') m *= Cosmos.hl4StartMult();
     if (hasUpg('inflation', 9)) m *= 1.05;
     if (hasUpg('entropy', 9)) m *= 1.05;
+    if (hasUpg('heatdeath', 9)) m *= 1.05;
+    if (typeof Absolute !== 'undefined') m *= Absolute.hl4StartMult();
     return m;
   },
 };
@@ -282,6 +287,8 @@ function applyHeatLoss(x) {
 }
 
 function heatGain() {
+  // During a Heat Death your Temperature only falls.
+  if (typeof HeatDeath !== 'undefined' && HeatDeath.running()) return D(0);
   return applyHeatLoss(rawHeatGain());
 }
 

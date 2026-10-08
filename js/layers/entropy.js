@@ -13,6 +13,7 @@ const Thermo = {
     if (!this.active()) return D(0);
     let r = layerPts('entropy').add(1).pow(0.5).mul(1 + this.data().time / 600);
     if (typeof Cosmos !== 'undefined' && Cosmos.has('decay')) r = r.mul(3);
+    if (Layers.ms('heatdeath', 5)) r = r.mul(0.5);
     return r;
   },
   // Disorder the Engines can process per second.
@@ -24,7 +25,7 @@ const Thermo = {
     return e;
   },
   engineRatio: () => (hasUpg('entropy', 5) ? 3 : 4),
-  engineCost(n = this.engines()) { return Decimal.pow(this.engineRatio(), n).mul(2); },
+  engineCost(n = this.engines()) { return Decimal.pow(this.engineRatio(), n); },
   canBuyEngine() { return Layers.isUnlocked('entropy') && layerPts('entropy').gte(this.engineCost()); },
   buyEngine() {
     if (!this.canBuyEngine()) return false;
@@ -39,11 +40,11 @@ const Thermo = {
     const D0 = this.disorder();
     if (D0.lte(0)) return 1;
     const k = hasUpg('entropy', 3) ? 0.01 : 0.02;
-    // Never worse than ×0.92, so Disorder alone cannot lock you out of an Entropy reset.
-    return Math.max(0.92, 1 / (1 + k * D0.add(1).log10().toNumber()));
+    // Never worse than ×0.96, so Disorder alone cannot lock you out of an Entropy reset.
+    return Math.max(0.96, 1 / (1 + k * D0.add(1).log10().toNumber()));
   },
   // Heat gain exponent bonus from Work.
-  workExp() { return 1 + 0.01 * this.work().add(1).log10().toNumber(); },
+  workExp() { return 1 + (hasUpg('absolute', 6) ? 0.015 : 0.01) * this.work().add(1).log10().toNumber(); },
   heatExp() {
     if (!this.data()) return 1;
     let e = this.workExp() * this.penalty();
@@ -70,18 +71,24 @@ Layers.register({
   verb: 'Let entropy win',
   color: '#a3a8d6',
   extraData: () => ({ disorder: D(0), work: D(0), engines: 0 }),
-  unlocked: () => Layers.ms('inflation', 1) && player.bestT.gte('1e7600'),
-  req: () => D('1e7700'),
+  unlocked: () => Layers.ms('inflation', 1) && player.bestT.gte('1e7900'),
+  req: () => D('1e8000'),
   gain() {
-    let g = player.T.log10().sub(7700).div(300).add(1).pow(2);
+    let g = player.T.log10().sub(8000).div(300).add(1).pow(2);
     g = g.mul(layerPts('inflation').add(1).log10().add(1));
     // Unprocessed Disorder is turned into Entropy.
     g = g.mul(Thermo.disorder().add(1).log10().add(1));
     if (Layers.ms('entropy', 10)) g = g.mul(2);
+    if (Layers.map.heatdeath) g = g.mul(Layers.map.heatdeath.entropyMult());
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());
     return g;
   },
   tick: (dt) => Thermo.tick(dt),
+  // Resetting turns your Disorder into Entropy.
+  onReset() { player.layers.entropy.disorder = D(0); },
+  onResetBy() { player.layers.entropy.disorder = D(0); },
+  keep: () => ({ upgrades: Layers.ms('heatdeath', 1) }),
+  autoReset: () => Layers.ms('heatdeath', 3),
   expansionMult: () => (hasUpg('entropy', 2) ? Thermo.work().add(1).pow(0.25) : D(1)),
   universeMult: () => (hasUpg('entropy', 8) ? Thermo.work().add(1).pow(0.2) : D(1)),
   effectText() {

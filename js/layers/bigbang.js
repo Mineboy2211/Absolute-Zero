@@ -38,7 +38,7 @@ const Cosmos = {
   // Multiplier on the heat gain exponent from Universes, upgrades and constants.
   heatExp() {
     if (!this.data()) return 1;
-    let e = 1 + (hasUpg('bigbang', 9) ? 0.045 : 0.03) * this.universes().add(1).log10().toNumber();
+    let e = 1 + (hasUpg('absolute', 4) ? 0.06 : hasUpg('bigbang', 9) ? 0.045 : 0.03) * this.universes().add(1).log10().toNumber();
     if (hasUpg('bigbang', 2)) e *= 1.02;
     if (hasUpg('bigbang', 8)) e *= 1.03;
     if (Layers.ms('bigbang', 2)) e *= 1.01;

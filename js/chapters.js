@@ -93,8 +93,12 @@ Chapters.register({
     'Every Chapter 2 layer now runs on its own. The black hole feeds without taking your Temperature.',
   ],
   goals: [
-    { desc: 'Reach 1e5000 K.', check: () => player.bestT.gte('1e5000') },
+    { desc: 'Reach 1e70000 K.', check: () => player.bestT.gte('1e70000') },
     { desc: 'Start a universe with at least 5 cosmic constants active.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= 5 },
+    { desc: 'Stretch every group to level 20.', check: () => !!player.layers.inflation && Object.values(player.layers.inflation.stretch).every((l) => l >= 20) },
+    { desc: 'Produce 1e10 Work.', check: () => !!player.layers.entropy && player.layers.entropy.work.gte(1e10) },
+    { desc: 'Cool below 1 K in a Heat Death.', check: () => !!player.layers.heatdeath && player.layers.heatdeath.bestLow < 0 },
+    { desc: 'Own the Absolute Zero node.', check: () => hasUpg('absolute', 12) },
   ],
   complete: [
     'Universes, inflation, entropy, and finally the cold at the end of everything.',

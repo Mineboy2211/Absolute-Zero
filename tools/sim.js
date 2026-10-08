@@ -51,6 +51,7 @@ ctx.STEP = step;
 ctx.REPORT_EVERY = Number(process.env.REPORT_EVERY || 0);
 ctx.STOP_CHAPTER = Number(process.env.STOP_CHAPTER || 0);
 if (process.env.BOT_CONSTS) ctx.BOT_CONSTS = process.env.BOT_CONSTS;
+if (process.env.HD_HOURS) ctx.HD_HOURS = Number(process.env.HD_HOURS);
 vm.runInContext(`
   const start = player.stats.timePlayed;
   const every = typeof REPORT_EVERY !== 'undefined' && REPORT_EVERY ? REPORT_EVERY : HOURS > 24 ? 6 * 3600 : 3600;

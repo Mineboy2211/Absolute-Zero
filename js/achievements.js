@@ -34,10 +34,28 @@ const Achievements = {
     { id: 43, chapter: 2, name: 'Four Digits', desc: 'Reach 1e1000 K.', check: () => player.bestT.gte('1e1000') },
     { id: 44, chapter: 2, name: 'Full Tree', desc: 'Own all 20 Stardust nodes.', check: () => !!player.layers.supernova && player.layers.supernova.upgrades.length >= 20 },
     { id: 45, chapter: 2, name: 'Stellar Perfection', desc: 'Max every Stellar challenge.', check: () => Challenges.list.filter((c) => c.chapter === 2).every((c) => chalComps(c.id) >= Challenges.maxComps) },
+    // Chapter 3 — each gives Universes, Expansion, Entropy, Absolutes and cooling speed ×1.1
+    { id: 51, chapter: 3, name: 'Let There Be Heat', desc: 'Start a new universe.', check: () => Layers.ms('bigbang', 1) },
+    { id: 52, chapter: 3, name: 'Lawbreaker', desc: 'Have 3 cosmic constants active at once.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= 3 },
+    { id: 53, chapter: 3, name: 'Multiverse', desc: 'Have 1 Million Universes.', check: () => !!player.layers.bigbang && layerPts('bigbang').gte(1e6) },
+    { id: 54, chapter: 3, name: 'Inflated', desc: 'Inflate for the first time.', check: () => Layers.ms('inflation', 1) },
+    { id: 55, chapter: 3, name: 'Stretched Thin', desc: 'Reach Stretch level 10 in any group.', check: () => !!player.layers.inflation && Object.values(player.layers.inflation.stretch).some((l) => l >= 10) },
+    { id: 56, chapter: 3, name: 'Ten Thousand Digits', desc: 'Reach 1e10000 K.', check: () => player.bestT.gte('1e10000') },
+    { id: 57, chapter: 3, name: 'It Only Goes Up', desc: 'Let entropy win for the first time.', check: () => Layers.ms('entropy', 1) },
+    { id: 58, chapter: 3, name: 'Perpetual Motion', desc: 'Build 10 Heat Engines.', check: () => !!player.layers.entropy && player.layers.entropy.engines >= 10 },
+    { id: 59, chapter: 3, name: 'Hard Work', desc: 'Produce 1e9 Work.', check: () => !!player.layers.entropy && player.layers.entropy.work.gte(1e9) },
+    { id: 60, chapter: 3, name: 'The Long Night', desc: 'Begin a Heat Death.', check: () => typeof HeatDeath !== 'undefined' && (HeatDeath.running() || Layers.ms('heatdeath', 1)) },
+    { id: 61, chapter: 3, name: 'Colder Than Space', desc: 'Cool below 2.7 K, the cosmic background.', check: () => typeof HeatDeath !== 'undefined' && (Math.min(player.layers.heatdeath.bestLow, HeatDeath.running() ? HeatDeath.currentLog() : 1e9) < Math.log10(2.725)) },
+    { id: 62, chapter: 3, name: 'Quantum Chill', desc: 'Cool below 1e-100 K.', check: () => typeof HeatDeath !== 'undefined' && (Math.min(player.layers.heatdeath.bestLow, HeatDeath.running() ? HeatDeath.currentLog() : 1e9) < -100) },
+    { id: 63, chapter: 3, name: 'Absolute', desc: 'Become absolute for the first time.', check: () => Layers.ms('absolute', 1) },
+    { id: 64, chapter: 3, name: 'Every Law Broken', desc: 'Start a universe with every cosmic constant active.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= COSMIC_CONSTANTS.length },
+    { id: 65, chapter: 3, name: 'Absolute Zero', desc: 'Own the Absolute Zero node.', check: () => hasUpg('absolute', 12) },
   ],
   bonus: { 1: 1.1 },
   // Chapter 2 achievements boost Stardust instead of heat.
   stardustMult() { return Decimal.pow(1.1, this.list.filter((a) => a.chapter === 2 && this.has(a.id)).length); },
+  // Chapter 3 achievements boost every Chapter 3 currency and cooling speed.
+  universeMult() { return Decimal.pow(1.1, this.list.filter((a) => a.chapter === 3 && this.has(a.id)).length); },
   has(id) { return player.achievements.includes(id); },
   count() { return player.achievements.length; },
   mult() {
