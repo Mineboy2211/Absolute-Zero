@@ -23,10 +23,10 @@ Layers.register({
   currency: 'Absolutes',
   verb: 'Become absolute',
   color: '#e6e9ff',
-  unlocked: () => Layers.ms('heatdeath', 1) && player.bestT.gte('1e27000'),
-  req: () => D('1e28000'),
+  unlocked: () => Layers.ms('heatdeath', 1) && player.bestT.gte('1e26500'),
+  req: () => D('1e27300'),
   gain() {
-    let g = player.T.log10().sub(28000).div(2000).add(1).pow(1.5);
+    let g = player.T.log10().sub(27300).div(2000).add(1).pow(1.5);
     g = g.mul(layerPts('heatdeath').add(1).log10().add(1));
     if (Layers.ms('absolute', 10)) g = g.mul(2);
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());

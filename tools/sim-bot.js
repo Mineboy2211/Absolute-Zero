@@ -148,3 +148,10 @@ botHooks.push(() => {
     botState.hdNext = player.stats.timePlayed + 3 * 3600;
   }
 });
+// Start a new universe whenever the armed constants differ from the active ones.
+botHooks.push(() => {
+  if (typeof Cosmos === 'undefined' || !player.layers.bigbang || !Layers.canReset('bigbang')) return;
+  const d = player.layers.bigbang;
+  const armed = d.armed.filter((id) => COSMIC_CONSTANTS.some((c) => c.id === id && Cosmos.isUnlocked(c)));
+  if (armed.length !== d.active.length) Layers.doReset('bigbang');
+});

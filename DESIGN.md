@@ -330,11 +330,23 @@ Most Chapter 3 layers weaken Heat Loss IV a little (power +0.01 to +0.02, or sta
 - Void: Heat Loss IV power +0.003·log V (max +0.02), heat exponent ×(1 + 0.01·log V).
 
 ### Layer 15 · Absolute → Absolutes
-- Reset at `1e28000`. `A = ((log T − 28000)/2000 + 1)^1.5 × (1 + log Void)`.
+- Reset at `1e27300`. `A = ((log T − 27300)/2000 + 1)^1.5 × (1 + log Void)`.
 - 12 nodes, each priced in Absolutes **plus** currencies from earlier layers (Embers, Magma, Pressure, Stardust, Neutronium, Hawking Heat, Nucleons, Jets, Planck Shards, Universes, Expansion, Entropy, Void). The last one is **Absolute Zero**.
 
 ### Chapter 3 goals
 1. Reach `1e70000 K`. 2. Start a universe with 5 cosmic constants active. 3. Stretch every group to level 20. 4. Produce 1e10 Work. 5. Cool below 1 K in a Heat Death. 6. Own the Absolute Zero node.
+
+### Pacing (perfect bot from a Chapter 2 complete save; casual ≈ 2×)
+| Milestone | Bot time |
+|---|---|
+| Chapter 3 unlock | 8d 16h |
+| Big Bang | 8d 17h |
+| Inflation | 9d 11h |
+| Entropy | 10d 22h |
+| Heat Death (first run ends below 1 K) | ~13d |
+| Absolute | 15d 11h |
+| `1e70000 K` | 15d 19h |
+| Absolute Zero node, **Chapter 3 complete** | **~18d** (≈ 5 weeks casual in total) |
 
 ## 6b. Chapter 4 — ideas *(draft, nothing built yet)*
 
