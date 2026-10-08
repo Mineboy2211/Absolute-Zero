@@ -62,7 +62,7 @@ Layers.register({
   // Element k (0-based) costs 10^(0.35k + 0.008k²): from 1 Nucleon (H) to ~6e13 (Fe).
   upgrades: ELEMENT_DATA.map(([sym, name, row, col, , desc, effect], idx) => ({
     sym, name, row, col, desc,
-    cost: Decimal.pow(10, 0.35 * idx + 0.008 * idx * idx).round(),
+    cost: Decimal.pow(10, 0.35 * idx + 0.008 * idx * idx).mul(3).round(),
     unlocked: () => idx === 0 || hasUpg('fusion', idx),
     effect,
     effectText: effect ? (e) => formatMult(e) : undefined,

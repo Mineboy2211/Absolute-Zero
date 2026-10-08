@@ -44,7 +44,7 @@ Chapters.register({
   ],
   goals: [
     { desc: 'Reach 1e500 K.', check: () => player.bestT.gte('1e500') },
-    { desc: 'Complete every Chapter 1 challenge at least 3 times.', check: () => Challenges.list.filter((c) => c.chapter === 1).every((c) => chalComps(c.id) >= 3) },
+    { desc: 'Complete every Chapter 1 challenge at least 4 times.', check: () => Challenges.list.filter((c) => c.chapter === 1).every((c) => chalComps(c.id) >= 4) },
     { desc: 'Own 20 Elements.', check: () => Elements.count() >= 20 },
     { desc: 'Reach Order 10.', check: () => player.ranks.order.gte(10) },
     { desc: 'Have 1 Million Electrons, Ions and Photons at once.', check: () => ['e', 'i', 'p'].every((k) => Layers.map.ionize.pool(k).gte(1e6)) },
