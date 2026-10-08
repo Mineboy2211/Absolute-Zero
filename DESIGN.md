@@ -136,7 +136,7 @@ The game was made about 3× longer and harder (strict resets, steeper costs). Ti
 | First Vaporize | `1e48 K` | 11h |
 | First Ionize | `1e84 K` | 1d 12h |
 | First Fusion | `1e125 K` | 2d 15h |
-| **Chapter 1 complete** | `1e500 K` + goals | **7d 21h** |
+| **Chapter 1 complete** | `1e500 K` + goals | **8d 11h** |
 | First Supernova | `1e480` | 7d 21h |
 | First Collapse | `1e556` | 16d 8h |
 | First Quasar | `1e690` | 21d 22h |
