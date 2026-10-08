@@ -29,6 +29,18 @@ The bundle hides the game state from the browser console and signs saves with a 
 
 Numbers use [break_eternity.js](https://github.com/Patashu/break_eternity.js), loaded from a CDN, so you need an internet connection the first time.
 
+## Cloud saves
+
+Players can create an account (username and password) in Options and carry their save between devices. It runs on Firebase (free tier):
+
+1. Create a project at https://console.firebase.google.com and add a **Web app**.
+2. **Authentication → Sign-in method:** enable **Email/Password** (usernames are turned into made-up addresses, no email is ever sent).
+3. **Authentication → Settings → Authorized domains:** add `mineboy2211.github.io`.
+4. **Firestore Database:** create it, then paste `firestore.rules` into its **Rules** tab and publish.
+5. Paste the web app's `firebaseConfig` object into `js/cloud-config.js`, rebuild (`node tools/build.js`) and push.
+
+Until step 5, the game shows "Cloud saves are not available yet".
+
 ## Pacing simulator
 
 `tools/sim.js` plays the game headlessly with a greedy bot and prints when each milestone is reached:

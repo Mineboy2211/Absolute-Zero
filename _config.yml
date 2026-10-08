@@ -6,3 +6,4 @@ exclude:
   - dev.html
   - DESIGN.md
   - node_modules
+  - firestore.rules

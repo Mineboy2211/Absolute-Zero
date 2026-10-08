@@ -1,0 +1,13 @@
+rules_version = '2';
+// Cloud saves for Absolute Zero: each player can only read and write their own save document.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /saves/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['save', 'timePlayed', 'bestT', 'chapter', 'updated'])
+        && request.resource.data.save is string
+        && request.resource.data.save.size() < 500000;
+    }
+  }
+}

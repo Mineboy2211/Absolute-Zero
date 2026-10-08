@@ -591,6 +591,8 @@ const Tabs = {
         h('button', { onclick: showImport }, 'Import'),
         h('button', { class: 'danger', onclick: showHardReset }, 'Hard reset'))));
 
+    if (typeof Cloud !== 'undefined') root.append(Cloud.card());
+
     if (player.options.devMode) {
       const dev = card('Developer',
         h('p', { class: 'muted', text: 'Speeds up game time to test pacing.' }));

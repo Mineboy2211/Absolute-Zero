@@ -62,6 +62,7 @@ function gameLoop() {
     lastAutosave = now;
     Save.save();
   }
+  if (typeof Cloud !== 'undefined') Cloud.tick();
 }
 
 function start() {
@@ -76,6 +77,7 @@ function start() {
   if (player.chapters.seenIntro < 1) UI.showChapterIntro(Chapters.get(1));
   else if (player.options.offline && away > 60) runOffline(away);
   setInterval(gameLoop, 50);
+  if (typeof Cloud !== 'undefined') Cloud.resume();
   window.addEventListener('beforeunload', () => { if (player.options.autosave) Save.save(); });
 }
 

@@ -417,3 +417,7 @@ table.stats td:last-child { text-align: right; }
 .bond { font-size: 14px; color: #ff5c5c; font-weight: 700; min-width: 12px; text-align: center; }
 .bond.ok { color: #5cf2a0; }
 @media (max-width: 420px) { .spin-cell { width: 30px; height: 30px; font-size: 16px; } .lattice { gap: 1px; } }
+
+/* Cloud save */
+.cloud-form { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.cloud-input { flex: 1 1 160px; min-width: 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }

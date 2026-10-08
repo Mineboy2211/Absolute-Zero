@@ -30,6 +30,8 @@ function getDefaultPlayer() {
       devSpeed: 1,
       tab: 'main',
       newsSeen: '',
+      cloudAuto: true,
+      cloudUser: '',
     },
     stats: { timePlayed: 0, created: Date.now(), devUsed: false, devtools: false },
     lastTick: Date.now(),
