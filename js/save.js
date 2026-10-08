@@ -119,6 +119,11 @@ const Save = {
   },
 
   load() {
+    this.loadProgress();
+    this.applySettings();
+  },
+
+  loadProgress() {
     let raw = null;
     try { raw = localStorage.getItem(SAVE_KEY); } catch (e) { /* storage blocked */ }
     if (!raw) { player = getDefaultPlayer(); return false; }
@@ -139,12 +144,31 @@ const Save = {
     }
   },
 
+  // Display and saving preferences are stored on their own the moment they change, so they survive a refresh
+  // even with autosave off. Developer settings are deliberately not part of it.
+  SETTINGS: ['notation', 'unit', 'autosaveEvery', 'offline', 'effects', 'toasts', 'cloudAuto'],
+  saveSettings() {
+    const s = {};
+    for (const k of this.SETTINGS) s[k] = player.options[k];
+    try { localStorage.setItem(SAVE_KEY + '_settings', JSON.stringify(s)); } catch (e) { /* storage blocked */ }
+  },
+  applySettings() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(SAVE_KEY + '_settings') || 'null'); } catch (e) { s = null; }
+    if (!s || typeof s !== 'object') return;
+    for (const k of this.SETTINGS) {
+      if (k in s && typeof s[k] === typeof player.options[k]) player.options[k] = s[k];
+    }
+  },
+
   exportString() { return this.encode(player); },
 
   importString(str) {
     const p = this.fromObject(this.decode(str));
     p.lastTick = Date.now();
     player = p;
+    // Preferences belong to this device, not to the imported save.
+    this.applySettings();
     this.save();
   },
 

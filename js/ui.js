@@ -48,7 +48,7 @@ const UI = {
   },
 
   init() {
-    notify = (msg) => this.toast(msg);
+    notify = (msg) => { if (player.options.toasts) this.toast(msg); };
     document.getElementById('menu-toggle').addEventListener('click', () => document.body.classList.toggle('nav-open'));
     document.getElementById('content').addEventListener('click', () => document.body.classList.remove('nav-open'));
     this.buildHeader();
@@ -562,17 +562,17 @@ const Tabs = {
     const select = h('select', { 'aria-label': 'Number notation' },
       Object.entries(NOTATIONS).map(([id, n]) => h('option', { value: id, text: n.label })));
     select.value = notation();
-    select.addEventListener('change', () => { player.options.notation = select.value; UI.refresh(); });
+    select.addEventListener('change', () => { player.options.notation = select.value; Save.saveSettings(); UI.refresh(); });
     const unit = h('select', { 'aria-label': 'Temperature unit' },
       h('option', { value: 'K', text: 'K' }), h('option', { value: 'kelvin', text: 'Kelvin' }));
     unit.value = player.options.unit === 'kelvin' ? 'kelvin' : 'K';
-    unit.addEventListener('change', () => { player.options.unit = unit.value; UI.refresh(); });
+    unit.addEventListener('change', () => { player.options.unit = unit.value; Save.saveSettings(); UI.refresh(); });
     const samples = ['12345', '6.78e15', '4.2e48', '1e400', '3e5000'];
 
-    const check = (key, label, hint) => {
+    const check = (key, label, hint, after) => {
       const box = h('input', { type: 'checkbox', class: 'switch' });
       box.checked = !!player.options[key];
-      box.addEventListener('change', () => { player.options[key] = box.checked; });
+      box.addEventListener('change', () => { player.options[key] = box.checked; Save.saveSettings(); if (after) after(box.checked); });
       return h('label', { class: 'option-row' },
         h('span', { class: 'option-text' }, h('span', { text: label }), hint ? h('span', { class: 'muted small', text: hint }) : null),
         box);
@@ -581,10 +581,20 @@ const Tabs = {
     root.append(card('Display',
       h('label', { class: 'option' }, 'Notation: ', select),
       h('label', { class: 'option' }, 'Temperature unit: ', unit),
-      h('p', { class: 'muted small' }, 'Preview: ', UI.dyn(() => samples.map((x) => formatK(x)).join(' · ')))));
+      h('p', { class: 'muted small' }, 'Preview: ', UI.dyn(() => samples.map((x) => formatK(x)).join(' · '))),
+      check('effects', 'Animations and effects', 'Hover growth, sparks when you buy, bouncing numbers and the like.', (on) => document.body.classList.toggle('no-fx', !on)),
+      check('toasts', 'Pop-up notifications', 'Achievements, new layers and other messages in the corner of the screen.')));
 
+    const every = h('select', { 'aria-label': 'Autosave interval' },
+      [[0, 'Off'], [10, 'Every 10 seconds'], [30, 'Every 30 seconds'], [60, 'Every minute'], [300, 'Every 5 minutes']]
+        .map(([v, t]) => h('option', { value: String(v), text: t })));
+    every.value = String(player.options.autosaveEvery);
+    every.addEventListener('change', () => { player.options.autosaveEvery = Number(every.value); Save.saveSettings(); });
     root.append(card('Saving',
-      check('autosave', 'Autosave', 'Saves every 30 seconds and when you close the page.'),
+      h('label', { class: 'option-row' },
+        h('span', { class: 'option-text' }, h('span', { text: 'Autosave' }),
+          h('span', { class: 'muted small', text: 'How often the game saves on its own. It also saves when you close the page, unless this is off.' })),
+        every),
       check('offline', 'Offline progress', 'Keep heating while the game is closed, up to 24 hours.'),
       h('div', { class: 'button-row' },
         h('button', { onclick: () => { if (Save.save()) notify('Game saved.'); } }, 'Save now'),
@@ -1120,7 +1130,7 @@ const Feel = {
     }, true);
   },
   sparks(x, y, color, n) {
-    if (!this.layer || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    if (!this.layer || !player.options.effects || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.6;
       const d = 22 + Math.random() * 26;

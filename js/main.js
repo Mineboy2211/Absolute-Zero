@@ -58,7 +58,8 @@ function gameLoop() {
     const fixed = fixNaN();
     if (fixed.length) console.warn('NaN values were reset:', fixed);
   }
-  if (player.options.autosave && now - lastAutosave > 30000) {
+  const every = player.options.autosaveEvery;
+  if (every > 0 && now - lastAutosave > every * 1000) {
     lastAutosave = now;
     Save.save();
   }
@@ -78,7 +79,8 @@ function start() {
   else if (player.options.offline && away > 60) runOffline(away);
   setInterval(gameLoop, 50);
   if (typeof Cloud !== 'undefined') Cloud.resume();
-  window.addEventListener('beforeunload', () => { if (player.options.autosave) Save.save(); });
+  window.addEventListener('beforeunload', () => { if (player.options.autosaveEvery > 0) Save.save(); });
+  document.body.classList.toggle('no-fx', !player.options.effects);
 }
 
 start();

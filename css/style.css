@@ -422,6 +422,12 @@ table.stats tr:hover td { background: #ffffff04; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* Options → Animations and effects turned off. */
+body.no-fx *, body.no-fx *::before, body.no-fx *::after { animation: none !important; transition: none !important; }
+body.no-fx button:hover, body.no-fx .upg:hover, body.no-fx .node:hover, body.no-fx .machine:hover, body.no-fx .pool:hover,
+body.no-fx .chal:hover, body.no-fx .ach:hover, body.no-fx .nav-btn:hover, body.no-fx .chip:hover, body.no-fx .element:hover,
+body.no-fx .spin-cell:hover, body.no-fx .rewards li:hover, body.no-fx .goals li:hover, body.no-fx button:active { transform: none; }
+body.no-fx .fx-layer { display: none; }
 
 /* ---------- mobile ---------- */
 @media (max-width: 760px) {
