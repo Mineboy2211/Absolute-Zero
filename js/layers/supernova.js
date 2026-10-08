@@ -6,28 +6,28 @@ const TREE_BRANCHES = ['Heat', 'Gravity', 'Memory', 'Trials'];
 const STARDUST_TREE = [
   // Heat
   { name: 'Stellar Wind', branch: 0, row: 1, cost: 1, desc: 'Heat gain ^1.02.' },
-  { name: 'Red Giant', branch: 0, row: 2, cost: 40, req: [1], desc: 'Stardust multiplies heat gain again.', effect: () => layerPts('supernova').add(1).pow(3) },
-  { name: 'Fusion Shells', branch: 0, row: 3, cost: 3e3, req: [2], desc: 'Heat Loss III is weaker: power +0.1.' },
-  { name: 'Hypergiant', branch: 0, row: 4, cost: 2e5, req: [3], desc: 'Bellows power +0.25.' },
-  { name: 'Core Ignition', branch: 0, row: 5, cost: 2e7, req: [4], desc: 'Heat gain ^1.03.' },
+  { name: 'Red Giant', branch: 0, row: 2, cost: 84, req: [1], desc: 'Stardust multiplies heat gain again.', effect: () => layerPts('supernova').add(1).pow(3) },
+  { name: 'Fusion Shells', branch: 0, row: 3, cost: 1.5e4, req: [2], desc: 'Heat Loss III is weaker: power +0.1.' },
+  { name: 'Hypergiant', branch: 0, row: 4, cost: 2.3e6, req: [3], desc: 'Bellows power +0.25.' },
+  { name: 'Core Ignition', branch: 0, row: 5, cost: 5.8e8, req: [4], desc: 'Heat gain ^1.03.' },
   // Gravity
   { name: 'Orbital Mechanics', branch: 1, row: 1, cost: 2, desc: 'Gravity weight ×0.75.' },
-  { name: 'Gravity Well', branch: 1, row: 2, cost: 80, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(hasUpg('collapse', 8) ? 0.7 : 0.6)) },
-  { name: 'Escape Velocity', branch: 1, row: 3, cost: 6e3, req: [7], desc: 'Gravity weight ×0.75 again.' },
-  { name: 'Tidal Forces', branch: 1, row: 4, cost: 4e5, req: [8], desc: 'Gravity multiplies Stardust gain.', effect: () => Gravity.amount().add(1) },
-  { name: 'Slingshot', branch: 1, row: 5, cost: 5e7, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2), up to ^1.15.' },
+  { name: 'Gravity Well', branch: 1, row: 2, cost: 190, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(hasUpg('collapse', 8) ? 0.7 : 0.6)) },
+  { name: 'Escape Velocity', branch: 1, row: 3, cost: 3.4e4, req: [7], desc: 'Gravity weight ×0.75 again.' },
+  { name: 'Tidal Forces', branch: 1, row: 4, cost: 5.3e6, req: [8], desc: 'Gravity multiplies Stardust gain.', effect: () => Gravity.amount().add(1) },
+  { name: 'Slingshot', branch: 1, row: 5, cost: 1.7e9, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2), up to ^1.15.' },
   // Memory
   { name: 'Afterglow', branch: 2, row: 1, cost: 1, desc: 'Every Chapter 1 currency gain ×10.' },
-  { name: 'Stellar Memory', branch: 2, row: 2, cost: 25, req: [11], desc: 'Chapter 2 resets keep your Grade and Order.' },
-  { name: 'Remnant', branch: 2, row: 3, cost: 1.5e3, req: [12], desc: 'Chapter 2 resets keep 1% of every Chapter 1 currency.' },
-  { name: 'Stellar Nursery', branch: 2, row: 4, cost: 1e5, req: [13], desc: 'Stardust gain ×3.' },
-  { name: 'Pulsar', branch: 2, row: 5, cost: 1e7, req: [14], desc: 'Gain 1% of pending Stardust every second.' },
+  { name: 'Stellar Memory', branch: 2, row: 2, cost: 48, req: [11], desc: 'Chapter 2 resets keep your Grade and Order.' },
+  { name: 'Remnant', branch: 2, row: 3, cost: 6500, req: [12], desc: 'Chapter 2 resets keep 1% of every Chapter 1 currency.' },
+  { name: 'Stellar Nursery', branch: 2, row: 4, cost: 1e6, req: [13], desc: 'Stardust gain ×3.' },
+  { name: 'Pulsar', branch: 2, row: 5, cost: 2.5e8, req: [14], desc: 'Gain 1% of pending Stardust every second.' },
   // Trials
-  { name: 'Stellar Trials', branch: 3, row: 1, cost: 5, extra: [['vaporize', D(1e12)]], desc: 'Unlock Challenge 9: Dense Core.' },
-  { name: 'Red Dwarf', branch: 3, row: 2, cost: 150, req: [16], desc: 'Unlock Challenge 10: Red Dwarf.' },
-  { name: 'Burnout', branch: 3, row: 3, cost: 1e4, req: [17], desc: 'Unlock Challenge 11: Burnout.' },
-  { name: 'Event Horizon', branch: 3, row: 4, cost: 1e6, req: [18], desc: 'Unlock Challenge 12: Event Horizon.' },
-  { name: 'Trial Mastery', branch: 3, row: 5, cost: 1e8, req: [19], desc: 'Stardust ×1.25 per Stellar challenge completion.', effect: () => Decimal.pow(1.25, Challenges.list.filter((c) => c.chapter === 2).reduce((s, c) => s + chalComps(c.id), 0)) },
+  { name: 'Stellar Trials', branch: 3, row: 1, cost: 7, extra: [['vaporize', D(1e12)]], desc: 'Unlock Challenge 9: Dense Core.' },
+  { name: 'Red Dwarf', branch: 3, row: 2, cost: 410, req: [16], desc: 'Unlock Challenge 10: Red Dwarf.' },
+  { name: 'Burnout', branch: 3, row: 3, cost: 6.3e4, req: [17], desc: 'Unlock Challenge 11: Burnout.' },
+  { name: 'Event Horizon', branch: 3, row: 4, cost: 1.6e7, req: [18], desc: 'Unlock Challenge 12: Event Horizon.' },
+  { name: 'Trial Mastery', branch: 3, row: 5, cost: 4e9, req: [19], desc: 'Stardust ×1.25 per Stellar challenge completion.', effect: () => Decimal.pow(1.25, Challenges.list.filter((c) => c.chapter === 2).reduce((s, c) => s + chalComps(c.id), 0)) },
 ];
 
 Layers.register({
