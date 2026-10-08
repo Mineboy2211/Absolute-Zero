@@ -6,6 +6,7 @@ function gameTick(dt) {
   GainCache.clear();
   player.T = player.T.add(heatGain().mul(dt));
   player.bestT = player.bestT.max(player.T);
+  if (typeof Inversion !== 'undefined') Inversion.tick(dt);
   Ranks.tick();
   GainCache.clear();
   Layers.tick(dt);

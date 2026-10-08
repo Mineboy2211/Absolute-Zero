@@ -29,6 +29,7 @@ Layers.register({
     let g = player.T.log10().sub(25500).div(2000).add(1).pow(1.5);
     g = g.mul(layerPts('heatdeath').add(1).log10().add(1));
     if (Layers.ms('absolute', 10)) g = g.mul(2);
+    if (hasUpg('tachyon', 8)) g = g.mul(upgEff('tachyon', 8));
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());
     return g;
   },

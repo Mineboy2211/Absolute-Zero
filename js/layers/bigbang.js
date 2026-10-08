@@ -88,6 +88,7 @@ Layers.register({
     if (hasUpg('inflation', 1)) g = g.mul(upgEff('inflation', 1));
     if (Layers.ms('inflation', 3)) g = g.mul(3);
     if (Layers.map.entropy) g = g.mul(Layers.map.entropy.universeMult());
+    if (Layers.map.laser) g = g.mul(Layers.map.laser.universeMult());
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());
     return g;
   },

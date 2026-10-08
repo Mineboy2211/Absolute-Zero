@@ -1,9 +1,23 @@
 // Release notes. Only major updates get an entry here; small fixes are not listed.
 
-const GAME_VERSION = '3.0';
+const GAME_VERSION = '4.0';
 
 const News = {
   list: [
+    {
+      version: '4.0',
+      title: 'Inversion',
+      date: '2026-10-09',
+      notes: [
+        'Chapter 4 is here: five new layers, from Laser to Beyond.',
+        'New rule, Inversion: your heat pumps a negative temperature, hotter than any positive one. It pushes Heat Loss IV further away.',
+        'Laser: fire beams that let one old currency boost another.',
+        'Spin Lattice: flip spins to satisfy as many bonds as you can. Some bonds always fight back.',
+        'Negative Kelvin: turn Inverted Temperature into Inversions, and build Pumps and Cavities.',
+        'Tachyon: bank time while you play and Warp it forward.',
+        'Beyond: the final tree, priced in both temperatures. 15 new achievements.',
+      ],
+    },
     {
       version: '3.0',
       title: 'Cosmic',

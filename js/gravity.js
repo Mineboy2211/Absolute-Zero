@@ -58,5 +58,25 @@ function heatExponent() {
   if (typeof Thermo !== 'undefined') e *= Thermo.heatExp();
   if (typeof HeatDeath !== 'undefined') e *= HeatDeath.heatExp();
   if (typeof Absolute !== 'undefined') e *= Absolute.heatExp();
-  return e;
+  for (const def of Layers.list) if (def.chapter === 4 && def.heatExp) e *= def.heatExp();
+  if (typeof Beyond !== 'undefined') e *= Beyond.heatExp();
+  return HeatLossV.apply(e);
 }
+
+// Heat Loss V (Chapter 4): the heat gain exponent itself is softcapped. Above ^start, extra exponent is raised to ^power.
+// Every exponent bonus multiplies the others, and without this they stack into the hundreds.
+const HeatLossV = {
+  active() { return player.chapters.unlocked >= 4; },
+  start() {
+    let s = 4;
+    if (hasUpg('beyond', 1)) s += 0.25;
+    if (hasUpg('beyond', 7)) s += 0.25;
+    return s;
+  },
+  power: () => 0.2,
+  apply(e) {
+    if (!this.active()) return e;
+    const s = this.start();
+    return e > s ? s * Math.pow(e / s, this.power()) : e;
+  },
+};

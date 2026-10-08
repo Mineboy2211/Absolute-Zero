@@ -80,16 +80,18 @@ Layers.register({
     g = g.mul(Thermo.disorder().add(1).log10().add(1));
     if (Layers.ms('entropy', 10)) g = g.mul(2);
     if (Layers.map.heatdeath) g = g.mul(Layers.map.heatdeath.entropyMult());
+    if (hasUpg('negkelvin', 5)) g = g.mul(upgEff('negkelvin', 5));
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());
     return g;
   },
   tick: (dt) => Thermo.tick(dt),
   // Resetting turns your Disorder into Entropy.
   onReset() { player.layers.entropy.disorder = D(0); },
-  onResetBy() {
+  onResetBy(by, keep) {
     const d = player.layers.entropy;
     d.disorder = D(0);
-    if (!Layers.ms('heatdeath', 3)) { d.engines = 0; d.work = D(0); }
+    const kept = by.chapter > 3 ? !!keep.engines : Layers.ms('heatdeath', 3);
+    if (!kept) { d.engines = 0; d.work = D(0); }
   },
   keep: () => ({ upgrades: Layers.ms('heatdeath', 1) }),
   autoReset: () => Layers.ms('heatdeath', 3),

@@ -50,12 +50,30 @@ const Achievements = {
     { id: 63, chapter: 3, name: 'Absolute', desc: 'Become absolute for the first time.', check: () => Layers.ms('absolute', 1) },
     { id: 64, chapter: 3, name: 'Every Law Broken', desc: 'Start a universe with every cosmic constant active.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= COSMIC_CONSTANTS.length },
     { id: 65, chapter: 3, name: 'Absolute Zero', desc: 'Own the Absolute Zero node.', check: () => hasUpg('absolute', 12) },
+    // Chapter 4 — each gives every Chapter 4 currency and Inverted Temperature gain ×1.1
+    { id: 71, chapter: 4, name: 'Population Inversion', desc: 'Fire the laser for the first time.', check: () => Layers.ms('laser', 1) },
+    { id: 72, chapter: 4, name: 'Below Zero, Above Infinity', desc: 'Reach −1,000 K of Inverted Temperature.', check: () => player.inv.best.gte(1e3) },
+    { id: 73, chapter: 4, name: 'Crossed Beams', desc: 'Run 2 beams at once.', check: () => typeof Beams !== 'undefined' && Beams.active().length >= 2 },
+    { id: 74, chapter: 4, name: 'Aligned', desc: 'Align the lattice for the first time.', check: () => Layers.ms('spin', 1) },
+    { id: 75, chapter: 4, name: 'Frustrated', desc: 'Satisfy 80% of the bonds of the 5×5 lattice.', check: () => typeof Lattice !== 'undefined' && Lattice.size() >= 5 && Lattice.order() >= 0.8 },
+    { id: 76, chapter: 4, name: 'Inverted', desc: 'Invert for the first time.', check: () => Layers.ms('negkelvin', 1) },
+    { id: 77, chapter: 4, name: 'Pumped', desc: 'Own 10 Pumps.', check: () => !!player.layers.negkelvin && player.layers.negkelvin.pump >= 10 },
+    { id: 78, chapter: 4, name: 'One Hundred Thousand', desc: 'Reach 1e100000 K.', check: () => player.bestT.gte('1e100000') },
+    { id: 79, chapter: 4, name: 'Faster Than Light', desc: 'Break causality for the first time.', check: () => Layers.ms('tachyon', 1) },
+    { id: 80, chapter: 4, name: 'Time Skip', desc: 'Warp for the first time.', check: () => !!player.layers.tachyon && player.layers.tachyon.warped > 0 },
+    { id: 81, chapter: 4, name: 'Hotter Than Hot', desc: 'Reach −1e15 K of Inverted Temperature.', check: () => player.inv.best.gte(1e15) },
+    { id: 82, chapter: 4, name: 'Beyond Belief', desc: 'Go beyond for the first time.', check: () => Layers.ms('beyond', 1) },
+    { id: 83, chapter: 4, name: 'Laser Show', desc: 'Run 5 beams at once.', check: () => typeof Beams !== 'undefined' && Beams.active().length >= 5 },
+    { id: 84, chapter: 4, name: 'Ground State', desc: 'Satisfy 90% of the bonds of the 6×6 lattice.', check: () => typeof Lattice !== 'undefined' && Lattice.size() >= 6 && Lattice.order() >= 0.9 },
+    { id: 85, chapter: 4, name: 'There Is No Hotter', desc: 'Own the Beyond node.', check: () => hasUpg('beyond', 12) },
   ],
   bonus: { 1: 1.1 },
   // Chapter 2 achievements boost Stardust instead of heat.
   stardustMult() { return Decimal.pow(1.1, this.list.filter((a) => a.chapter === 2 && this.has(a.id)).length); },
   // Chapter 3 achievements boost every Chapter 3 currency and cooling speed.
   universeMult() { return Decimal.pow(1.1, this.list.filter((a) => a.chapter === 3 && this.has(a.id)).length); },
+  // Chapter 4 achievements boost every Chapter 4 currency and Inverted Temperature.
+  inversionMult() { return Decimal.pow(1.1, this.list.filter((a) => a.chapter === 4 && this.has(a.id)).length); },
   has(id) { return player.achievements.includes(id); },
   count() { return player.achievements.length; },
   mult() {

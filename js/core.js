@@ -176,6 +176,7 @@ function tickMult() {
 
 // Every multiplier on heat gain, named, for the Stats breakdown.
 function heatMultipliers() {
+  if (GainCache.mults) return GainCache.mults;
   const m = [];
   m.push(['Bellows', bellowsMult()]);
   m.push(['Draft', tickMult()]);
@@ -185,12 +186,12 @@ function heatMultipliers() {
   }
   m.push(['Achievements', Achievements.mult()]);
   // Inflation's Stretch raises whole groups of multipliers to a power.
-  if (typeof Stretch !== 'undefined') return m.map(([n, v, def]) => [n, Stretch.apply(n, def, v)]);
-  return m;
+  GainCache.mults = typeof Stretch !== 'undefined' ? m.map(([n, v, def]) => [n, Stretch.apply(n, def, v)]) : m;
+  return GainCache.mults;
 }
 
 // Per-frame cache for the expensive heat gain chain; cleared at every game tick and UI frame.
-const GainCache = { raw: null, gain: null, clear() { this.raw = null; this.gain = null; } };
+const GainCache = { raw: null, gain: null, mults: null, clear() { this.raw = null; this.gain = null; this.mults = null; } };
 
 function rawHeatGain() {
   if (GainCache.raw) return GainCache.raw;
@@ -270,6 +271,9 @@ const cosmicHL4 = {
     if (hasUpg('entropy', 9)) m *= 1.05;
     if (hasUpg('heatdeath', 9)) m *= 1.05;
     if (typeof Absolute !== 'undefined') m *= Absolute.hl4StartMult();
+    if (typeof Inversion !== 'undefined') m *= Inversion.hl4StartMult();
+    if (typeof Beyond !== 'undefined') m *= Beyond.hl4StartMult();
+    for (const [lid, n] of [['laser', 7], ['spin', 5], ['negkelvin', 6], ['negkelvin', 9], ['tachyon', 6]]) if (hasUpg(lid, n)) m *= 1.05;
     return m;
   },
 };

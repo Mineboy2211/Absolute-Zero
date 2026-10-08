@@ -10,7 +10,7 @@ An incremental game about heating up forever. You start at 0 K with a single spa
 - Chapter 1: Combustion, complete: Ignition (Embers), Meltdown (Magma), Vaporize (Pressure), Ionize (Plasma split), Fusion (Elements H to Fe), 8 challenges and 6 chapter goals
 - Chapter 2: Stellar, complete: the Gravity rule, Supernova (Stardust tree), Collapse (compressors), Singularity (black hole), Quasar (Jets) and Planck Break, 4 Stellar challenges and 6 chapter goals
 - Chapter 3: Cosmic, complete: the cosmic constants rule, Big Bang (Universes), Inflation (Stretch), Entropy (Disorder and Heat Engines), Heat Death (cooling runs for Void) and Absolute (the final tree), and 6 chapter goals
-- Coming next: Chapter 4 (ideas in DESIGN.md)
+- Chapter 4: Inversion, complete: the Inverted Temperature rule and Heat Loss V, Laser (beams), Spin Lattice (a flip puzzle), Negative Kelvin (Pumps and Cavities), Tachyon (time bank and Warp) and Beyond (the final tree)
 
 See [DESIGN.md](DESIGN.md) for formulas, layer plans and pacing targets.
 

@@ -128,3 +128,39 @@ Chapters.register({
     'You have seen absolute zero from both sides.',
   ],
 });
+
+Chapters.register({
+  id: 4,
+  name: 'Inversion',
+  rule: 'Inversion. Your heat now pumps a second track, the Inverted Temperature: a negative temperature, hotter than any positive one. It pushes Heat Loss IV further away.',
+  // What Chapter 4 resets keep of Chapters 1 to 3 (Laser milestones).
+  keep(def) {
+    const m = (n) => Layers.ms('laser', n);
+    if (def.chapter === 1) return { upgrades: m(1), flow: m(1), split: m(1) };
+    if (def.chapter === 2) return { upgrades: m(1), records: m(1), mass: m(1), levels: m(1) };
+    switch (def.id) {
+      case 'inflation': return { upgrades: m(1), stretch: m(2) };
+      case 'entropy': return { upgrades: m(1), engines: m(2) };
+      case 'heatdeath': return { upgrades: m(1), points: m(2), void: m(2) };
+      default: return { upgrades: m(1) };
+    }
+  },
+  intro: [
+    'You have touched absolute zero from both sides. There is nothing colder.',
+    'But there is something hotter than infinity: a negative temperature.',
+    'A population inversion, where more of everything sits high than low.',
+    'Every Chapter 4 reset wipes Chapters 1 to 3 clean, until Laser milestones teach you what to keep.',
+  ],
+  goals: [
+    { desc: 'Reach 1e1,000,000 K.', check: () => player.bestT.gte('1e1000000') },
+    { desc: 'Have 4 beams running at once.', check: () => typeof Beams !== 'undefined' && Beams.active().length >= 4 },
+    { desc: 'Satisfy 85% of the bonds of the 6×6 Spin Lattice.', check: () => typeof Lattice !== 'undefined' && Lattice.size() >= 6 && Lattice.order() >= 0.85 },
+    { desc: 'Reach −1e25 K of Inverted Temperature.', check: () => player.inv.best.gte(1e25) },
+    { desc: 'Warp a total of 3 days.', check: () => !!player.layers.tachyon && player.layers.tachyon.warped >= 3 * 86400 },
+    { desc: 'Own the Beyond node.', check: () => hasUpg('beyond', 12) },
+  ],
+  complete: [
+    'Hotter than infinity, colder than zero, faster than light.',
+    'There is no direction left that you have not burned.',
+  ],
+});

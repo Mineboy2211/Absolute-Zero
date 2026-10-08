@@ -61,6 +61,10 @@ const Layers = {
     if (def.chapter === 1) g = this.chapter1Boost(g);
     if (typeof Jets !== 'undefined') g = g.mul(Jets.layerMult(id));
     if (typeof Cosmos !== 'undefined') g = Cosmos.gainMod(def, g);
+    if (typeof Beams !== 'undefined' && def.chapter <= 3) g = g.mul(Beams.mult(id));
+    if (def.chapter === 4 && hasUpg('beyond', 11)) g = g.mul(10);
+    if (id === 'spin' && hasUpg('beyond', 4)) g = g.mul(10);
+    if (id === 'laser' && hasUpg('beyond', 8)) g = g.mul(100);
     return Number.isNaN(g.mag) ? D(0) : g.floor();
   },
 
@@ -139,14 +143,14 @@ const Layers = {
     const u = this.map[id].upgMap[uid];
     if (!this.isUnlocked(id) || (u.unlocked && !u.unlocked()) || hasUpg(id, uid)) return false;
     if (!player.layers[id].points.gte(u.cost)) return false;
-    return !u.extra || u.extra.every(([lid, amt]) => player.layers[lid].points.gte(amt));
+    return !u.extra || u.extra.every(([lid, amt]) => extraPts(lid).gte(amt));
   },
   buyUpg(id, uid) {
     if (!this.canBuyUpg(id, uid)) return false;
     const d = player.layers[id];
     const u = this.map[id].upgMap[uid];
     d.points = d.points.sub(u.cost);
-    if (u.extra) for (const [lid, amt] of u.extra) player.layers[lid].points = player.layers[lid].points.sub(amt);
+    if (u.extra) for (const [lid, amt] of u.extra) extraSub(lid, amt);
     d.upgrades.push(uid);
     return true;
   },

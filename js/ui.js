@@ -219,7 +219,7 @@ const UI = {
       h('div', { class: 'chapter-num', text: `Chapter ${ch.id} complete` }),
       (ch.complete || []).map((line) => h('p', { text: line })),
       h('p', { text: 'The next chapter is still being forged.' }),
-      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), ch.id === 1 ? 'Chapter 2, Stellar.' : ch.id === 2 ? 'Chapter 3, Cosmic.' : 'Chapter 4.'));
+      h('p', { class: 'chapter-rule' }, h('b', { text: 'Coming next: ' }), ch.id === 1 ? 'Chapter 2, Stellar.' : ch.id === 2 ? 'Chapter 3, Cosmic.' : ch.id === 3 ? 'Chapter 4, Inversion.' : 'Chapter 5.'));
     this.modal(`${ch.name}: complete`, body, [{ text: 'Keep burning', primary: true }]);
   },
 
@@ -357,6 +357,15 @@ const Tabs = {
       UI.dyn(() => Gravity.describe(), 'p'));
     UI.classIf(grav, 'gravity-bonus', () => Gravity.isBonus());
     root.append(UI.showIf(grav, () => Gravity.active()));
+
+    const inv = card('Inversion',
+      h('p', { class: 'muted', text: 'Your heat pumps a negative temperature, hotter than any positive one. Inverted Temperature pushes Heat Loss IV further away.' }),
+      h('div', { class: 'gravity-row' },
+        h('div', null, h('div', { class: 'muted small', text: 'Inverted Temperature' }), UI.dyn(() => Inversion.format(), 'div', 'gravity-big')),
+        h('div', null, h('div', { class: 'muted small', text: 'Gain' }), UI.dyn(() => '−' + formatK(Inversion.gain()) + '/s', 'div', 'gravity-big')),
+        h('div', null, h('div', { class: 'muted small', text: 'Heat Loss IV starts' }), UI.dyn(() => formatMult(Inversion.hl4StartMult()) + ' later', 'div', 'gravity-big'))),
+      UI.dyn(() => `Heat Loss V: the heat gain exponent is softcapped above ^${format(HeatLossV.start(), 2)} (the extra part is raised to ^${HeatLossV.power()}).`, 'p', 'muted small'));
+    root.append(UI.showIf(inv, () => Inversion.active()));
 
     const hlRows = HeatLoss.map((hl, i) => {
       const row = h('div', { class: 'heatloss' });
@@ -643,7 +652,7 @@ function renderLayerTab(def) {
         h('span', { class: 'upg-desc', text: u.desc }),
         u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
         h('span', { class: 'upg-cost', text: `Cost: ${formatWhole(u.cost)} ${def.currency}` +
-          (u.extra ? u.extra.map(([lid, amt]) => ` + ${formatWhole(amt)} ${Layers.map[lid].currency}`).join('') : '') }));
+          (u.extra ? u.extra.map(([lid, amt]) => ` + ${formatWhole(amt)} ${extraName(lid)}`).join('') : '') }));
       UI.bind(() => {
         btn.classList.toggle('bought', hasUpg(def.id, u.id));
         btn.classList.toggle('can', Layers.canBuyUpg(def.id, u.id));

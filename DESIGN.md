@@ -148,6 +148,9 @@ The game was made about 3× longer and harder (strict resets, steeper costs). Ti
 | First Heat Death run | `1e15000` | ~46d |
 | First Absolute | `1e25500` | 48d 4h |
 | **Chapter 3 complete** | `1e70000` + goals | **59d 13h** (≈ 4 months casual) |
+| First Laser | `1e60000` | ~61d |
+| First Beyond | `1e120000` | ~64d |
+| **Chapter 4 complete** | `1e1,000,000` + goals | **~75d** (lattice goal by hand) |
 
 ### Reset rule (IMR style)
 Every reset wipes **everything** below it: currencies, upgrades, Elements, buyables, ranks, Plasma split, Magma flow, challenge completions, compressor records, the black hole, Planck Levels, Stretch levels, Heat Engines, Work, Coolers and Void. A reset from a later chapter ignores the earlier chapter's own keep rules entirely. The only way to keep something is a milestone or upgrade of the layer doing the reset (Supernova milestones for Chapter 2 resets, Big Bang milestones for Chapter 3 resets, and so on). Finished chapters do **not** run on their own: their passive gain and autobuyers come only from milestones and upgrades, which a later reset can take away.
@@ -324,23 +327,43 @@ Most Chapter 3 layers weaken Heat Loss IV a little (power +0.01 to +0.02, or sta
 ### Pacing
 See section 3.
 
-## 6b. Chapter 4 — ideas *(draft, nothing built yet)*
+## 6b. Chapter 4 — Inversion (implemented in v4.0)
 
-Chapter 3 ends near `1e67000 K` with Heat Loss IV weakened as far as it goes (power capped at 0.6). Chapter 4 should move the game into a new number regime (towards `ee6` = 1e1,000,000 and beyond) and introduce **Heat Loss V** (an `slog` softcap) as its wall. Three directions, to pick one before building:
+**Unlock:** complete the 6 Chapter 3 goals. Every Chapter 4 reset wipes Chapters 1–3 except what Laser milestones keep (1 reset: every upgrade of Chapters 1–3, the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions; 2 resets: Stretch levels, Heat Engines, Work, Void and Coolers). Cosmic constants are never wiped.
 
-**A. Inversion (recommended).** Real physics: a system with a population inversion has a *negative* absolute temperature, and it is hotter than any positive temperature. Having touched absolute zero from both sides, the only way further is through the far side of infinity.
-- New rule — **Inversion:** Temperature gains a second, inverted track (−K). Pushing it toward −0 K counts as hotter than anything positive; the two tracks feed each other but every layer has to choose which one it boosts.
-- 16 Laser → Coherence: pump energy levels; beams permanently link two older currencies (one boosts the other).
-- 17 Spin Lattice → Spin: a small Ising-style grid; aligning neighbouring spins gives multipliers, frustration gives penalties (a light puzzle layer).
-- 18 Negative Kelvin → Inversions: the inverted track itself, with its own buyables mirroring the Hearth.
-- 19 Tachyon → Tachyons: time runs backwards; bank offline time and spend it to fast-forward any layer.
-- 20 Beyond → Hyperheat: the final tree, priced in both tracks.
+### New rule — Inversion
+- A second track, the **Inverted Temperature** (shown as −K: a negative temperature, hotter than any positive one). It grows on its own from your heat: `((log T − 50000)/5000 + 1)³ × mults` per second, polynomial so it cannot run away.
+- Effect: Heat Loss IV starts `1 + k·sqrt(log10(1 + IT))` times later, `k = 0.05` (+0.01 per Cavity, +upgrades).
+- **Heat Loss V:** the heat gain exponent itself is softcapped above ^4 (the extra part is raised to ^0.2; Beyond nodes move it to ^4.5). Every exponent bonus multiplies the others, and without it they stacked into the hundreds.
+- Chapter 4 currencies boost each other only logarithmically (`(1 + log X)²`). Power-law chains between them ran away in testing.
 
-**B. Quantum.** New rule — **Uncertainty:** every multiplier wobbles inside a band; *Observing* locks the current roll for a while. Layers: Decoherence → Qubits, Entanglement (two currencies share their best value), Tunneling (skip a softcap for a limited time), Superposition (run two branches of the same run and keep the better), Collapse → Observations.
+### Layer 16 · Laser → Coherence
+- Reset at `1e60000`. `C = ((log T − 60000)/5000 + 1)² × (1 + log Absolutes)`.
+- **Beams** (1 to 5 slots): pick a source and a target among Chapter 1–3 currencies; the target's gain is multiplied by `(1 + log source)^power` (power 1, up to 3).
+- Coherence: Inverted Temperature ×(1 + log C)², heat exponent ×(1 + 0.01·log C).
 
-**C. Multiverse.** New rule — **Trade:** the Universes from Chapter 3 become separate economies with different constants; you move currencies between them at exchange rates that drift. Layers: Wormhole, Brane, Bulk, String, Omniverse.
+### Layer 17 · Spin Lattice → Spin
+- Reset at `1e70000`. `Sp = ((log T − 70000)/5000 + 1)² × (1 + 9·order⁴) × (1 + log C)`.
+- **Lattice:** a 4×4 grid of spins (5×5 and 6×6 with upgrades). Each bond wants equal or opposite spins (about 30% want opposite, fixed per size). Tap to flip. Order = satisfied bonds / all bonds. Frustration makes 100% impossible: best possible is 91.7% (4×4), 90% (5×5), 90% (6×6); the Anneal button (greedy) reaches about 92%, 80% and 82%.
+- Spin: Coherence ×(1 + log Sp)², Inverted Temperature ×(1 + log Sp)².
 
-Shared Chapter 4 plans whatever the theme: 15 achievements, 6 goals, a new challenge set (Chapter 3 has none, so Chapter 4 brings "Cosmic challenges" that run inside a constrained universe), and full automation of Chapter 3 (Heat Death runs on a timer, auto-arming of constants).
+### Layer 18 · Negative Kelvin → Inversions
+- Reset at `1e80000`. `I = (log10(1 + IT)/5)² × (1 + log Sp)`. Resetting sets Inverted Temperature back to 0 (it is converted).
+- Bought with Inverted Temperature: **Pump** (`10 × 4^n`, IT gain ×(1 + n)) and **Cavity** (`1e4 × 1e4^n`, strength +0.01).
+
+### Layer 19 · Tachyon → Tachyons
+- Reset at `1e95000`. `Ta = ((log T − 95000)/10000 + 1)² × (1 + log I)`.
+- **Time bank:** fills at 0.25 s per second played (up to 2 with Tachyons and upgrades), capped at 4 h (8 h, 16 h). **Warp** spends it and runs the game forward instantly (×1.5, ×2 with upgrades).
+
+### Layer 20 · Beyond → Hyperheat
+- Reset at `1e120000`. `H = ((log T − 120000)/10000 + 1)^1.5 × (1 + log Ta)`.
+- 12 nodes priced in Hyperheat plus Inverted Temperature and currencies from all four chapters. The last one is **Beyond**.
+
+### Chapter 4 goals
+1. Reach `1e1,000,000 K`. 2. Run 4 beams at once. 3. Satisfy 85% of the 6×6 lattice's bonds (needs solving by hand: Anneal stops near 82%). 4. Reach −1e25 K of Inverted Temperature. 5. Warp a total of 3 days. 6. Own the Beyond node.
+
+### Pacing
+Tested with shorter, approximate runs (a few simulated days from a Chapter 3 complete save) rather than full-chapter runs. Bot times: Laser ~61d, Spin Lattice ~63d, Negative Kelvin and Tachyon ~63d, Beyond ~64d, the Beyond node and `1e1,000,000 K` ~75d; the lattice goal needs a person.
 
 ## 7. Systems shared across chapters
 

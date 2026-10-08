@@ -16,6 +16,7 @@ function getDefaultPlayer() {
     buyables: { kindling: D(0), bellows: D(0), furnace: D(0), tickspeed: D(0) },
     ranks: { degree: D(0), grade: D(0), order: D(0) },
     layers: {},
+    inv: { T: D(0), best: D(0) },
     challenges: { active: 0, comps: {} },
     achievements: [],
     chapters: { unlocked: 1, seenIntro: 0, completed: 0 },

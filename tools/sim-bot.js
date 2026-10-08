@@ -18,6 +18,7 @@ function report() {
   if (typeof Stretch !== 'undefined' && Stretch.data()) parts.push('str=' + JSON.stringify(Stretch.data().stretch));
   if (typeof Gravity !== 'undefined' && player.chapters.unlocked >= 2) parts.push('G=' + format(Gravity.amount()) + ' gexp=' + Gravity.exponent().toFixed(3));
   console.log(parts.join(' '));
+  if (typeof DEBUG_REPORT === 'function') DEBUG_REPORT();
 }
 
 function buyAllUpgrades() {
@@ -150,7 +151,7 @@ botHooks.push(() => {
     if (d.time > hours * 3600) { mark('first Heat Death ended (depth ' + format(d.depth) + ')'); HeatDeath.end(); }
   } else if (HeatDeath.canStart() && (botState.hdNext || 0) <= player.stats.timePlayed) {
     HeatDeath.start();
-    botState.hdNext = player.stats.timePlayed + 3 * 3600;
+    botState.hdNext = player.stats.timePlayed + (player.chapters.unlocked >= 4 ? 12 : 3) * 3600;
   }
 });
 // Start a new universe whenever the armed constants differ from the active ones.
@@ -159,4 +160,15 @@ botHooks.push(() => {
   const d = player.layers.bigbang;
   const armed = d.armed.filter((id) => COSMIC_CONSTANTS.some((c) => c.id === id && Cosmos.isUnlocked(c)));
   if (armed.length !== d.active.length) Layers.doReset('bigbang');
+});
+// Chapter 4: aim beams, relax the lattice, buy Pumps and Cavities, warp when the bank is full.
+var BOT_BEAMS = [['ignition', 'bigbang'], ['supernova', 'inflation'], ['meltdown', 'entropy'], ['collapse', 'absolute'], ['singularity', 'heatdeath']];
+botHooks.push(() => {
+  if (typeof Beams === 'undefined' || !player.layers.laser || !Layers.isUnlocked('laser')) return;
+  BOT_BEAMS.forEach(([a, b], i) => {
+    if (i < Beams.slots() && Layers.isUnlocked(a) && Layers.isUnlocked(b)) { Beams.set(i, 'from', a); Beams.set(i, 'to', b); }
+  });
+  if (Layers.isUnlocked('spin') && (botState.annealAt || 0) <= player.stats.timePlayed) { Lattice.anneal(); botState.annealAt = player.stats.timePlayed + 600; }
+  if (Layers.isUnlocked('negkelvin')) { NegKelvin.buyMax('cavity'); NegKelvin.buyMax('pump'); }
+  if (Layers.isUnlocked('tachyon') && player.layers.tachyon.bank >= Tachyons.cap()) { Tachyons.warp(); mark('first Warp'); }
 });

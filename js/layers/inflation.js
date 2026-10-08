@@ -61,6 +61,7 @@ Layers.register({
     g = g.mul(layerPts('bigbang').add(1).log10().add(1).pow(0.5));
     if (Layers.ms('inflation', 10)) g = g.mul(2);
     if (Layers.map.entropy) g = g.mul(Layers.map.entropy.expansionMult());
+    if (hasUpg('spin', 4)) g = g.mul(upgEff('spin', 4));
     if (typeof Achievements.universeMult === 'function') g = g.mul(Achievements.universeMult());
     return g;
   },
@@ -71,8 +72,9 @@ Layers.register({
   },
   passive: () => (Layers.ms('inflation', 25) ? 0.1 : Layers.ms('inflation', 5) ? 0.01 : 0),
   keep: () => ({ upgrades: Layers.ms('entropy', 1) }),
-  onResetBy() {
-    if (!Layers.ms('entropy', 5)) player.layers.inflation.stretch = { fire: 0, ash: 0, stars: 0 };
+  onResetBy(by, keep) {
+    const kept = by.chapter > 3 ? !!keep.stretch : Layers.ms('entropy', 5);
+    if (!kept) player.layers.inflation.stretch = { fire: 0, ash: 0, stars: 0 };
   },
   autoReset: () => Layers.ms('entropy', 2),
   upgrades: [

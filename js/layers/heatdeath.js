@@ -42,6 +42,7 @@ const HeatDeath = {
     if (this.belowOne()) g = g.mul(hasUpg('heatdeath', 6) ? 30 : 10);
     if (Layers.ms('heatdeath', 10)) g = g.mul(2);
     if (Layers.map.absolute) g = g.mul(Layers.map.absolute.voidMult());
+    if (hasUpg('negkelvin', 8)) g = g.mul(upgEff('negkelvin', 8));
     return g.floor();
   },
   end() {
@@ -106,8 +107,9 @@ Layers.register({
   gain: () => HeatDeath.pending(),
   tick: (dt) => HeatDeath.tick(dt),
   keep: () => ({ points: Layers.ms('absolute', 3), upgrades: Layers.ms('absolute', 1) }),
-  onResetBy() {
-    if (!Layers.ms('absolute', 3)) player.layers.heatdeath.coolers = 0;
+  onResetBy(by, keep) {
+    const kept = by.chapter > 3 ? !!keep.void : Layers.ms('absolute', 3);
+    if (!kept) player.layers.heatdeath.coolers = 0;
   },
   entropyMult: () => (hasUpg('heatdeath', 2) ? layerPts('heatdeath').add(1).log10().add(1).pow(2) : D(1)),
   effectText() {

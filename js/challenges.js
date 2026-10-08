@@ -159,7 +159,8 @@ const Challenges = {
   // layer keeps them (its own milestone, or for a later chapter, Supernova / Big Bang milestones).
   resetBy(byDef) {
     const crossKept = (ch) => (byDef.chapter === 2 ? Layers.ms('supernova', 3)
-      : byDef.chapter === 3 ? Layers.ms('bigbang', ch === 1 ? 1 : 2) : false);
+      : byDef.chapter === 3 ? Layers.ms('bigbang', ch === 1 ? 1 : 2)
+      : byDef.chapter === 4 ? Layers.ms('laser', 1) : false);
     for (const c of this.list) {
       const layer = Layers.map[c.layer];
       let wiped = false;
