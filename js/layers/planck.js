@@ -43,6 +43,9 @@ Layers.register({
   effectText() {
     return `Planck Level ${formatWhole(Planck.level())} raises heat gain to the power ${format(Planck.heatExp(), 3)} (+0.02 per level).`;
   },
+  onResetBy(by, keep) {
+    if (!keep.levels) player.layers.planck.level = D(0);
+  },
   jetMult: () => (hasUpg('planck', 5) ? layerPts('planck').add(1).log10().add(1) : D(1)),
   upgrades: [
     { cost: D(1), desc: 'Break Heat Loss I: it no longer exists.' },

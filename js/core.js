@@ -6,8 +6,7 @@ const Automation = {
   // def: { id, name, group, unlocked(), run(), amount: bool (has a threshold input) }
   register(def) { this.list.push(def); this.map[def.id] = def; },
   ids() { return this.list.map((a) => a.id); },
-  // Autobuyers of finished chapters are always available.
-  isUnlocked(id) { const a = this.map[id]; return a.unlocked() || Chapters.passed(a.chapter || 1); },
+  isUnlocked(id) { return this.map[id].unlocked(); },
   isOn(id) { return this.isUnlocked(id) && player.auto[id] && player.auto[id].on; },
   amount(id) {
     try { const v = D(player.auto[id].amount); return Number.isNaN(v.mag) ? D(1) : v; } catch (e) { return D(1); }

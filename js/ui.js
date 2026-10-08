@@ -1003,7 +1003,7 @@ Layers.map.inflation.panel = () => {
   });
   return h('div', { class: 'panel' },
     h('p', { class: 'muted' }, 'Each Stretch level adds ', UI.dyn(() => format(Stretch.perLevel(), 3)),
-      ' to the power of every heat multiplier in its group. Stretch levels are never reset.'),
+      ' to the power of every heat multiplier in its group. Entropy and later resets wipe them unless kept.'),
     h('div', { class: 'pools' }, tiles),
     autoToggle('auto_stretch'));
 };

@@ -105,8 +105,10 @@ Layers.register({
   req: () => D('1e15000'),
   gain: () => HeatDeath.pending(),
   tick: (dt) => HeatDeath.tick(dt),
-  // Void is a permanent store: Absolute keeps it.
-  keep: () => ({ points: true, upgrades: Layers.ms('absolute', 1) }),
+  keep: () => ({ points: Layers.ms('absolute', 3), upgrades: Layers.ms('absolute', 1) }),
+  onResetBy() {
+    if (!Layers.ms('absolute', 3)) player.layers.heatdeath.coolers = 0;
+  },
   entropyMult: () => (hasUpg('heatdeath', 2) ? layerPts('heatdeath').add(1).log10().add(1).pow(2) : D(1)),
   effectText() {
     return `Void weakens Heat Loss IV (power +${format(HeatDeath.hl4Power(), 3)}) and raises the heat gain exponent ×${format(HeatDeath.heatExp(), 3)}.`;
@@ -136,7 +138,7 @@ Layers.register({
   milestones: [
     { req: 1, desc: 'Keep Entropy upgrades on Heat Death.' },
     { req: 2, desc: 'Unlock the Heat Engine autobuyer.' },
-    { req: 3, desc: 'Unlock the Entropy autobuyer.' },
+    { req: 3, desc: 'Unlock the Entropy autobuyer. Keep Heat Engines and Work on Heat Death.' },
     { req: 5, desc: 'Disorder rises half as fast.' },
     { req: 10, desc: 'Void gain ×2.' },
   ],

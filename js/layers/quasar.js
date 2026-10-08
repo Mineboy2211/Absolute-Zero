@@ -78,6 +78,9 @@ Layers.register({
   },
   passive: () => (Layers.ms('planck', 5) ? 0.1 : 0),
   onResetBy() {
+    const d = player.layers.quasar;
+    d.remaining = 0;
+    d.cooling = 0;
     if (Layers.ms('planck', 3)) Layers.addPoints('quasar', D(10).sub(layerPts('quasar')).max(0));
   },
   autoReset: () => Layers.ms('planck', 2),

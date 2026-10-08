@@ -69,7 +69,9 @@ Layers.register({
     return `Neutronium multiplies Stardust gain by ${formatMult(this.supernovaMult())}. Compressed Embers multiply heat gain by ${formatMult(Compressors.heatMult())}.`;
   },
   passive: () => (Layers.ms('singularity', 5) ? 0.1 : 0),
-  onResetBy() {
+  onResetBy(by, keep) {
+    // Compressor records survive Chapter 2 resets, but a Big Bang wipes them unless kept.
+    if (by.chapter > 2 && !keep.records) for (const k of Object.keys(COMPRESSORS)) player.layers.collapse.compressed[k] = D(0);
     if (Layers.ms('singularity', 3)) Layers.addPoints('collapse', D(100).sub(layerPts('collapse')).max(0));
   },
   autoReset: () => Layers.ms('singularity', 2),

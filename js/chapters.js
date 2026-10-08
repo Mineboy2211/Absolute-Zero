@@ -9,6 +9,11 @@ const Chapters = {
   isComplete(ch) { return ch.goals.every((g) => g.check()); },
   // True once the player has moved past chapter `id` (its layers are then fully automated).
   passed(id) { return player.chapters.unlocked > id; },
+  // What a reset from chapter byDef.chapter keeps of an earlier-chapter layer `def`.
+  crossKeep(def, byDef) {
+    const ch = this.get(byDef.chapter);
+    return (ch && ch.keep && ch.keep(def)) || {};
+  },
   tick() {
     const ch = this.current();
     if (!ch || !this.isComplete(ch)) return;
@@ -23,13 +28,6 @@ const Chapters = {
   },
   unlock(ch) {
     player.chapters.unlocked = ch.id;
-    // Starting a chapter switches on the previous chapters' autobuyers. Auto-resets stay off:
-    // those layers now earn their currency passively, and resetting them would only cost Temperature.
-    for (const a of Automation.list) {
-      if ((a.chapter || 1) >= ch.id) continue;
-      if (a.id.startsWith('reset_')) player.auto[a.id].on = false;
-      else player.auto[a.id].on = true;
-    }
     if (typeof UI !== 'undefined') UI.showChapterIntro(ch);
   },
 };
@@ -62,11 +60,23 @@ Chapters.register({
   id: 2,
   name: 'Stellar',
   rule: 'Gravity. It grows with your temperature and pulls your heat gain down, until you learn to use it.',
+  // What Chapter 2 resets keep of Chapter 1 (Supernova milestones).
+  keep(def) {
+    const m = (n) => Layers.ms('supernova', n);
+    switch (def.id) {
+      case 'ignition': return { upgrades: m(2) };
+      case 'meltdown': return { upgrades: m(2), flow: m(5) };
+      case 'vaporize': return { upgrades: m(3) };
+      case 'ionize': return { upgrades: m(3), split: m(3) };
+      case 'fusion': return { upgrades: m(10) ? true : m(5) ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [] };
+      default: return {};
+    }
+  },
   intro: [
     'Iron. The fire has nothing left to fuse.',
     'So it falls inward, under its own weight.',
     'Gravity is no longer something you can ignore: the hotter you burn, the harder it pulls.',
-    'Every Chapter 1 layer now runs on its own, and Grade and Order no longer reset anything. Your job is the stars.',
+    'Grade and Order no longer reset anything. But every Chapter 2 reset wipes Chapter 1 clean, until Supernova milestones teach you what to keep.',
   ],
   goals: [
     { desc: 'Reach 1e2500 K.', check: () => player.bestT.gte('1e2500') },
@@ -86,11 +96,24 @@ Chapters.register({
   id: 3,
   name: 'Cosmic',
   rule: 'Cosmic constants. Before each Big Bang, choose which laws of physics to break. Every broken law makes the next universe richer in Universes.',
+  // What Chapter 3 resets keep of Chapters 1 and 2 (Big Bang milestones).
+  keep(def) {
+    const m = (n) => Layers.ms('bigbang', n);
+    if (def.chapter === 1) return { upgrades: m(1), flow: m(1), split: m(1) };
+    switch (def.id) {
+      case 'supernova': return { upgrades: m(2) };
+      case 'collapse': return { upgrades: m(3), records: m(5) };
+      case 'singularity': return { upgrades: m(3), mass: m(5) };
+      case 'quasar': return { upgrades: m(3) };
+      case 'planck': return { upgrades: m(3), levels: m(10) };
+      default: return {};
+    }
+  },
   intro: [
     'The Planck limit is broken. There is nothing left inside this universe to burn.',
     'So you burn the universe itself.',
     'A Big Bang starts everything over with new laws of physics, and you get to choose them.',
-    'Every Chapter 2 layer now runs on its own. The black hole feeds without taking your Temperature.',
+    'Every Chapter 3 reset wipes Chapters 1 and 2 clean, until Big Bang milestones teach you what to keep. The black hole now feeds without taking your Temperature.',
   ],
   goals: [
     { desc: 'Reach 1e70000 K.', check: () => player.bestT.gte('1e70000') },

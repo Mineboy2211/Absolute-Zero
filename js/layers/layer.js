@@ -6,8 +6,9 @@
 //   req, reqText()     Temperature needed to reset
 //   gain()             raw currency gain on reset (floored by the engine)
 //   onReset(gain)      extra effects when this layer resets
-//   keep(byDef)        what survives when a higher layer resets this one: { upgrades: true | [ids], points: bool }
-//   onResetBy(byDef)   extra cleanup when reset by a higher layer
+//   keep(byDef)        what survives when a higher layer of the SAME chapter resets this one: { upgrades: true | [ids], points: bool }
+//                      (a later chapter ignores it and asks Chapters.crossKeep instead, like IMR's big resets)
+//   onResetBy(byDef, keep)  extra cleanup when reset by a higher layer (keep = the keep object that applied)
 //   heatMult()         multiplier on heat gain (listed in Stats)
 //   effectText()       short description of the currency's effect
 //   passive()          fraction of pending gain earned per second
@@ -73,11 +74,8 @@ const Layers = {
     return g;
   },
 
-  // Fraction of pending gain earned per second: the layer's own passive, or 100% once its chapter is behind you.
-  passiveRate(def) {
-    const own = def.passive ? def.passive() : 0;
-    return Chapters.passed(def.chapter) ? Math.max(own, 1) : own;
-  },
+  // Fraction of pending gain earned per second.
+  passiveRate(def) { return def.passive ? def.passive() : 0; },
 
   canReset(id) {
     const def = this.map[id];
@@ -113,24 +111,24 @@ const Layers = {
   resetBelow(byDef) {
     const lower = this.list.filter((l) => l.chapter < byDef.chapter || (l.chapter === byDef.chapter && l.order < byDef.order));
     for (let i = lower.length - 1; i >= 0; i--) this.resetLayer(lower[i], byDef);
+    if (byDef.chapter > 1) Challenges.resetEarlier(byDef);
     Ranks.reset(byDef);
     resetCore();
   },
 
   resetLayer(def, byDef) {
     const d = player.layers[def.id];
-    const keep = def.keep ? Object.assign({}, def.keep(byDef)) : {};
-    // A later chapter never takes away the upgrades of an earlier one.
+    // A later chapter wipes everything of an earlier one, except what its own milestones keep.
     const crossChapter = byDef.chapter > def.chapter;
-    if (crossChapter) keep.upgrades = true;
-    if (crossChapter && def.chapter === 1 && hasUpg('supernova', 13)) d.points = d.points.mul(0.01);
+    const keep = Object.assign({}, crossChapter ? Chapters.crossKeep(def, byDef) : (def.keep ? def.keep(byDef) : {}));
+    if (crossChapter && def.chapter === 1 && byDef.chapter === 2 && hasUpg('supernova', 13)) d.points = d.points.mul(0.01);
     else if (!keep.points) d.points = D(0);
     if (keep.upgrades !== true) {
       const kept = keep.upgrades || [];
       d.upgrades = d.upgrades.filter((u) => kept.includes(u));
     }
     d.time = 0;
-    if (def.onResetBy) def.onResetBy(byDef);
+    if (def.onResetBy) def.onResetBy(byDef, keep);
   },
 
   // ----- milestones & upgrades -----
@@ -171,8 +169,6 @@ const Layers = {
         const g = this.gain(def.id);
         if (g.gt(0)) this.addPoints(def.id, g.mul(rate * dt));
       }
-      // Layers of finished chapters buy their own upgrades.
-      if (Chapters.passed(def.chapter)) this.buyAllUpgs(def.id);
       if (def.tick) def.tick(dt);
     }
   },

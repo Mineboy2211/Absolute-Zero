@@ -155,6 +155,14 @@ const Challenges = {
     Layers.doReset(this.get(id).layer, { force: true, noGain: true });
     player.challenges.active = id;
   },
+  // A later chapter's reset wipes earlier chapters' challenge completions unless its milestones keep them.
+  resetEarlier(byDef) {
+    const kept = (ch) => (byDef.chapter === 2 ? Layers.ms('supernova', 3)
+      : byDef.chapter === 3 ? Layers.ms('bigbang', ch === 1 ? 1 : 2) : false);
+    for (const c of this.list) {
+      if (c.chapter < byDef.chapter && !kept(c.chapter)) delete player.challenges.comps[c.id];
+    }
+  },
   exit() {
     const id = player.challenges.active;
     if (!id) return;

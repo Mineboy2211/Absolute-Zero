@@ -123,10 +123,11 @@ Layers.register({
     { cost: D(2e7), desc: 'Heat Loss IV starts 10% later (in orders of magnitude).' },
   ],
   milestones: [
-    { req: 1, desc: 'Stardust, Neutronium and Hawking Heat gain ×1e10.' },
-    { req: 2, desc: 'Heat gain exponent ×1.01.' },
-    { req: 5, desc: 'Gain 1% of pending Universes every second.' },
-    { req: 10, desc: 'Universe gain ×2.' },
+    { req: 1, desc: 'Stardust, Neutronium and Hawking Heat gain ×1e10. Chapter 3 resets keep every Chapter 1 upgrade and Element, your Magma flow, Plasma split and Chapter 1 challenge completions.' },
+    { req: 2, desc: 'Heat gain exponent ×1.01. Chapter 3 resets keep the Stardust tree and Stellar challenge completions.' },
+    { req: 3, desc: 'Chapter 3 resets keep Neutronium, Hawking Heat, Jet and Planck upgrades.' },
+    { req: 5, desc: 'Gain 1% of pending Universes every second. Chapter 3 resets keep compressor records and the black hole mass.' },
+    { req: 10, desc: 'Universe gain ×2. Chapter 3 resets keep Planck Levels.' },
     { req: 25, desc: 'Gain 10% of pending Universes every second.' },
   ],
 });

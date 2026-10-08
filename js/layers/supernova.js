@@ -90,10 +90,10 @@ Layers.register({
   })),
   milestones: [
     { req: 1, desc: 'Every Chapter 1 currency gain ×10.' },
-    { req: 2, desc: 'Chapter 2 resets keep your Plasma split.' },
-    { req: 3, desc: 'Chapter 2 resets leave you with at least Grade 5 and Order 3.' },
-    { req: 5, desc: 'Chapter 2 resets keep your Magma flow.' },
-    { req: 10, desc: 'Stardust gain ×2.' },
+    { req: 2, desc: 'Chapter 2 resets keep Ember and Magma upgrades.' },
+    { req: 3, desc: 'Chapter 2 resets keep Pressure and Plasma upgrades, your Plasma split and Chapter 1 challenge completions, and leave you with at least Grade 5 and Order 3.' },
+    { req: 5, desc: 'Chapter 2 resets keep your Magma flow and the first 10 Elements.' },
+    { req: 10, desc: 'Stardust gain ×2. Chapter 2 resets keep every Element.' },
     { req: 25, desc: 'Gain 10% of pending Stardust every second.' },
   ],
 });

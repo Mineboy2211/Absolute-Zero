@@ -54,6 +54,7 @@ Layers.register({
   milestones: [
     { req: 1, desc: 'Keep Heat Death upgrades on Absolute.' },
     { req: 2, desc: 'Unlock the Cooler autobuyer.' },
+    { req: 3, desc: 'Keep Void and Coolers on Absolute.' },
     { req: 5, desc: 'Gain 1% of pending Absolutes every second.' },
     { req: 10, desc: 'Absolute gain ×2.' },
     { req: 25, desc: 'Gain 10% of pending Absolutes every second.' },

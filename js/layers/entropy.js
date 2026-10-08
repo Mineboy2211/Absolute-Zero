@@ -86,7 +86,11 @@ Layers.register({
   tick: (dt) => Thermo.tick(dt),
   // Resetting turns your Disorder into Entropy.
   onReset() { player.layers.entropy.disorder = D(0); },
-  onResetBy() { player.layers.entropy.disorder = D(0); },
+  onResetBy() {
+    const d = player.layers.entropy;
+    d.disorder = D(0);
+    if (!Layers.ms('heatdeath', 3)) { d.engines = 0; d.work = D(0); }
+  },
   keep: () => ({ upgrades: Layers.ms('heatdeath', 1) }),
   autoReset: () => Layers.ms('heatdeath', 3),
   expansionMult: () => (hasUpg('entropy', 2) ? Thermo.work().add(1).pow(0.25) : D(1)),
@@ -121,7 +125,7 @@ Layers.register({
     { req: 1, desc: 'Disorder starts rising. Keep Inflation upgrades on Entropy.' },
     { req: 2, desc: 'Unlock the Inflation autobuyer.' },
     { req: 3, desc: 'Unlock the Stretch autobuyer.' },
-    { req: 5, desc: 'Gain 1% of pending Entropy every second.' },
+    { req: 5, desc: 'Gain 1% of pending Entropy every second. Keep Stretch levels on Entropy.' },
     { req: 10, desc: 'Entropy gain ×2 and Work ×2.' },
     { req: 25, desc: 'Gain 10% of pending Entropy every second.' },
   ],

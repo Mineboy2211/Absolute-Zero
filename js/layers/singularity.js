@@ -77,8 +77,9 @@ Layers.register({
     return `Hawking Heat multiplies heat gain by ${formatMult(BlackHole.heatMult())}, Magma flow by ${formatMult(BlackHole.flowMult())} and Stardust gain by ${formatMult(BlackHole.stardustMult())}.`;
   },
   passive: () => (Layers.ms('quasar', 5) ? 0.1 : 0),
-  onResetBy() {
-    if (!Layers.ms('quasar', 3)) player.layers.singularity.mass = D(0);
+  onResetBy(by, keep) {
+    const keepMass = by.chapter > 2 ? !!keep.mass : Layers.ms('quasar', 3);
+    if (!keepMass) player.layers.singularity.mass = D(0);
   },
   autoReset: () => Layers.ms('quasar', 2),
   keep: () => ({ upgrades: Layers.ms('quasar', 1) }),
