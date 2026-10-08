@@ -51,6 +51,7 @@ const BlackHole = {
 
 Layers.register({
   id: 'singularity',
+  keepChallenges: () => Layers.ms('singularity', 10),
   chapter: 2,
   order: 3,
   name: 'Singularity',
@@ -115,6 +116,7 @@ Layers.register({
     { req: 2, desc: 'Unlock the Collapse autobuyer.' },
     { req: 3, desc: 'Start every Singularity with 100 Neutronium.' },
     { req: 5, desc: 'Gain 10% of pending Neutronium every second.' },
+    { req: 10, desc: 'Singularity keeps your Stellar challenge completions.' },
     { req: 25, desc: 'Each feed adds twice the mass.' },
   ],
 });

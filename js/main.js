@@ -3,6 +3,8 @@
 const OFFLINE_CAP = 24 * 3600;
 let lastAutosave = Date.now();
 let lastNaNCheck = Date.now();
+let lastFrame = 0;
+const FRAME_MS = window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 150 : 100;
 
 function snapshot() {
   const s = { T: player.T, best: player.bestT };
@@ -34,6 +36,8 @@ function runOffline(seconds) {
 
 function gameLoop() {
   const now = Date.now();
+  // Paused while developer tools are open (see guard.js).
+  if (typeof Guard !== 'undefined' && Guard.paused) { player.lastTick = now; return; }
   const real = (now - player.lastTick) / 1000;
   player.lastTick = now;
   if (real > 60 && player.options.offline) {
@@ -44,7 +48,10 @@ function gameLoop() {
     const steps = Math.min(20, Math.max(1, Math.ceil(dt / 1)));
     for (let i = 0; i < steps; i++) gameTick(dt / steps);
   }
-  UI.update();
+  if (now - lastFrame >= FRAME_MS) {
+    lastFrame = now;
+    UI.update();
+  }
 
   if (now - lastNaNCheck > 5000) {
     lastNaNCheck = now;

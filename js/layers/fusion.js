@@ -37,6 +37,7 @@ const Elements = {
 
 Layers.register({
   id: 'fusion',
+  keepChallenges: () => Layers.ms('fusion', 4),
   chapter: 1,
   order: 5,
   name: 'Fusion',
@@ -71,6 +72,7 @@ Layers.register({
     { req: 1, desc: 'Keep Plasma upgrades and your Plasma split on Fusion.' },
     { req: 2, desc: 'Unlock the Ionize autobuyer.' },
     { req: 3, desc: 'Unlock the Plasma auto-split (uses your last split ratio).' },
+    { req: 4, desc: 'Fusion keeps your challenge completions.' },
     { req: 5, desc: 'Start every run with 10 Plasma.' },
     { req: 10, desc: 'Gain 10% of pending Plasma every second.' },
     { req: 25, desc: 'Nucleon gain ×2.' },

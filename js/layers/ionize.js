@@ -8,6 +8,7 @@ const PLASMA_POOLS = {
 
 Layers.register({
   id: 'ionize',
+  keepChallenges: () => Layers.ms('ionize', 3),
   chapter: 1,
   order: 4,
   name: 'Ionize',
@@ -128,6 +129,7 @@ Layers.register({
   milestones: [
     { req: 1, desc: 'Keep Pressure upgrades 1, 3 and 5, and start every run with 5 Pressure.' },
     { req: 2, desc: 'Unlock the Vaporize autobuyer.' },
+    { req: 3, desc: 'Ionize keeps your challenge completions.' },
     { req: 5, desc: 'Keep all Pressure upgrades.' },
     { req: 10, desc: 'Gain 10% of pending Pressure every second.' },
     { req: 25, desc: 'Respec no longer forces an Ionize reset.' },

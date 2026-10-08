@@ -25,6 +25,7 @@ const Planck = {
 
 Layers.register({
   id: 'planck',
+  keepChallenges: () => Layers.ms('planck', 10),
   chapter: 2,
   order: 5,
   name: 'Planck Break',
@@ -64,7 +65,7 @@ Layers.register({
     { req: 2, desc: 'Unlock the Quasar autobuyer.' },
     { req: 3, desc: 'Start every Planck Break with 10 Jets.' },
     { req: 5, desc: 'Gain 10% of pending Jets every second.' },
-    { req: 10, desc: 'Unlock the Planck Level autobuyer.' },
+    { req: 10, desc: 'Unlock the Planck Level autobuyer. Planck Break keeps your Stellar challenge completions.' },
     { req: 25, desc: 'Planck Shard gain ×2.' },
   ],
 });

@@ -162,6 +162,7 @@ const UI = {
     const render = Tabs[id] || (Layers.map[id] ? () => renderLayerTab(Layers.map[id]) : Tabs.main);
     content.append(render());
     content.scrollTop = 0;
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
     document.body.classList.remove('nav-open');
     this.updateSidebar(true);
     this.update();
@@ -170,16 +171,22 @@ const UI = {
   // ---------- per frame ----------
   frame: 0,
   update() {
+    GainCache.clear();
     for (const fn of this.headerUpdaters) fn();
     for (const fn of this.updaters) fn();
     if (this.frame++ % 10 === 0) this.updateSidebar(false);
     this.updateAccent();
   },
 
+  // Changing --accent restyles the whole page, so it is only written when the colour really changes.
   updateAccent() {
     const target = Math.log10(Math.max(0, player.T.max(1).log10().toNumber()) + 1);
-    this.accentLog += (target - this.accentLog) * 0.08;
-    document.documentElement.style.setProperty('--accent', accentColor(this.accentLog));
+    this.accentLog += (target - this.accentLog) * 0.15;
+    const c = accentColor(Math.round(this.accentLog * 50) / 50);
+    if (c !== this.accentValue) {
+      this.accentValue = c;
+      document.documentElement.style.setProperty('--accent', c);
+    }
   },
 
   // ---------- modals & toasts ----------
@@ -444,7 +451,7 @@ const Tabs = {
 
   challenges() {
     const root = h('div', { class: 'tab' });
-    root.append(h('p', { class: 'muted', text: 'Entering a challenge performs a Vaporize reset without giving Pressure. Each challenge has 5 tiers: a tier is completed the moment you reach its goal, and you can keep going for the next one. Leaving also performs a Vaporize reset.' }));
+    root.append(h('p', { class: 'muted', text: 'Entering a challenge performs a reset of its layer without giving anything. Ionize and every higher reset wipe challenge completions unless milestones of that layer keep them. Each challenge has 5 tiers: a tier is completed the moment you reach its goal, and you can keep going for the next one. Leaving also performs a Vaporize reset.' }));
     const exit = h('button', { class: 'wide danger', onclick: () => Challenges.exit() }, 'Leave the current challenge');
     root.append(UI.showIf(exit, () => player.challenges.active));
     const grid = h('div', { class: 'grid' });
@@ -510,7 +517,8 @@ const Tabs = {
       row('Best temperature', () => formatK(player.bestT)),
       row('Achievements', () => `${Achievements.count()} / ${Achievements.list.length}`),
       row('Challenge completions', () => String(Challenges.totalComps())),
-      UI.showIf(row('Developer speed used', () => 'yes'), () => player.stats.devUsed))));
+      UI.showIf(row('Developer speed used', () => 'yes'), () => player.stats.devUsed),
+      UI.showIf(row('Developer tools opened', () => 'yes'), () => player.stats.devtools))));
 
     const multTable = h('table', { class: 'stats' });
     const rebuild = () => {
@@ -634,8 +642,8 @@ function renderLayerTab(def) {
         u.name ? h('span', { class: 'node-name', text: u.name }) : null,
         h('span', { class: 'upg-desc', text: u.desc }),
         u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
-        h('span', { class: 'upg-cost', text: `Cost: ${format(u.cost, 0)} ${def.currency}` +
-          (u.extra ? u.extra.map(([lid, amt]) => ` + ${format(amt, 0)} ${Layers.map[lid].currency}`).join('') : '') }));
+        h('span', { class: 'upg-cost', text: `Cost: ${formatWhole(u.cost)} ${def.currency}` +
+          (u.extra ? u.extra.map(([lid, amt]) => ` + ${formatWhole(amt)} ${Layers.map[lid].currency}`).join('') : '') }));
       UI.bind(() => {
         btn.classList.toggle('bought', hasUpg(def.id, u.id));
         btn.classList.toggle('can', Layers.canBuyUpg(def.id, u.id));
@@ -825,7 +833,7 @@ Layers.map.fusion.card = () => {
     setText(dTitle, visible ? `${u.sym} · ${u.name}` : '???');
     setText(dDesc, visible ? u.desc : 'Synthesize the previous Element first.');
     setText(dEff, visible && u.effect ? 'Currently: ' + u.effectText(u.effect()) : '');
-    setText(dCost, hasUpg('fusion', u.id) ? 'Synthesized.' : `Cost: ${format(u.cost, 0)} Nucleons`);
+    setText(dCost, hasUpg('fusion', u.id) ? 'Synthesized.' : `Cost: ${formatWhole(u.cost)} Nucleons`);
   });
   return card('Elements',
     h('p', { class: 'muted', text: 'Tap an Element to see it, tap again to synthesize it. Elements unlock in order.' }),
@@ -838,12 +846,12 @@ Layers.map.supernova.card = () => {
   const cols = TREE_BRANCHES.map((name, b) => {
     const col = h('div', { class: 'branch' }, h('div', { class: 'branch-name', text: name }));
     def.upgrades.filter((u) => u.branch === b).sort((x, y) => x.row - y.row).forEach((u) => {
-      const extra = u.extra ? u.extra.map(([lid, amt]) => ` + ${format(amt, 0)} ${Layers.map[lid].currency}`).join('') : '';
+      const extra = u.extra ? u.extra.map(([lid, amt]) => ` + ${formatWhole(amt)} ${Layers.map[lid].currency}`).join('') : '';
       const node = h('button', { class: 'node', onclick: () => Layers.buyUpg('supernova', u.id) },
         h('span', { class: 'node-name', text: u.name }),
         h('span', { class: 'node-desc', text: u.desc }),
         u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
-        h('span', { class: 'upg-cost', text: `${format(u.cost, 0)} Stardust${extra}` }));
+        h('span', { class: 'upg-cost', text: `${formatWhole(u.cost)} Stardust${extra}` }));
       UI.bind(() => {
         node.classList.toggle('bought', hasUpg('supernova', u.id));
         node.classList.toggle('can', Layers.canBuyUpg('supernova', u.id));
@@ -953,7 +961,7 @@ Layers.map.quasar.panel = () => {
 Layers.map.planck.panel = () => {
   const buy = h('button', { class: 'big', onclick: () => Planck.buy() });
   UI.bind(() => {
-    setText(buy, `Planck Level ${formatWhole(Planck.level().add(1))} (cost ${format(Planck.cost(), 0)} Planck Shards)`);
+    setText(buy, `Planck Level ${formatWhole(Planck.level().add(1))} (cost ${formatWhole(Planck.cost())} Planck Shards)`);
     buy.classList.toggle('can', Planck.canBuy());
   });
   return h('div', { class: 'panel' },
@@ -989,7 +997,7 @@ Layers.map.inflation.panel = () => {
   const tiles = Object.entries(STRETCH_GROUPS).map(([k, g]) => {
     const buy = h('button', { onclick: () => Stretch.buy(k) });
     UI.bind(() => {
-      setText(buy, `Stretch (${format(Stretch.cost(k), 0)} Expansion)`);
+      setText(buy, `Stretch (${formatWhole(Stretch.cost(k))} Expansion)`);
       buy.classList.toggle('can', Stretch.canBuy(k));
     });
     const el = h('div', { class: 'pool' },
@@ -1012,7 +1020,7 @@ Layers.map.inflation.panel = () => {
 Layers.map.entropy.panel = () => {
   const buy = h('button', { class: 'big', onclick: () => Thermo.buyEngine() });
   UI.bind(() => {
-    setText(buy, `Build Heat Engine ${Thermo.engines() + 1} (${format(Thermo.engineCost(), 0)} Entropy)`);
+    setText(buy, `Build Heat Engine ${Thermo.engines() + 1} (${formatWhole(Thermo.engineCost())} Entropy)`);
     buy.classList.toggle('can', Thermo.canBuyEngine());
   });
   const fill = h('div', { class: 'fill' });
@@ -1051,7 +1059,7 @@ Layers.map.heatdeath.panel = () => {
   });
   const cooler = h('button', { onclick: () => HeatDeath.buyCooler() });
   UI.bind(() => {
-    setText(cooler, `Buy Cooler ${d().coolers + 1} (${format(HeatDeath.coolerCost(), 0)} Void)`);
+    setText(cooler, `Buy Cooler ${d().coolers + 1} (${formatWhole(HeatDeath.coolerCost())} Void)`);
     cooler.classList.toggle('can', HeatDeath.canBuyCooler());
   });
   const run = h('div', null,

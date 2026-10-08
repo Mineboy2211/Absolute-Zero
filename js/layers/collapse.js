@@ -46,6 +46,7 @@ const Compressors = {
 
 Layers.register({
   id: 'collapse',
+  keepChallenges: () => Layers.ms('collapse', 10),
   chapter: 2,
   order: 2,
   name: 'Collapse',
@@ -98,6 +99,7 @@ Layers.register({
     { req: 2, desc: 'Unlock the Supernova autobuyer.' },
     { req: 3, desc: 'Start every Collapse with 10 Thousand Stardust.' },
     { req: 5, desc: 'Gain 10% of pending Stardust every second.' },
+    { req: 10, desc: 'Collapse keeps your Stellar challenge completions.' },
     { req: 25, desc: 'Neutronium gain ×2.' },
   ],
 });

@@ -103,15 +103,16 @@ const Layers = {
       if (def.onReset) def.onReset(g);
     }
     d.time = 0;
-    this.resetBelow(def);
+    // Entering or leaving a challenge (noGain) never touches challenge completions.
+    this.resetBelow(def, !noGain);
     return true;
   },
 
   // Layers reset every lower layer of their chapter, and every layer of earlier chapters.
-  resetBelow(byDef) {
+  resetBelow(byDef, resetChallenges = true) {
     const lower = this.list.filter((l) => l.chapter < byDef.chapter || (l.chapter === byDef.chapter && l.order < byDef.order));
     for (let i = lower.length - 1; i >= 0; i--) this.resetLayer(lower[i], byDef);
-    if (byDef.chapter > 1) Challenges.resetEarlier(byDef);
+    if (resetChallenges) Challenges.resetBy(byDef);
     Ranks.reset(byDef);
     resetCore();
   },

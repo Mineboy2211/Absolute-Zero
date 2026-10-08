@@ -30,7 +30,7 @@ function getDefaultPlayer() {
       tab: 'main',
       newsSeen: '',
     },
-    stats: { timePlayed: 0, created: Date.now(), devUsed: false },
+    stats: { timePlayed: 0, created: Date.now(), devUsed: false, devtools: false },
     lastTick: Date.now(),
   };
   for (const def of Layers.list) p.layers[def.id] = Layers.defaultData(def);

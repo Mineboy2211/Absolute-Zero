@@ -43,6 +43,7 @@ const Jets = {
 
 Layers.register({
   id: 'quasar',
+  keepChallenges: () => Layers.ms('quasar', 10),
   chapter: 2,
   order: 4,
   name: 'Quasar',
@@ -107,7 +108,7 @@ Layers.register({
     { req: 2, desc: 'Unlock the Singularity autobuyer.' },
     { req: 3, desc: 'The black hole keeps its mass on Quasar.' },
     { req: 5, desc: 'Gain 10% of pending Hawking Heat every second.' },
-    { req: 10, desc: 'Jets recharge twice as fast.' },
+    { req: 10, desc: 'Jets recharge twice as fast. Quasar keeps your Stellar challenge completions.' },
     { req: 25, desc: 'Jet power +1.' },
   ],
 });

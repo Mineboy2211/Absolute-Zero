@@ -155,12 +155,17 @@ const Challenges = {
     Layers.doReset(this.get(id).layer, { force: true, noGain: true });
     player.challenges.active = id;
   },
-  // A later chapter's reset wipes earlier chapters' challenge completions unless its milestones keep them.
-  resetEarlier(byDef) {
-    const kept = (ch) => (byDef.chapter === 2 ? Layers.ms('supernova', 3)
+  // A reset wipes the completions of every challenge that belongs to a lower layer, unless the resetting
+  // layer keeps them (its own milestone, or for a later chapter, Supernova / Big Bang milestones).
+  resetBy(byDef) {
+    const crossKept = (ch) => (byDef.chapter === 2 ? Layers.ms('supernova', 3)
       : byDef.chapter === 3 ? Layers.ms('bigbang', ch === 1 ? 1 : 2) : false);
     for (const c of this.list) {
-      if (c.chapter < byDef.chapter && !kept(c.chapter)) delete player.challenges.comps[c.id];
+      const layer = Layers.map[c.layer];
+      let wiped = false;
+      if (c.chapter < byDef.chapter) wiped = !crossKept(c.chapter);
+      else if (c.chapter === byDef.chapter && layer.order < byDef.order) wiped = !(byDef.keepChallenges && byDef.keepChallenges());
+      if (wiped && !inChal(c.id)) delete player.challenges.comps[c.id];
     }
   },
   exit() {

@@ -3,9 +3,11 @@
 function gameTick(dt) {
   if (!(dt > 0)) return;
   player.stats.timePlayed += dt;
+  GainCache.clear();
   player.T = player.T.add(heatGain().mul(dt));
   player.bestT = player.bestT.max(player.T);
   Ranks.tick();
+  GainCache.clear();
   Layers.tick(dt);
   Automation.run();
   Challenges.tick();

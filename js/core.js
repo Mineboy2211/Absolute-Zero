@@ -189,11 +189,16 @@ function heatMultipliers() {
   return m;
 }
 
+// Per-frame cache for the expensive heat gain chain; cleared at every game tick and UI frame.
+const GainCache = { raw: null, gain: null, clear() { this.raw = null; this.gain = null; } };
+
 function rawHeatGain() {
+  if (GainCache.raw) return GainCache.raw;
   let g = heatBase();
   for (const [, v] of heatMultipliers()) g = g.mul(v);
   const e = heatExponent();
   if (e !== 1) g = g.pow(e);
+  GainCache.raw = g;
   return g;
 }
 
@@ -288,7 +293,8 @@ function applyHeatLoss(x) {
 function heatGain() {
   // During a Heat Death your Temperature only falls.
   if (typeof HeatDeath !== 'undefined' && HeatDeath.running()) return D(0);
-  return applyHeatLoss(rawHeatGain());
+  if (!GainCache.gain) GainCache.gain = applyHeatLoss(rawHeatGain());
+  return GainCache.gain;
 }
 
 function resetCore(keepBuyables = {}) {
