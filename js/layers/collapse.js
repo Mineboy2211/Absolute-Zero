@@ -59,6 +59,7 @@ Layers.register({
     let g = Decimal.pow(10, player.T.log10().sub(556).div(25)).mul(layerPts('supernova').add(1).log10().add(1));
     if (Layers.ms('collapse', 25)) g = g.mul(2);
     if (Layers.map.singularity) g = g.mul(Layers.map.singularity.neutroniumMult());
+    if (hasUpg('inflation', 7)) g = g.mul(upgEff('inflation', 7));
     return g;
   },
   heatMult: () => Compressors.heatMult(),

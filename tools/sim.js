@@ -11,6 +11,7 @@
 //   SAVE_OUT=file.txt      write the save to this file when the run ends
 //   STOP_CHAPTER=1         stop as soon as this chapter is completed
 //   QUIET=1                only print first-time events and checkpoints
+//   PRE='code'             run this code in the game context before the bot starts
 
 const fs = require('fs');
 const path = require('path');
@@ -40,6 +41,7 @@ if (process.env.LOAD) {
   vm.runInContext('player = Save.fromObject(Save.decode(LOADED));', ctx);
 }
 vm.runInContext('player.options.notation = "scientific";', ctx);
+if (process.env.PRE) vm.runInContext(process.env.PRE, ctx);
 
 const bot = fs.readFileSync(path.join(__dirname, 'sim-bot.js'), 'utf8');
 vm.runInContext(bot, ctx, { filename: 'sim-bot.js' });
@@ -48,6 +50,7 @@ ctx.HOURS = hours;
 ctx.STEP = step;
 ctx.REPORT_EVERY = Number(process.env.REPORT_EVERY || 0);
 ctx.STOP_CHAPTER = Number(process.env.STOP_CHAPTER || 0);
+if (process.env.BOT_CONSTS) ctx.BOT_CONSTS = process.env.BOT_CONSTS;
 vm.runInContext(`
   const start = player.stats.timePlayed;
   const every = typeof REPORT_EVERY !== 'undefined' && REPORT_EVERY ? REPORT_EVERY : HOURS > 24 ? 6 * 3600 : 3600;

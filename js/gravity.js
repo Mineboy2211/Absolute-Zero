@@ -23,12 +23,13 @@ const Gravity = {
     return w;
   },
   isBonus() { return hasUpg('supernova', 10); },
+  slingCap() { return 0.15 + (typeof Cosmos !== 'undefined' ? Cosmos.slingCap() : 0) + (hasUpg('inflation', 8) ? 0.03 : 0); },
   // Exponent applied to heat gain before Heat Loss.
   exponent() {
     const gw = this.amount().toNumber() * this.weight();
     if (!(gw > 0)) return 1;
     // Slingshot is capped: an exponent that grew with Temperature would run away.
-    return this.isBonus() ? 1 + Math.min(gw / 2, 0.15) : 1 / (1 + gw);
+    return this.isBonus() ? 1 + Math.min(gw / 2, this.slingCap()) : 1 / (1 + gw);
   },
   describe() {
     const e = this.exponent();
@@ -51,5 +52,9 @@ function heatExponent() {
   if (inChal(12)) e *= 0.75;
   e *= 1 + Challenges.reward(12);
   if (typeof Planck !== 'undefined') e *= Planck.heatExp();
+  if (typeof Cosmos !== 'undefined') e *= Cosmos.heatExp();
+  if (hasUpg('inflation', 4)) e *= 1.03;
+  if (hasUpg('inflation', 10)) e *= 1.04;
+  if (typeof Thermo !== 'undefined') e *= Thermo.heatExp();
   return e;
 }

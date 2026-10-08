@@ -182,9 +182,11 @@ function heatMultipliers() {
   m.push(['Draft', tickMult()]);
   m.push(['Ranks', Ranks.heatMult()]);
   for (const def of Layers.list) {
-    if (def.heatMult) m.push([def.currency, def.heatMult()]);
+    if (def.heatMult) m.push([def.currency, def.heatMult(), def]);
   }
   m.push(['Achievements', Achievements.mult()]);
+  // Inflation's Stretch raises whole groups of multipliers to a power.
+  if (typeof Stretch !== 'undefined') return m.map(([n, v, def]) => [n, Stretch.apply(n, def, v)]);
   return m;
 }
 
@@ -241,8 +243,27 @@ const HeatLoss = [
   },
   // The event horizon of heat: a logarithmic softcap that Planck Break cannot break.
   // Above the start, the exponent of the gain is raised to `power`, so no feedback loop can run away.
-  { name: 'Heat Loss IV', log: true, start: () => D('1e1000'), power: () => 0.5 },
+  // Chapter 3 weakens it a little; every gain in its power raises the ceiling a lot.
+  { name: 'Heat Loss IV', log: true, start: () => Decimal.pow(10, 1000 * cosmicHL4.startMult()), power: () => cosmicHL4.power() },
 ];
+
+// Chapter 3 modifiers of Heat Loss IV. Later layers add their parts here.
+const cosmicHL4 = {
+  power() {
+    let p = 0.5;
+    if (typeof Cosmos !== 'undefined') p += Cosmos.hl4Power();
+    if (hasUpg('inflation', 6)) p += 0.01;
+    if (hasUpg('entropy', 6)) p += 0.01;
+    return Math.min(p, 0.75);
+  },
+  startMult() {
+    let m = 1;
+    if (typeof Cosmos !== 'undefined') m *= Cosmos.hl4StartMult();
+    if (hasUpg('inflation', 9)) m *= 1.05;
+    if (hasUpg('entropy', 9)) m *= 1.05;
+    return m;
+  },
+};
 
 function softcap(x, s, p) { return x.gt(s) ? s.mul(x.div(s).pow(p)) : x; }
 // Log-space softcap: 10^(log(s) × (log(x)/log(s))^p).

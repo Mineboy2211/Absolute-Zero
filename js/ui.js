@@ -610,6 +610,7 @@ function renderLayerTab(def) {
   });
 
   const lower = Layers.list.filter((l) => l.chapter === def.chapter && l.order < def.order).map((l) => l.currency);
+  if (def.chapter > 1) lower.push(`every Chapter ${def.chapter > 2 ? '1–' + (def.chapter - 1) : '1'} currency`);
   const resetsWhat = ['Temperature', 'buyables', 'ranks', ...lower].join(', ');
 
   root.append(card(null,
@@ -957,4 +958,77 @@ Layers.map.planck.panel = () => {
     h('div', { class: 'button-row' }, buy, h('button', { onclick: () => Planck.buyMax() }, 'Max')),
     h('p', { class: 'muted small', text: 'Each level costs ×3 more Shards and adds +0.02 to the heat exponent. The first three upgrades below break Heat Loss I, II and III. Heat Loss IV cannot be broken.' }),
     autoToggle('buy_planck'));
+};
+
+// Cosmic constants for Big Bang.
+Layers.map.bigbang.panel = () => {
+  const tiles = COSMIC_CONSTANTS.map((c) => {
+    const btn = h('button', { class: 'const', onclick: () => Cosmos.toggle(c.id) },
+      h('span', { class: 'const-name', text: c.name }),
+      h('span', { class: 'const-desc', text: c.desc }),
+      h('span', { class: 'const-mult', text: `Universes ×${c.mult}` }),
+      UI.dyn(() => (Cosmos.has(c.id) ? 'active now' : '') + (Cosmos.has(c.id) && Cosmos.armed(c.id) ? ' · ' : '') + (Cosmos.armed(c.id) ? 'armed for the next universe' : ''), 'span', 'const-state'));
+    UI.classIf(btn, 'armed', () => Cosmos.armed(c.id));
+    UI.classIf(btn, 'active', () => Cosmos.has(c.id));
+    return UI.showIf(btn, () => Cosmos.isUnlocked(c));
+  });
+  return h('div', { class: 'panel' },
+    h('p', null, h('b', { text: 'Cosmic constants. ' }),
+      'Arm the laws you want to break, then start a new universe. Armed constants take effect at the next Big Bang and stay until the one after. Their Universe multipliers stack.'),
+    h('p', { class: 'muted' }, 'This universe: ', UI.dyn(() => `${Cosmos.data().active.length} active, Universes ${formatMult(Cosmos.constMult())}`),
+      ' · next universe: ', UI.dyn(() => `${Cosmos.data().armed.length} armed, Universes ${formatMult(Cosmos.constMult(Cosmos.data().armed))}`)),
+    h('div', { class: 'consts' }, tiles));
+};
+
+// Stretch for Inflation.
+Layers.map.inflation.panel = () => {
+  const tiles = Object.entries(STRETCH_GROUPS).map(([k, g]) => {
+    const buy = h('button', { onclick: () => Stretch.buy(k) });
+    UI.bind(() => {
+      setText(buy, `Stretch (${format(Stretch.cost(k), 0)} Expansion)`);
+      buy.classList.toggle('can', Stretch.canBuy(k));
+    });
+    const el = h('div', { class: 'pool' },
+      h('div', { class: 'pool-head' }, h('span', { class: 'pool-name', text: g.name }),
+        UI.dyn(() => 'level ' + Stretch.level(k), 'span', 'pool-amount')),
+      h('div', { class: 'muted small', text: `Raises ${g.desc} as heat multipliers to a power.` }),
+      UI.dyn(() => `Power ^${format(Stretch.power(k), 3)}`, 'div', 'effect'),
+      h('div', { class: 'button-row' }, buy, h('button', { onclick: () => Stretch.buyMax(k) }, 'Max')));
+    el.style.setProperty('--pool', g.color);
+    return el;
+  });
+  return h('div', { class: 'panel' },
+    h('p', { class: 'muted' }, 'Each Stretch level adds ', UI.dyn(() => format(Stretch.perLevel(), 3)),
+      ' to the power of every heat multiplier in its group. Stretch levels are never reset.'),
+    h('div', { class: 'pools' }, tiles),
+    autoToggle('auto_stretch'));
+};
+
+// Disorder and Heat Engines for Entropy.
+Layers.map.entropy.panel = () => {
+  const buy = h('button', { class: 'big', onclick: () => Thermo.buyEngine() });
+  UI.bind(() => {
+    setText(buy, `Build Heat Engine ${Thermo.engines() + 1} (${format(Thermo.engineCost(), 0)} Entropy)`);
+    buy.classList.toggle('can', Thermo.canBuyEngine());
+  });
+  const fill = h('div', { class: 'fill' });
+  UI.bind(() => {
+    // How much of the incoming Disorder the Engines can handle.
+    const r = Thermo.disorderRate();
+    const pct = r.gt(0) ? Math.min(1, Thermo.capacity().div(r).toNumber()) : 1;
+    const w = (pct * 100).toFixed(1) + '%';
+    if (fill.style.width !== w) fill.style.width = w;
+  });
+  return h('div', { class: 'panel' },
+    UI.showIf(h('p', { class: 'muted', text: 'Disorder starts rising after your first Entropy reset.' }), () => !Thermo.active()),
+    h('p', null, 'Disorder: ', UI.dyn(() => format(Thermo.disorder()), 'b'),
+      UI.dyn(() => ` (+${format(Thermo.disorderRate())}/s)`, 'span', 'muted')),
+    h('p', null, 'Engines process: ', UI.dyn(() => format(Thermo.capacity()) + ' Disorder/s', 'b'),
+      UI.dyn(() => ` · efficiency ×${format(Thermo.efficiency())}`, 'span', 'muted')),
+    h('div', { class: 'meter' }, fill),
+    h('p', null, 'Work: ', UI.dyn(() => format(Thermo.work()), 'b'),
+      UI.dyn(() => ` · heat gain exponent ×${format(Thermo.workExp(), 3)}`, 'span', 'muted')),
+    h('div', { class: 'button-row' }, buy, h('button', { onclick: () => Thermo.buyMaxEngines() }, 'Max')),
+    h('p', { class: 'muted small', text: 'Disorder rises with the square root of your Entropy and faster the longer this Entropy run lasts. Engines turn it into Work, which is never lost. Unprocessed Disorder lowers heat gain (at most ×0.92) but is turned into extra Entropy when you reset.' }),
+    autoToggle('auto_engine'));
 };

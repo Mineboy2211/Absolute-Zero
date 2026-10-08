@@ -59,6 +59,7 @@ const Layers = {
     let g = def.gain();
     if (def.chapter === 1) g = this.chapter1Boost(g);
     if (typeof Jets !== 'undefined') g = g.mul(Jets.layerMult(id));
+    if (typeof Cosmos !== 'undefined') g = Cosmos.gainMod(def, g);
     return Number.isNaN(g.mag) ? D(0) : g.floor();
   },
 

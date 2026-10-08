@@ -18,7 +18,8 @@ const BlackHole = {
     const d = this.data();
     d.mass = d.mass.add(this.feedGain());
     d.feeds += 1;
-    player.T = D(0);
+    // Once Chapter 2 is behind you, feeding no longer costs your Temperature.
+    if (!Chapters.passed(2)) player.T = D(0);
     return true;
   },
   radiation() {
@@ -28,6 +29,8 @@ const BlackHole = {
     if (hasUpg('singularity', 2)) r = r.mul(3);
     if (hasUpg('singularity', 6)) r = r.mul(m.pow(0.5));
     if (Layers.map.quasar) r = r.mul(Layers.map.quasar.radiationMult());
+    if (typeof Cosmos !== 'undefined' && Cosmos.has('heavy')) r = r.pow(0.5);
+    if (Layers.map.inflation) r = r.mul(Layers.map.inflation.speed());
     return r;
   },
   hawkingExp: () => (hasUpg('singularity', 9) ? 4 : 3),

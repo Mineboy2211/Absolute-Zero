@@ -13,6 +13,8 @@ function report() {
   const parts = ['--- ' + formatTime(player.stats.timePlayed) + ': T=' + format(player.T) + ' best=' + format(player.bestT)];
   for (const def of Layers.list) if (player.layers[def.id].unlocked) parts.push(def.currency + '=' + format(def.id === 'ionize' ? Layers.map.ionize.totalPlasma() : layerPts(def.id)));
   parts.push('El=' + Elements.count(), 'comps=' + Challenges.totalComps(), 'ranks ' + player.ranks.degree + '/' + player.ranks.grade + '/' + player.ranks.order);
+  if (typeof Thermo !== 'undefined' && Thermo.active()) parts.push('Dis=' + format(Thermo.disorder()) + ' Work=' + format(Thermo.work()) + ' eng=' + Thermo.engines());
+  if (typeof Stretch !== 'undefined' && Stretch.data()) parts.push('str=' + JSON.stringify(Stretch.data().stretch));
   if (typeof Gravity !== 'undefined' && player.chapters.unlocked >= 2) parts.push('G=' + format(Gravity.amount()) + ' gexp=' + Gravity.exponent().toFixed(3));
   console.log(parts.join(' '));
 }
@@ -115,3 +117,20 @@ function botStep(dt) {
   const L = player.bestT.max(1).log10().toNumber();
   for (const e of [6, 20, 48, 84, 125, 200, 300, 400, 500, 600, 800, 1000, 1500, 2000, 3000, 5000, 1e4, 2e4, 5e4, 1e5, 1e6]) if (L >= e) mark('T >= 1e' + e);
 }
+// Arm cosmic constants before each Big Bang (BOT_CONSTS=comma list, default: the ones that do not touch heat).
+botHooks.push(() => {
+  if (typeof Cosmos === 'undefined' || !player.layers.bigbang || !Layers.isUnlocked('bigbang')) return;
+  const want = (typeof BOT_CONSTS !== 'undefined' ? BOT_CONSTS : 'frozen,dim,short,heavy').split(',');
+  for (const c of COSMIC_CONSTANTS) if (want.includes(c.id) && Cosmos.isUnlocked(c) && !Cosmos.armed(c.id)) Cosmos.toggle(c.id);
+});
+// Buy Stretch levels, cheapest first.
+botHooks.push(() => {
+  if (typeof Stretch === 'undefined' || !Layers.isUnlocked('inflation')) return;
+  for (let i = 0; i < 100; i++) {
+    const ks = Object.keys(STRETCH_GROUPS).filter((k) => Stretch.canBuy(k)).sort((a, b) => Stretch.cost(a).cmp(Stretch.cost(b)));
+    if (!ks.length) break;
+    Stretch.buy(ks[0]);
+  }
+});
+// Buy Heat Engines whenever affordable.
+botHooks.push(() => { if (typeof Thermo !== 'undefined' && Layers.isUnlocked('entropy')) Thermo.buyMaxEngines(); });

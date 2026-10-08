@@ -81,3 +81,23 @@ Chapters.register({
     'Only the universe is left to heat.',
   ],
 });
+
+Chapters.register({
+  id: 3,
+  name: 'Cosmic',
+  rule: 'Cosmic constants. Before each Big Bang, choose which laws of physics to break. Every broken law makes the next universe richer in Universes.',
+  intro: [
+    'The Planck limit is broken. There is nothing left inside this universe to burn.',
+    'So you burn the universe itself.',
+    'A Big Bang starts everything over with new laws of physics, and you get to choose them.',
+    'Every Chapter 2 layer now runs on its own. The black hole feeds without taking your Temperature.',
+  ],
+  goals: [
+    { desc: 'Reach 1e5000 K.', check: () => player.bestT.gte('1e5000') },
+    { desc: 'Start a universe with at least 5 cosmic constants active.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= 5 },
+  ],
+  complete: [
+    'Universes, inflation, entropy, and finally the cold at the end of everything.',
+    'You have seen absolute zero from both sides.',
+  ],
+});

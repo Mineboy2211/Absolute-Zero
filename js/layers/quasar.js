@@ -11,11 +11,13 @@ const Jets = {
     if (hasUpg('quasar', 9)) p += 2;
     if (Layers.ms('quasar', 25)) p += 1;
     if (hasUpg('planck', 9)) p += 2;
+    if (typeof Cosmos !== 'undefined' && Cosmos.has('dim')) p = Math.max(0, p - 2);
     return p;
   },
   duration: () => 60 + (hasUpg('quasar', 2) ? 30 : 0),
   cooldown: () => (hasUpg('quasar', 7) ? 15 : 30),
-  rechargeTime: () => 600 / (hasUpg('quasar', 3) ? 2 : 1) / (Layers.ms('quasar', 10) ? 2 : 1),
+  rechargeTime: () => 600 / (hasUpg('quasar', 3) ? 2 : 1) / (Layers.ms('quasar', 10) ? 2 : 1) * (typeof Cosmos !== 'undefined' && Cosmos.has('dim') ? 5 : 1)
+    / (Layers.map.inflation ? Layers.map.inflation.speed().toNumber() : 1),
   canFire() {
     const d = this.data();
     return !!d && Layers.isUnlocked('quasar') && d.points.gte(1) && d.remaining <= 0 && d.cooling <= 0;
