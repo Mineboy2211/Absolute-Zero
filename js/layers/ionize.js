@@ -35,8 +35,9 @@ Layers.register({
   // Move a fraction of unallocated Plasma into a pool.
   allocate(k, frac) {
     const d = player.layers.ionize;
-    const amt = frac >= 1 ? d.points : d.points.mul(frac).floor();
-    if (amt.lte(0)) return;
+    if (d.points.lte(0)) return;
+    // At least 1 Plasma per click, so +10% still works when you have fewer than 10.
+    const amt = frac >= 1 ? d.points : Decimal.min(d.points, d.points.mul(frac).floor().max(1));
     d.points = d.points.sub(amt);
     d.alloc[k] = d.alloc[k].add(amt);
     const tot = this.allocated();

@@ -60,6 +60,7 @@ const UI = {
     syncHeader();
     this.updateSidebar(true);
     this.switchTab(player.options.tab || 'main');
+    Feel.init();
     document.addEventListener('keydown', (ev) => {
       if (ev.target && (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.tagName === 'SELECT')) return;
       DevUnlock.key(ev.key);
@@ -333,7 +334,7 @@ const Tabs = {
       const tile = h('div', { class: 'machine', 'data-kind': id },
         h('div', { class: 'machine-head' },
           h('span', { class: 'machine-name', text: b.name }),
-          UI.dyn(() => formatWhole(Buyables.level(id)), 'span', 'machine-level')),
+          Feel.bumpOnChange(UI.dyn(() => formatWhole(Buyables.level(id)), 'span', 'machine-level'))),
         h('div', { class: 'muted small', text: b.desc }),
         UI.dyn(() => b.effectText(), 'div', 'effect'),
         UI.showIf(h('span', { class: 'tag', text: 'Cost scaling' }), () => Buyables.isScaled(id)),
@@ -1087,4 +1088,59 @@ Layers.map.heatdeath.panel = () => {
     h('div', { class: 'button-row' }, cooler, h('button', { onclick: () => HeatDeath.buyMaxCoolers() }, 'Max')),
     h('p', { class: 'muted small', text: 'Each Cooler multiplies cooling speed by 1.5. Coolers are never reset.' }),
     autoToggle('auto_cooler'));
+};
+
+// ---------- feel: hover, press and purchase feedback ----------
+// Every button ripples when pressed; buying something (a button that was affordable) throws a few sparks
+// in the colour of the layer. Purely visual: nothing here changes the game.
+const Feel = {
+  layer: null,
+  init() {
+    this.layer = h('div', { class: 'fx-layer', 'aria-hidden': 'true' });
+    document.body.append(this.layer);
+    document.addEventListener('pointerdown', (ev) => {
+      const b = ev.target.closest && ev.target.closest('button');
+      if (!b) return;
+      b.classList.remove('press');
+      void b.offsetWidth; // restart the animation
+      b.classList.add('press');
+    });
+    document.addEventListener('animationend', (ev) => {
+      const t = ev.target;
+      if (t && t.classList) t.classList.remove('press', 'bump', 'flip');
+    });
+    // An affordable button that gets clicked means something was bought or reset: celebrate it.
+    document.addEventListener('click', (ev) => {
+      const b = ev.target.closest && ev.target.closest('button');
+      if (!b || !b.classList.contains('can')) return;
+      const r = b.getBoundingClientRect();
+      const x = ev.clientX || r.left + r.width / 2;
+      const y = ev.clientY || r.top + r.height / 2;
+      this.sparks(x, y, getComputedStyle(b).getPropertyValue('--layer').trim() || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), b.classList.contains('big') ? 14 : 8);
+    }, true);
+  },
+  sparks(x, y, color, n) {
+    if (!this.layer || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + Math.random() * 0.6;
+      const d = 22 + Math.random() * 26;
+      const s = h('span', { class: 'spark' });
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      s.style.setProperty('--dx', Math.cos(a) * d + 'px');
+      s.style.setProperty('--dy', Math.sin(a) * d + 'px');
+      if (color) s.style.setProperty('--c', color);
+      this.layer.append(s);
+      setTimeout(() => s.remove(), 650);
+    }
+  },
+  // Adds a short bounce to an element whenever its text changes.
+  bumpOnChange(el) {
+    let last = null;
+    UI.bind(() => {
+      if (last !== null && el.textContent !== last) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+      last = el.textContent;
+    });
+    return el;
+  },
 };

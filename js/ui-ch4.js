@@ -38,7 +38,7 @@ Layers.map.spin.panel = () => {
     for (let c = 0; c < 2 * n - 1; c++) {
       if (r % 2 === 0 && c % 2 === 0) {
         const i = (r / 2) * n + c / 2;
-        const btn = h('button', { class: 'spin-cell', 'aria-label': 'Flip spin', onclick: () => Lattice.flip(i) });
+        const btn = h('button', { class: 'spin-cell', 'aria-label': 'Flip spin', onclick: () => { Lattice.flip(i); btn.classList.remove('flip'); void btn.offsetWidth; btn.classList.add('flip'); } });
         UI.bind(() => {
           const up = Lattice.cells()[i] > 0;
           setText(btn, up ? '↑' : '↓');

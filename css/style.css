@@ -152,10 +152,10 @@ p { margin: 6px 0; }
 button {
   background: var(--s2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
   padding: 8px 14px; cursor: pointer; color: var(--text); line-height: 1.35;
-  transition: background .15s, border-color .15s, box-shadow .2s, transform .08s, color .15s;
+  transition: background .15s, border-color .15s, box-shadow .2s, transform .18s cubic-bezier(.2, .8, .3, 1.4), color .15s;
 }
 button:hover { background: var(--s3); border-color: #ffffff38; }
-button:active { transform: scale(.985); }
+button:active { transform: scale(.95); transition-duration: .06s; }
 button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button:disabled { opacity: .55; cursor: progress; }
 /* Named numbers can be very long words: let them wrap instead of stretching layouts. */
@@ -537,3 +537,61 @@ table.stats tr:hover td { background: #ffffff04; }
 /* Cloud save */
 .cloud-form { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .cloud-input { flex: 1 1 170px; min-width: 0; padding: 10px 12px; }
+
+/* ---------- feel: hover, press and purchase feedback ---------- */
+/* Hover growth only on devices with a real pointer, so touch screens do not get stuck "hovered". */
+@media (hover: hover) and (pointer: fine) {
+  button:hover { transform: translateY(-1px) scale(1.04); }
+  button.big:hover, .upg:hover, .node:hover, .const:hover, .chal button:hover { transform: translateY(-2px) scale(1.015); }
+  .upg:hover, .node:hover, .const:hover { box-shadow: 0 12px 24px -14px #000, 0 0 0 1px color-mix(in srgb, var(--layer, var(--accent)) 30%, transparent); }
+  .upg.can:hover { box-shadow: 0 12px 24px -12px #000, 0 0 22px -6px var(--layer, var(--accent)); }
+  .upg.bought:hover, .node.bought:hover { transform: translateY(-1px) scale(1.01); }
+  .element:hover { transform: scale(1.1); z-index: 2; }
+  .spin-cell:hover { transform: scale(1.12); }
+  .nav-btn:hover { transform: translateX(3px); }
+  .nav-btn.active:hover { transform: none; }
+  .chip:hover { transform: translateY(-2px); }
+  .machine, .pool, .ach, .gravity-row > div, .chal { transition: transform .2s cubic-bezier(.2, .8, .3, 1.3), border-color .2s, box-shadow .2s; }
+  .machine:hover, .pool:hover, .chal:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+  .ach:hover { transform: translateY(-2px) scale(1.03); }
+  .rewards li, .goals li { transition: transform .15s, background .15s; }
+  .rewards li:hover, .goals li:hover { transform: translateX(3px); background: #ffffff08; }
+  .card { transition: border-color .25s; }
+  .card:hover { border-color: var(--line-strong); }
+}
+.nav-btn, .chip { transition: background .15s, color .15s, border-color .15s, transform .18s cubic-bezier(.2, .8, .3, 1.4); }
+.nav-btn:active, .chip:active { transform: scale(.96); }
+
+/* Press: a ring of light expands from the button. */
+button.press { animation: press-ring .45s ease-out; }
+@keyframes press-ring {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--layer, var(--accent)) 55%, transparent); }
+  to { box-shadow: 0 0 0 12px transparent; }
+}
+/* Sparks thrown when something is bought. */
+.fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }
+.spark {
+  position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
+  background: var(--c, var(--accent)); box-shadow: 0 0 10px var(--c, var(--accent));
+  animation: spark .6s cubic-bezier(.15, .7, .3, 1) forwards;
+}
+@keyframes spark {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; }
+}
+/* Numbers bounce when they change; spins flip. */
+.bump { display: inline-block; animation: bump .35s cubic-bezier(.2, .8, .3, 1.6); }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); color: #fff; } 100% { transform: scale(1); } }
+.spin-cell.flip { animation: flip .3s ease-out; }
+@keyframes flip { from { transform: rotateX(180deg) scale(.9); } to { transform: none; } }
+/* Ready-to-reset buttons breathe gently. */
+.layer-tab button.reset.can { animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--layer) 40%, transparent), 0 0 18px -8px var(--layer); }
+  50% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--layer) 70%, transparent), 0 0 30px -4px var(--layer); }
+}
+.layer-tab button.reset.can.press { animation: press-ring .45s ease-out; }
+/* Switches bounce when toggled. */
+input[type=checkbox]::before { transition: transform .25s cubic-bezier(.2, .8, .3, 1.5), background .2s; }
+input[type=checkbox]:active::before { width: 20px; }
+input[type=checkbox]:checked:active::before { transform: translateX(14px); }
