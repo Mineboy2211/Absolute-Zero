@@ -118,7 +118,7 @@ Chapters.register({
   goals: [
     { desc: 'Reach 1e70000 K.', check: () => player.bestT.gte('1e70000') },
     { desc: 'Start a universe with at least 5 cosmic constants active.', check: () => !!player.layers.bigbang && player.layers.bigbang.active.length >= 5 },
-    { desc: 'Stretch every group to level 20.', check: () => !!player.layers.inflation && Object.values(player.layers.inflation.stretch).every((l) => l >= 20) },
+    { desc: 'Stretch every group to level 15.', check: () => !!player.layers.inflation && Object.values(player.layers.inflation.stretch).every((l) => l >= 15) },
     { desc: 'Produce 1e10 Work.', check: () => !!player.layers.entropy && player.layers.entropy.work.gte(1e10) },
     { desc: 'Cool below 1 K in a Heat Death.', check: () => !!player.layers.heatdeath && player.layers.heatdeath.bestLow < 0 },
     { desc: 'Own the Absolute Zero node.', check: () => hasUpg('absolute', 12) },

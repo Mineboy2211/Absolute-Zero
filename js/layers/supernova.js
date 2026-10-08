@@ -15,7 +15,7 @@ const STARDUST_TREE = [
   { name: 'Gravity Well', branch: 1, row: 2, cost: 190, req: [6], desc: 'Gravity multiplies heat gain.', effect: () => Decimal.pow(10, Gravity.amount().pow(hasUpg('collapse', 8) ? 0.7 : 0.6)) },
   { name: 'Escape Velocity', branch: 1, row: 3, cost: 3.4e4, req: [7], desc: 'Gravity weight ×0.75 again.' },
   { name: 'Tidal Forces', branch: 1, row: 4, cost: 5.3e6, req: [8], desc: 'Gravity multiplies Stardust gain.', effect: () => Gravity.amount().add(1) },
-  { name: 'Slingshot', branch: 1, row: 5, cost: 1.7e9, extra: [['vaporize', D(1e14)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2), up to ^1.15.' },
+  { name: 'Slingshot', branch: 1, row: 5, cost: 1.7e9, extra: [['vaporize', D(1e12)]], req: [9], desc: 'Gravity stops pulling and starts pushing: heat gain ^(1 + G·w/2), up to ^1.15.' },
   // Memory
   { name: 'Afterglow', branch: 2, row: 1, cost: 1, desc: 'Every Chapter 1 currency gain ×10.' },
   { name: 'Stellar Memory', branch: 2, row: 2, cost: 48, req: [11], desc: 'Chapter 2 resets keep your Grade and Order.' },

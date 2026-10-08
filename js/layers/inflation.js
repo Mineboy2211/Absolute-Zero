@@ -2,9 +2,9 @@
 // each Stretch level raises every multiplier in its group to a higher power.
 
 const STRETCH_GROUPS = {
-  fire: { name: 'Fire', desc: 'Bellows and Draft', base: 1, ratio: 3, color: '#ff7a3d' },
-  ash: { name: 'Ash', desc: 'Ranks and every Chapter 1 currency', base: 2, ratio: 3, color: '#c77dff' },
-  stars: { name: 'Stars', desc: 'every Chapter 2 currency', base: 3, ratio: 3, color: '#ffd166' },
+  fire: { name: 'Fire', desc: 'Bellows and Draft', base: 1, ratio: 6, color: '#ff7a3d' },
+  ash: { name: 'Ash', desc: 'Ranks and every Chapter 1 currency', base: 2, ratio: 6, color: '#c77dff' },
+  stars: { name: 'Stars', desc: 'every Chapter 2 currency', base: 3, ratio: 6, color: '#ffd166' },
 };
 
 const Stretch = {
@@ -17,7 +17,7 @@ const Stretch = {
     if (hasUpg('absolute', 5)) p += 0.01;
     return p;
   },
-  ratio(k) { return STRETCH_GROUPS[k].ratio - (hasUpg('inflation', 2) ? 0.3 : 0); },
+  ratio(k) { return STRETCH_GROUPS[k].ratio - (hasUpg('inflation', 2) ? 1 : 0); },
   cost(k, lvl = this.level(k)) { return Decimal.pow(this.ratio(k), lvl).mul(STRETCH_GROUPS[k].base); },
   canBuy(k) { return !!this.data() && Layers.isUnlocked('inflation') && layerPts('inflation').gte(this.cost(k)); },
   buy(k) {
@@ -54,10 +54,10 @@ Layers.register({
   verb: 'Inflate',
   color: '#80ffdb',
   extraData: () => ({ stretch: { fire: 0, ash: 0, stars: 0 } }),
-  unlocked: () => Layers.ms('bigbang', 1) && player.bestT.gte('1e4100'),
-  req: () => D('1e4150'),
+  unlocked: () => Layers.ms('bigbang', 1) && player.bestT.gte('1e3950'),
+  req: () => D('1e4000'),
   gain() {
-    let g = player.T.log10().sub(4150).div(200).add(1).pow(2);
+    let g = player.T.log10().sub(4000).div(200).add(1).pow(2);
     g = g.mul(layerPts('bigbang').add(1).log10().add(1).pow(0.5));
     if (Layers.ms('inflation', 10)) g = g.mul(2);
     if (Layers.map.entropy) g = g.mul(Layers.map.entropy.expansionMult());
@@ -77,25 +77,25 @@ Layers.register({
   autoReset: () => Layers.ms('entropy', 2),
   upgrades: [
     {
-      cost: D(2),
+      cost: D(3),
       desc: 'Expansion multiplies Universe gain.',
       effect: () => layerPts('inflation').add(1).pow(0.5),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(5), desc: 'Stretch levels are cheaper: each cost ratio −0.3.' },
-    { cost: D(15), desc: 'Start every Inflation with 1,000 Universes.' },
-    { cost: D(40), desc: 'Heat gain exponent ×1.03.' },
-    { cost: D(100), desc: 'Stretch is stronger: +0.025 power per level instead of +0.02.' },
-    { cost: D(300), desc: 'Heat Loss IV is weaker: power +0.01.' },
+    { cost: D(11), desc: 'Stretch levels are cheaper: cost ratio 6 → 5.' },
+    { cost: D(58), desc: 'Start every Inflation with 1,000 Universes.' },
+    { cost: D(250), desc: 'Heat gain exponent ×1.03.' },
+    { cost: D(1000), desc: 'Stretch is stronger: +0.025 power per level instead of +0.02.' },
+    { cost: D(5200), desc: 'Heat Loss IV is weaker: power +0.01.' },
     {
-      cost: D(1e3),
+      cost: D(3.2e4),
       desc: 'Expansion multiplies Neutronium gain.',
       effect: () => layerPts('inflation').add(1),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(3e3), desc: 'Slingshot cap +0.03.' },
-    { cost: D(1e4), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
-    { cost: D(5e4), desc: 'Heat gain exponent ×1.04.' },
+    { cost: D(1.6e5), desc: 'Slingshot cap +0.03.' },
+    { cost: D(1e6), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
+    { cost: D(1.1e7), desc: 'Heat gain exponent ×1.04.' },
   ],
   milestones: [
     { req: 1, desc: 'Keep Big Bang upgrades on Inflation.' },

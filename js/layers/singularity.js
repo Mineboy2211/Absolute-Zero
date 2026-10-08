@@ -29,7 +29,7 @@ const BlackHole = {
     if (hasUpg('singularity', 2)) r = r.mul(3);
     if (hasUpg('singularity', 6)) r = r.mul(m.pow(0.5));
     if (Layers.map.quasar) r = r.mul(Layers.map.quasar.radiationMult());
-    if (typeof Cosmos !== 'undefined' && Cosmos.has('heavy')) r = r.pow(0.5);
+    if (typeof Cosmos !== 'undefined' && Cosmos.has('heavy')) r = r.pow(0.8);
     if (Layers.map.inflation) r = r.mul(Layers.map.inflation.speed());
     return r;
   },

@@ -4,10 +4,10 @@
 // `mult` is the Universe gain multiplier while the constant is active.
 const COSMIC_CONSTANTS = [
   { id: 'thin', name: 'Thin Vacuum', desc: 'Heat gain exponent ×0.95.', mult: 2 },
-  { id: 'frozen', name: 'Frozen Stars', desc: 'Stardust gain ^0.5.', mult: 1.5 },
+  { id: 'frozen', name: 'Frozen Stars', desc: 'Stardust gain ^0.8.', mult: 1.5 },
   { id: 'dim', name: 'Dim Light', desc: 'Jets recharge 5× slower and have 2 less power.', mult: 1.5 },
-  { id: 'short', name: 'Short Memory', desc: 'Every Chapter 1 currency gain ^0.5.', mult: 1.5 },
-  { id: 'heavy', name: 'Heavy Vacuum', desc: 'Hawking radiation ^0.5.', mult: 1.5 },
+  { id: 'short', name: 'Short Memory', desc: 'Every Chapter 1 currency gain ^0.8.', mult: 1.5 },
+  { id: 'heavy', name: 'Heavy Vacuum', desc: 'Hawking radiation ^0.8.', mult: 1.5 },
   { id: 'cold', name: 'Cold Start', desc: 'Heat Loss IV power −0.03.', mult: 2.5 },
   { id: 'false', name: 'False Vacuum', desc: 'Heat gain exponent ×0.9.', mult: 4, unlocked: () => hasUpg('bigbang', 4) },
   { id: 'decay', name: 'Fast Decay', desc: 'Disorder rises 3× faster.', mult: 2, unlocked: () => typeof Layers.map.entropy !== 'undefined' && Layers.isUnlocked('entropy') },
@@ -55,12 +55,12 @@ const Cosmos = {
   // Applied to every layer's currency gain.
   gainMod(def, g) {
     if (!this.data() || player.chapters.unlocked < 3) return g;
-    if (def.chapter === 1 && this.has('short')) g = g.pow(0.5);
+    if (def.chapter === 1 && this.has('short')) g = g.pow(0.8);
     // Jets and Planck Shards are left out: Planck Levels turn any multiplier into an exponent.
     if (['supernova', 'collapse', 'singularity'].includes(def.id)) {
       g = g.mul(this.chapter2Mult());
       if ((def.id === 'supernova' || def.id === 'singularity') && hasUpg('bigbang', 1)) g = g.mul(this.universes().add(1).pow(2));
-      if (def.id === 'supernova' && this.has('frozen')) g = g.pow(0.5);
+      if (def.id === 'supernova' && this.has('frozen')) g = g.pow(0.8);
     }
     return g;
   },
@@ -79,7 +79,7 @@ Layers.register({
   color: '#ffe08a',
   extraData: () => ({ armed: [], active: [] }),
   unlocked: () => player.chapters.unlocked >= 3,
-  req: () => D('1e3300'),
+  req: () => D('1e2700'),
   gain() {
     let g = player.T.log10().div(1000).pow(4).div(10);
     g = g.mul(Cosmos.constMult());

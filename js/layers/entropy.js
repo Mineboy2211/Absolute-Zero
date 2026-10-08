@@ -24,7 +24,7 @@ const Thermo = {
     if (Layers.ms('entropy', 10)) e = e.mul(2);
     return e;
   },
-  engineRatio: () => (hasUpg('entropy', 5) ? 3 : 4),
+  engineRatio: () => (hasUpg('entropy', 5) ? 6 : 8),
   engineCost(n = this.engines()) { return Decimal.pow(this.engineRatio(), n); },
   canBuyEngine() { return Layers.isUnlocked('entropy') && layerPts('entropy').gte(this.engineCost()); },
   buyEngine() {
@@ -102,24 +102,24 @@ Layers.register({
   upgrades: [
     { cost: D(1), desc: 'Engines are twice as efficient: double Work.' },
     {
-      cost: D(5),
+      cost: D(11),
       desc: 'Work multiplies Expansion gain.',
       effect: () => Thermo.work().add(1).pow(0.25),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(25), desc: 'Disorder hurts half as much.' },
-    { cost: D(150), desc: 'Heat gain exponent ×1.03.' },
-    { cost: D(1e3), desc: 'Engines are cheaper: cost ratio 4 → 3.' },
-    { cost: D(1e4), desc: 'Heat Loss IV is weaker: power +0.01.' },
-    { cost: D(1e5), desc: 'Stretch power +0.005 per level.' },
+    { cost: D(120), desc: 'Disorder hurts half as much.' },
+    { cost: D(1800), desc: 'Heat gain exponent ×1.03.' },
+    { cost: D(3.2e4), desc: 'Engines are cheaper: cost ratio 8 → 6.' },
+    { cost: D(1e6), desc: 'Heat Loss IV is weaker: power +0.01.' },
+    { cost: D(3.2e7), desc: 'Stretch power +0.005 per level.' },
     {
-      cost: D(1e6),
+      cost: D(1e9),
       desc: 'Work multiplies Universe gain.',
       effect: () => Thermo.work().add(1).pow(0.2),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(1e7), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
-    { cost: D(1e8), desc: 'Heat gain exponent ×1.04.' },
+    { cost: D(3.2e10), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
+    { cost: D(1e12), desc: 'Heat gain exponent ×1.04.' },
   ],
   milestones: [
     { req: 1, desc: 'Disorder starts rising. Keep Inflation upgrades on Entropy.' },

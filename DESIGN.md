@@ -127,37 +127,34 @@ Notation (Named default: 12.3 Million / Short: 12.3 M / Letters / Scientific / E
 
 ## 3. Pacing targets
 
-Times are for an active-ish player; "casual" ≈ 2× these. Times are cumulative from a new game.
+The game was made about 3× longer and harder (strict resets, steeper costs). Times below are from the headless bot (`tools/sim.js`), a perfect active player; casual ≈ 2× these. Cumulative from a new game.
 
-| Milestone | Required T | Target time |
-|-----------|-----------|-------------|
-| First Degree | 10 K | 10 s |
-| First Grade | Degree 5 | ~6 min |
-| **First Ignition** | `1e7 K` | **15–20 min** (sim: 17 min) |
-| First Order | Grade 3 | ~1 h |
-| **First Meltdown** | `1e22 K` | **~1h45** (sim: 1h41) |
-| **First Vaporize** | `1e48 K` | **4–6 h** (sim: 4h32) |
-| All 6 challenges tier 1 | | ~6h30 (sim) |
-| First Ionize | `1e84 K` | ~15 h (sim: 14.5 h) |
-| First Fusion | `1e125 K` | ~1.5 days (sim: 1d 6h) |
-| All 26 Elements | | sim: ~2d 9h |
-| **Chapter 1 complete** | `1e500 K` + goals | **~1 week casual** (sim, perfect bot: ~3.5 days) |
-| Supernova | `1e3000` | +0.5 day |
-| Collapse | `e1e4` | day 6 |
-| Singularity | `e1e5` | day 8 |
-| Quasar | `e1e6` | day 10 |
-| Planck Break | `e1e8` | day 13 |
-| **Chapter 2 complete** | ~`ee10` | **~2 weeks** |
-| Big Bang | `ee12` | day 16 |
-| Inflation | `ee25` | day 19 |
-| Entropy | `ee60` | day 22 |
-| Heat Death | `ee150` | day 26 |
-| Absolute | `eee3` | day 30 |
-| **Game end** (all Absolutes) | `eee10`-ish | **~5–6 weeks** |
+| Milestone | Required T | Bot time |
+|-----------|-----------|----------|
+| **First Ignition** | `1e7 K` | **16 min** |
+| First Meltdown | `1e22 K` | 3h 50m |
+| First Vaporize | `1e48 K` | 11h |
+| First Ionize | `1e84 K` | 1d 12h |
+| First Fusion | `1e125 K` | 2d 15h |
+| **Chapter 1 complete** | `1e500 K` + goals | **7d 21h** |
+| First Supernova | `1e480` | 7d 21h |
+| First Collapse | `1e556` | 16d 8h |
+| First Quasar | `1e690` | 21d 22h |
+| First Planck Break | `1e815` | 26d 22h |
+| **Chapter 2 complete** | `1e2500` + goals | **~27d** |
+| First Big Bang | `1e2700` | ~27d |
+| First Inflation | `1e4000` | 34d 23h |
+| First Entropy | `1e8000` | 37d 14h |
+| First Heat Death run | `1e15000` | ~46d |
+| First Absolute | `1e25500` | 48d 4h |
+| **Chapter 3 complete** | `1e70000` + goals | **59d 13h** (≈ 4 months casual) |
 
-Each layer is balanced so that the *first* reset of a new layer comes after the previous layer has run its course (~3–5 resets of the layer below), and its first upgrades make re-reaching the previous point ~5× faster.
+### Reset rule (IMR style)
+Every reset wipes **everything** below it: currencies, upgrades, Elements, buyables, ranks, Plasma split, Magma flow, challenge completions, compressor records, the black hole, Planck Levels, Stretch levels, Heat Engines, Work, Coolers and Void. A reset from a later chapter ignores the earlier chapter's own keep rules entirely. The only way to keep something is a milestone or upgrade of the layer doing the reset (Supernova milestones for Chapter 2 resets, Big Bang milestones for Chapter 3 resets, and so on). Finished chapters do **not** run on their own: their passive gain and autobuyers come only from milestones and upgrades, which a later reset can take away.
 
 ## 4. Chapter 1 — Combustion
+
+Upgrade costs listed in the code are the source of truth: when the game was made harder, Ember and Magma upgrade costs were raised to ^1.3 and Pressure and Plasma costs to ^1.28 of their original values, Chapter 2 upgrade costs to ^1.2, and Chapter 3 upgrade costs (except Big Bang) to ^1.5.
 
 **Rule introduced:** none (the base game). Ranks, buyables, heat loss.
 
@@ -225,14 +222,14 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 ### Layer 5 · Fusion → Nucleons (spent on Elements)
 - Unlock: best T ≥ `1e110`. Reset at `T ≥ 1e125`.
 - Gain: `N = floor( 10^((log(T) − 125)/30) × (1 + log(1+totalPlasma))^1.5 × nucleonMul )`.
-- **Elements**: 26 one-time upgrades from H to Fe, bought in order, shown as a periodic table (compact grid on phones). Element k (0-based) costs `10^(0.35k + 0.008k²)` Nucleons, from 1 (H) to ~6e13 (Fe).
+- **Elements**: 26 one-time upgrades from H to Fe, bought in order, shown as a periodic table (compact grid on phones). Element k (0-based) costs `3 × 10^(0.35k + 0.008k²)` Nucleons, from 1 (H) to ~6e13 (Fe).
   - Highlights: H heat ×total Nucleons · Ne 100% passive Embers/Magma/Pressure · Na/S unlock challenges 7/8 · C, Al weaken Heat Loss I/II · Ca delays Heat Loss III · Fe raw heat gain ^1.05.
 - Milestones: 1 keep Plasma upgrades and split · 2 Ionize autobuyer · 3 Plasma auto-split (last ratio) · 5 start with 10 Plasma · 10 gain 10% pending Plasma/s · 25 Nucleons ×2.
 - Challenges 7 (Thin Air: Bellows stuck at ×1.1 → Bellows power +0.05/completion) and 8 (Plasma Storm: pools do nothing → Plasma ×(1+c)²) reset at the Ionize level.
 
 ### Chapter 1 goals (complete all → Chapter 1 complete screen; Chapter 2 unlocks once it exists)
 1. Reach `1e500 K` (Heat Loss III starts at `1e500`, so this is the edge of Chapter 1).
-2. Complete every challenge (1–8) at least 3 times.
+2. Complete every challenge (1–8) at least 4 times.
 3. Own 20 Elements.
 4. Reach Order 10.
 5. Have 1 Million Electrons, Ions and Photons at the same time.
@@ -242,11 +239,9 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 
 **Unlock:** complete the 6 Chapter 1 goals. Players who finished Chapter 1 before Chapter 2 existed unlock it on their next load.
 
-**Starting Chapter 2 grants (rule: never grind old resets by hand):**
-- Chapter 1 autobuyers are unlocked and switched on (buyables, Grade/Order, Plasma split). Chapter 1 auto-resets stay off: those layers no longer need resets.
-- Chapter 1 layers passively gain 100% of their pending currency every second, and buy their own upgrades and Elements.
-- Chapter 1 upgrades and Elements are never lost to Chapter 2 resets (currencies, Plasma split, Magma flow, ranks, buyables and Temperature are).
+**Starting Chapter 2:**
 - Grade and Order no longer reset anything (with the rank autobuyers on, they used to wipe Temperature every tick).
+- Every Chapter 2 reset wipes Chapter 1 completely, except what Supernova milestones keep: 2 resets keep Ember and Magma upgrades, 3 keep Pressure and Plasma upgrades, the Plasma split and Chapter 1 challenge completions, 5 keep the Magma flow and the first 10 Elements, 10 keep every Element.
 - The header only shows the newest chapter's currencies.
 
 ### New rule — Gravity
@@ -261,7 +256,7 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 ### Layer 6 · Supernova → Stardust
 - Unlocks with Chapter 2. Reset at `1e480`. `SD = 10^((log T − 480)/40) × (1 + log(1+Nucleons)) × mults`.
 - Stardust: heat ×(1+SD)², Nucleons ×(1+SD).
-- **Tree** (20 nodes, 4 branches, row costs ≈ 1 / 40 / 3e3 / 2e5 / 2e7 Stardust, Gravity and Trials branches also cost Pressure): Heat (Stellar Wind ^1.02, Red Giant ×SD³, Fusion Shells HL III +0.1, Hypergiant Bellows +0.25, Core Ignition ^1.03), Gravity (Orbital Mechanics, Gravity Well ×10^(G^0.6), Escape Velocity, Tidal Forces ×(1+G) Stardust, Slingshot), Memory (Afterglow Ch1 ×10, Stellar Memory keeps ranks, Remnant keeps 1%, Stellar Nursery ×3, Pulsar 1%/s), Trials (unlock challenges 9–12, Trial Mastery ×1.25 per Stellar completion).
+- **Tree** (20 nodes, 4 branches, row costs ≈ 1 / 80 / 2e4 / 3e6 / 1e9 Stardust, Gravity and Trials branches also cost Pressure): Heat (Stellar Wind ^1.02, Red Giant ×SD³, Fusion Shells HL III +0.1, Hypergiant Bellows +0.25, Core Ignition ^1.03), Gravity (Orbital Mechanics, Gravity Well ×10^(G^0.6), Escape Velocity, Tidal Forces ×(1+G) Stardust, Slingshot), Memory (Afterglow Ch1 ×10, Stellar Memory keeps ranks, Remnant keeps 1%, Stellar Nursery ×3, Pulsar 1%/s), Trials (unlock challenges 9–12, Trial Mastery ×1.25 per Stellar completion).
 - **Stellar challenges** (Supernova-level reset): 9 Dense Core (Gravity ×3 → weight −5%/c), 10 Red Dwarf (Ch1 gains ^0.5 → Stardust ×(1+c)), 11 Burnout (HL I–III start 1e100× earlier → HL III +0.02/c), 12 Event Horizon (heat ^0.75 → heat ^(1+0.01c)). Goals from 1e482 to 1e740.
 
 ### Layer 7 · Collapse → Neutronium
@@ -286,67 +281,48 @@ Each layer is balanced so that the *first* reset of a new layer comes after the 
 ### Chapter 2 goals
 1. Reach `1e2500 K`. 2. Learn Slingshot. 3. Complete every Stellar challenge 3 times. 4. Grow the black hole to 1,000 solar masses. 5. Fire 500 Jets. 6. Break all three Heat Losses.
 
-### Pacing (perfect bot from a Chapter 1 complete save; casual ≈ 2×)
-| Milestone | Bot time |
-|---|---|
-| Chapter 2 unlock | 3d 11h |
-| Supernova | 3d 21h |
-| Slingshot | 4d 11h |
-| Collapse | 4d 12h |
-| Singularity unlock / black hole 1,000 M☉ | 4d 15h / 5d 3h |
-| Quasar | 6d 17h |
-| 500 Jets | 7d 10h |
-| Planck Break | 8d 16h |
-| **Chapter 2 complete** | **8d 16h** (≈ 2.5 weeks casual in total) |
+### Pacing
+See section 3.
 
 ## 6. Chapter 3 — Cosmic (implemented in v3.0)
 
-**Unlock:** complete the 6 Chapter 2 goals. Starting Chapter 3 switches on every Chapter 2 autobuyer (not the auto-resets), gives Chapter 2 layers 100% passive gain, and feeding the black hole no longer costs Temperature.
+**Unlock:** complete the 6 Chapter 2 goals. Feeding the black hole no longer costs Temperature. Every Chapter 3 reset wipes Chapters 1 and 2 except what Big Bang milestones keep (1: all of Chapter 1; 2: the Stardust tree and Stellar challenges; 3: Neutronium, Hawking, Jet and Planck upgrades; 5: compressor records and the black hole; 10: Planck Levels).
 
 ### New rule — cosmic constants
 Before each Big Bang you *arm* constants (laws you break). Armed constants become active at the next Big Bang and stay until the one after. Each active constant multiplies Universe gain:
-Thin Vacuum (heat exponent ×0.95, ×2), Frozen Stars (Stardust ^0.5, ×1.5), Dim Light (Jets 5× slower recharge, −2 power, ×1.5), Short Memory (Chapter 1 gains ^0.5, ×1.5), Heavy Vacuum (Hawking radiation ^0.5, ×1.5), Cold Start (Heat Loss IV power −0.03, ×2.5), False Vacuum (Big Bang upgrade 4: heat exponent ×0.9, ×4), Fast Decay (with Entropy: Disorder ×3, ×2).
+Thin Vacuum (heat exponent ×0.95, ×2), Frozen Stars (Stardust ^0.8, ×1.5), Dim Light (Jets 5× slower recharge, −2 power, ×1.5), Short Memory (Chapter 1 gains ^0.8, ×1.5), Heavy Vacuum (Hawking radiation ^0.8, ×1.5), Cold Start (Heat Loss IV power −0.03, ×2.5), False Vacuum (Big Bang upgrade 4: heat exponent ×0.9, ×4), Fast Decay (with Entropy: Disorder ×3, ×2).
 
 ### Heat Loss IV in Chapter 3
 Most Chapter 3 layers weaken Heat Loss IV a little (power +0.01 to +0.02, or start +5–10% in orders of magnitude). With the log softcap the equilibrium is roughly `L = S·(e·c)^(p/(1−p))` (S = start in orders of magnitude, e = heat exponent, c = sum of log-multipliers per order of magnitude), so the power `p` is by far the strongest lever. It is capped at **0.6**.
 
 ### Layer 11 · Big Bang → Universes
-- Reset at `1e3300`. `U = (log T / 1000)^4 / 10 × constants × mults` (polynomial, so penalties stay affordable).
+- Reset at `1e2700`. `U = (log T / 1000)^4 / 10 × constants × mults` (polynomial, so penalties stay affordable).
 - Universes: heat exponent ×(1 + 0.03·log(1+U)) (0.045, 0.06 with upgrades); Stardust, Neutronium and Hawking Heat ×(1+U)² (Jets and Planck Shards are left out on purpose: Planck Levels turn any multiplier into an exponent).
 - 10 upgrades (1 → 2e7 Universes), milestones 1/2/5/10/25.
 
 ### Layer 12 · Inflation → Expansion
-- Reset at `1e4150`. `E = ((log T − 4150)/200 + 1)² × sqrt(1 + log U)`.
-- **Stretch:** three groups of heat multipliers (Fire = Bellows + Draft; Ash = Ranks + Chapter 1 currencies; Stars = Chapter 2 currencies). Each level raises every multiplier of its group to +0.02 power (up to +0.04 with upgrades). Cost `base × 3^level` Expansion. Never reset.
+- Reset at `1e4000`. `E = ((log T − 4000)/200 + 1)² × sqrt(1 + log U)`.
+- **Stretch:** three groups of heat multipliers (Fire = Bellows + Draft; Ash = Ranks + Chapter 1 currencies; Stars = Chapter 2 currencies). Each level raises every multiplier of its group to +0.02 power (up to +0.04 with upgrades). Cost `base × 6^level` Expansion (5^level with an upgrade). Wiped by Entropy and later resets unless Entropy has 5 resets. Never reset.
 - Expansion speeds up Jet recharge and Hawking radiation ×sqrt(1+E).
 
 ### Layer 13 · Entropy → Entropy
 - Reset at `1e8000`. `S = ((log T − 8000)/300 + 1)² × (1 + log E) × (1 + log Disorder)`.
-- **Disorder** rises at `sqrt(1+S) × (1 + t/600)` per second (t = time in this Entropy run) and lowers the heat exponent ×1/(1 + 0.02·log D), never below ×0.96. **Heat Engines** (cost `4^n` Entropy, later 3^n) process `3^n − 1` Disorder/s into **Work** (never lost): heat exponent ×(1 + 0.01·log W).
+- **Disorder** rises at `sqrt(1+S) × (1 + t/600)` per second (t = time in this Entropy run) and lowers the heat exponent ×1/(1 + 0.02·log D), never below ×0.96. **Heat Engines** (cost `8^n` Entropy, later 6^n) process `3^n − 1` Disorder/s into **Work** (never lost): heat exponent ×(1 + 0.01·log W).
 
 ### Layer 14 · Heat Death → Void
 - Begin at `1e15000`: resets everything below, then Temperature only falls. Depth grows as `d(depth)/dt = R / (1 + depth/1000)²` (solved exactly each tick), `R = 10 × 1.5^Coolers × mults` orders of magnitude per second.
-- End any time: `Void = (depth/500)²`, ×10 if you ended below 1 K (×30 with an upgrade). Coolers cost `4^n` Void. Void is kept by Absolute.
+- End any time: `Void = (depth/500)²`, ×10 if you ended below 1 K (×30 with an upgrade). Coolers cost `6^n` Void (5^n with an upgrade). Void and Coolers are wiped by Absolute unless it has 3 resets.
 - Void: Heat Loss IV power +0.003·log V (max +0.02), heat exponent ×(1 + 0.01·log V).
 
 ### Layer 15 · Absolute → Absolutes
-- Reset at `1e27300`. `A = ((log T − 27300)/2000 + 1)^1.5 × (1 + log Void)`.
+- Reset at `1e25500`. `A = ((log T − 25500)/2000 + 1)^1.5 × (1 + log Void)`.
 - 12 nodes, each priced in Absolutes **plus** currencies from earlier layers (Embers, Magma, Pressure, Stardust, Neutronium, Hawking Heat, Nucleons, Jets, Planck Shards, Universes, Expansion, Entropy, Void). The last one is **Absolute Zero**.
 
 ### Chapter 3 goals
-1. Reach `1e70000 K`. 2. Start a universe with 5 cosmic constants active. 3. Stretch every group to level 20. 4. Produce 1e10 Work. 5. Cool below 1 K in a Heat Death. 6. Own the Absolute Zero node.
+1. Reach `1e70000 K`. 2. Start a universe with 5 cosmic constants active. 3. Stretch every group to level 15. 4. Produce 1e10 Work. 5. Cool below 1 K in a Heat Death. 6. Own the Absolute Zero node.
 
-### Pacing (perfect bot from a Chapter 2 complete save; casual ≈ 2×)
-| Milestone | Bot time |
-|---|---|
-| Chapter 3 unlock | 8d 16h |
-| Big Bang | 8d 17h |
-| Inflation | 9d 11h |
-| Entropy | 10d 22h |
-| Heat Death (first run ends below 1 K) | ~13d |
-| Absolute | 15d 11h |
-| `1e70000 K` | 15d 19h |
-| Absolute Zero node, **Chapter 3 complete** | **~18d** (≈ 5 weeks casual in total) |
+### Pacing
+See section 3.
 
 ## 6b. Chapter 4 — ideas *(draft, nothing built yet)*
 
@@ -370,7 +346,7 @@ Shared Chapter 4 plans whatever the theme: 15 achievements, 6 goals, a new chall
 
 - **Achievements:** 15 per chapter (45 total + secret ones). Each gives ×1.05 heat (Ch1), ×1.1 a Ch2 currency, etc. Achievement bonus total shown in Stats.
 - **Old currencies stay relevant:** every chapter adds upgrades priced in earlier currencies (Stardust nodes cost Pressure, Neutronium eats Embers/Magma/Plasma, Absolutes cost everything) and effects that scale with them.
-- **Automation per layer:** each layer's milestones/upgrades automate the layer below; starting a chapter fully automates the previous chapter.
+- **Automation per layer:** each layer's milestones/upgrades automate the layer below. Starting a new chapter does not automate the previous one (removed when the game was made harder).
 - **Accent color** = function of `log(T)`: blue (< 1e3), red (1e3–1e40), orange (1e40–1e400), white (1e400–ee6), violet (≥ ee6), smoothly interpolated.
 - **Chapter unlock screen:** full-screen overlay with 3–4 lines of text and the new rule.
 

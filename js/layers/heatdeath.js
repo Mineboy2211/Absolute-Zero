@@ -59,7 +59,7 @@ const HeatDeath = {
     d.time = 0;
     return true;
   },
-  coolerRatio: () => (hasUpg('heatdeath', 4) ? 3.5 : 4),
+  coolerRatio: () => (hasUpg('heatdeath', 4) ? 5 : 6),
   coolerCost() { return Decimal.pow(this.coolerRatio(), this.data().coolers); },
   canBuyCooler() { return Layers.isUnlocked('heatdeath') && layerPts('heatdeath').gte(this.coolerCost()); },
   buyCooler() {
@@ -116,24 +116,24 @@ Layers.register({
   upgrades: [
     { cost: D(1), desc: 'Cooling ×3.' },
     {
-      cost: D(3),
+      cost: D(5),
       desc: 'Void multiplies Entropy gain.',
       effect: () => layerPts('heatdeath').add(1).log10().add(1).pow(2),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(10), desc: 'Heat gain exponent ×1.03.' },
-    { cost: D(30), desc: 'Coolers are cheaper: cost ratio 4 → 3.5.' },
-    { cost: D(100), desc: 'Cooling slows down half as fast as you go deeper.' },
-    { cost: D(300), desc: 'Ending a Heat Death below 1 K gives ×30 Void instead of ×10.' },
-    { cost: D(1e3), desc: 'Heat Loss IV is weaker: power +0.01.' },
+    { cost: D(32), desc: 'Heat gain exponent ×1.03.' },
+    { cost: D(160), desc: 'Coolers are cheaper: cost ratio 6 → 5.' },
+    { cost: D(1000), desc: 'Cooling slows down half as fast as you go deeper.' },
+    { cost: D(5200), desc: 'Ending a Heat Death below 1 K gives ×30 Void instead of ×10.' },
+    { cost: D(3.2e4), desc: 'Heat Loss IV is weaker: power +0.01.' },
     {
-      cost: D(3e3),
+      cost: D(1.6e5),
       desc: 'Work speeds up cooling.',
       effect: () => Thermo.work().add(1).log10().add(1).pow(0.5),
       effectText: (e) => formatMult(e),
     },
-    { cost: D(1e4), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
-    { cost: D(5e4), desc: 'Heat gain exponent ×1.04.' },
+    { cost: D(1e6), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
+    { cost: D(1.1e7), desc: 'Heat gain exponent ×1.04.' },
   ],
   milestones: [
     { req: 1, desc: 'Keep Entropy upgrades on Heat Death.' },

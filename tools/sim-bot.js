@@ -46,11 +46,16 @@ function doLayerResets() {
   for (const def of [...Layers.list].reverse()) {
     const d = player.layers[def.id];
     if (!Layers.canReset(def.id)) continue;
-    if (def.passive && def.passive() > 0) continue;
-    if (Layers.passiveRate && Layers.passiveRate(def) > 0) continue;
     const g = Layers.gain(def.id);
     const have = def.id === 'ionize' ? Layers.map.ionize.totalPlasma() : d.points;
-    if (g.gte(have.max(1)) || (d.time > 600 && g.gte(have.mul(0.1)))) {
+    // Layers with passive gain are still reset now and then, when it would multiply the currency tenfold.
+    if (Layers.passiveRate(def) > 0) {
+      if (g.gte(have.max(1).mul(10))) { Layers.doReset(def.id); mark('first ' + def.name); return; }
+      continue;
+    }
+    // Chapter 2+ layers wipe a lot, so only reset them when it at least doubles the currency.
+    // Chapter 3 currencies grow slowly (polynomial), so stack them: reset after an hour if it adds 20%.
+    if (g.gte(have.max(1)) || (def.chapter === 1 && d.time > 600 && g.gte(have.mul(0.1))) || (def.chapter >= 3 && d.time > 3600 && g.gte(have.mul(0.2)))) {
       Layers.doReset(def.id);
       mark('first ' + def.name);
       return;
