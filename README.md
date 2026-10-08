@@ -16,7 +16,18 @@ See [DESIGN.md](DESIGN.md) for formulas, layer plans and pacing targets.
 
 ## Running locally
 
-Open `index.html` in a browser. No build step. Numbers use [break_eternity.js](https://github.com/Patashu/break_eternity.js), loaded from a CDN, so you need an internet connection the first time.
+`index.html` (the published page) loads one sealed, obfuscated bundle, `dist/game.js`. While developing, open `dev.html` instead: it loads the readable source files from `js/`.
+
+After changing anything in `js/`, rebuild the bundle before publishing:
+
+```bash
+npm install javascript-obfuscator
+node tools/build.js
+```
+
+The bundle hides the game state from the browser console and signs saves with a key kept in `tools/.save-key`, which is never committed (it is created on the first build). The source folder, tools and `dev.html` are not served by GitHub Pages (`_config.yml`).
+
+Numbers use [break_eternity.js](https://github.com/Patashu/break_eternity.js), loaded from a CDN, so you need an internet connection the first time.
 
 ## Pacing simulator
 

@@ -55,9 +55,44 @@ function fixNaN(obj = player, tpl = getDefaultPlayer(), pathName = 'player') {
   return fixed;
 }
 
+// Saves are signed with a keyed hash. The real key only exists inside the built bundle (tools/build.js reads it
+// from an untracked file), so a save edited by hand no longer loads. Without the bundle (development and the
+// simulator), a placeholder key is used.
+const SIGN_KEY = typeof SAVE_SECRET !== 'undefined' ? SAVE_SECRET : 'development-key';
+// Saves from before signing still load until this date, so nobody loses progress when the update lands.
+const UNSIGNED_UNTIL = Date.UTC(2026, 10, 15);
+
+// cyrb53-style 53-bit hash, run twice around the key. Not cryptographic, but useless without the key.
+function signHash(str) {
+  const h = (s, seed) => {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  };
+  return h(SIGN_KEY + str + SIGN_KEY, 7) + h(str + SIGN_KEY, 131);
+}
+
 const Save = {
-  encode(p) { return btoa(unescape(encodeURIComponent(JSON.stringify(p)))); },
-  decode(str) { return JSON.parse(decodeURIComponent(escape(atob(str.trim())))); },
+  encode(p) {
+    const json = JSON.stringify(p);
+    return btoa(unescape(encodeURIComponent(json))) + '.' + signHash(json);
+  },
+  decode(str) {
+    const [body, sig] = str.trim().split('.');
+    const json = decodeURIComponent(escape(atob(body)));
+    if (!sig) {
+      if (Date.now() > UNSIGNED_UNTIL) throw new Error('This save is not signed.');
+    } else if (sig !== signHash(json)) {
+      throw new Error('This save was edited outside the game, so it cannot be loaded.');
+    }
+    return JSON.parse(json);
+  },
 
   fromObject(obj) {
     if (!obj || typeof obj !== 'object' || obj.T === undefined) throw new Error('Not an Absolute Zero save.');
@@ -73,7 +108,9 @@ const Save = {
 
   save() {
     try {
-      localStorage.setItem(SAVE_KEY, this.encode(player));
+      const s = this.encode(player);
+      localStorage.setItem(SAVE_KEY, s);
+      localStorage.setItem(SAVE_KEY + '_backup', s);
       return true;
     } catch (e) {
       console.error('Save failed', e);
@@ -89,6 +126,12 @@ const Save = {
       player = this.fromObject(this.decode(raw));
       return true;
     } catch (e) {
+      // Fall back to the backup copy (it is also signed, so it cannot be edited either).
+      try {
+        player = this.fromObject(this.decode(localStorage.getItem(SAVE_KEY + '_backup') || ''));
+        console.warn('The main save could not be loaded; the backup was used instead.', e);
+        return true;
+      } catch (e2) { /* no valid backup */ }
       console.error('Could not load save, starting fresh. The broken save is kept under ' + SAVE_KEY + '_broken.', e);
       try { localStorage.setItem(SAVE_KEY + '_broken', raw); } catch (e2) { /* ignore */ }
       player = getDefaultPlayer();

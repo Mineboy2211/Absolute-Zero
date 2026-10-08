@@ -1,0 +1,8 @@
+# GitHub Pages (Jekyll) settings: publish only what the game needs.
+# The readable source (js/), the build tools and the dev page stay in the repo but are not served.
+exclude:
+  - js
+  - tools
+  - dev.html
+  - DESIGN.md
+  - node_modules

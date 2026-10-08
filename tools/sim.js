@@ -21,7 +21,8 @@ const hours = Number(process.argv[2] || 3);
 const step = Number(process.env.STEP || 1);
 const bePath = process.argv[3] || require.resolve('break_eternity.js/dist/break_eternity.cjs.js', { paths: [process.cwd(), __dirname] });
 const root = path.join(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+// dev.html lists the source files; index.html only loads the built bundle.
+const html = fs.readFileSync(path.join(root, 'dev.html'), 'utf8');
 // Logic scripts are every local script before ui.js in index.html.
 const scripts = [...html.matchAll(/<script src="(js\/[^"?]+)/g)].map((m) => m[1]);
 const logic = scripts.slice(0, scripts.indexOf('js/ui.js'));
