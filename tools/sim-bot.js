@@ -73,6 +73,8 @@ function doChallenges() {
       if (c.unlocked() && goal && player.T.gte(goal.pow(1.1 + 0.15 * fails))) {
         Challenges.enter(c.id);
         botState.started = now;
+        // Completions can be wiped by higher resets, so compare with the count at entry.
+        botState.lastComps[c.id] = chalComps(c.id);
         return;
       }
     }
