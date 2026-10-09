@@ -9,4 +9,4 @@ const FIREBASE_CONFIG = {
   appId: '1:282996867092:web:0114295d63c1a110ece701',
 };
 // reCAPTCHA v3 site key registered in Firebase App Check (public, like the values above). Empty = App Check off.
-const FIREBASE_APPCHECK_KEY = '';
+const FIREBASE_APPCHECK_KEY = '6LcODuYtAAAAAIBgHZV-GaMDuW71XcTYThwIuh7h';
