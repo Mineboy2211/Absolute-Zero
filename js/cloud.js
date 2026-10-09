@@ -35,6 +35,12 @@ const Cloud = {
       await this.loadScript(CLOUD_SDK + 'firebase-auth-compat.js');
       await this.loadScript(CLOUD_SDK + 'firebase-firestore-compat.js');
       firebase.initializeApp(FIREBASE_CONFIG);
+      // App Check: once enforced in the Firebase console, only this game's pages (proven with reCAPTCHA)
+      // can create accounts, log in or touch saves; scripts calling Firebase directly are refused.
+      if (typeof FIREBASE_APPCHECK_KEY !== 'undefined' && FIREBASE_APPCHECK_KEY) {
+        await this.loadScript(CLOUD_SDK + 'firebase-app-check-compat.js');
+        firebase.appCheck().activate(new firebase.appCheck.ReCaptchaV3Provider(FIREBASE_APPCHECK_KEY), true);
+      }
       await new Promise((resolve) => {
         firebase.auth().onAuthStateChanged((u) => {
           this.user = u;

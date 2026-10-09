@@ -1,13 +1,33 @@
 rules_version = '2';
 // Cloud saves for Absolute Zero: each player can only read and write their own save document.
+// Only accounts made by the game (username@players.absolute-zero.game) may use it, and every field
+// must have the exact type and size the game writes, so nothing else can be stored.
 service cloud.firestore {
   match /databases/{database}/documents {
+    function gameAccount() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('^[a-z0-9_]{3,20}@players[.]absolute-zero[.]game$');
+    }
+    function owner(uid) { return gameAccount() && request.auth.uid == uid; }
+    function validSave() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['save', 'timePlayed', 'bestT', 'chapter', 'updated'])
+        && d.keys().hasAll(['save', 'timePlayed', 'bestT', 'chapter', 'updated'])
+        && d.save is string && d.save.size() > 0 && d.save.size() < 500000
+        && d.timePlayed is number && d.timePlayed >= 0
+        && d.bestT is string && d.bestT.size() < 64
+        && d.chapter is int && d.chapter >= 1 && d.chapter <= 20
+        && d.updated == request.time;
+    }
+
     match /saves/{uid} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['save', 'timePlayed', 'bestT', 'chapter', 'updated'])
-        && request.resource.data.save is string
-        && request.resource.data.save.size() < 500000;
+      allow get, delete: if owner(uid);
+      allow create, update: if owner(uid) && validSave();
+    }
+    // Everything else (other collections, listing all saves) is refused.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
