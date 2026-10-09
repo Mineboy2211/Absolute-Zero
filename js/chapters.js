@@ -60,15 +60,16 @@ Chapters.register({
   id: 2,
   name: 'Stellar',
   rule: 'Gravity. It grows with your temperature and pulls your heat gain down, until you learn to use it.',
-  // What Chapter 2 resets keep of Chapter 1 (Supernova milestones).
+  // What Chapter 2 resets keep of Chapter 1 (Supernova upgrades and milestones).
   keep(def) {
     const m = (n) => Layers.ms('supernova', n);
+    const u = (n) => hasUpg('supernova', n);
     switch (def.id) {
-      case 'ignition': return { upgrades: m(2) };
-      case 'meltdown': return { upgrades: m(2), flow: m(5) };
-      case 'vaporize': return { upgrades: m(3) };
-      case 'ionize': return { upgrades: m(3), split: m(3) };
-      case 'fusion': return { upgrades: m(10) ? true : m(5) ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [] };
+      case 'ignition': return { upgrades: u(101) };
+      case 'meltdown': return { upgrades: u(101), flow: m(5) };
+      case 'vaporize': return { upgrades: u(102) };
+      case 'ionize': return { upgrades: u(102), split: m(3) };
+      case 'fusion': return { upgrades: u(104) ? true : u(103) ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [] };
       default: return {};
     }
   },
@@ -76,7 +77,7 @@ Chapters.register({
     'Iron. The fire has nothing left to fuse.',
     'So it falls inward, under its own weight.',
     'Gravity is no longer something you can ignore: the hotter you burn, the harder it pulls.',
-    'Grade and Order no longer reset anything. But every Chapter 2 reset wipes Chapter 1 clean, until Supernova milestones teach you what to keep.',
+    'Grade and Order no longer reset anything. But every Chapter 2 reset wipes Chapter 1 clean, until Supernova upgrades and milestones teach you what to keep.',
   ],
   goals: [
     { desc: 'Reach 1e2500 K.', check: () => player.bestT.gte('1e2500') },
@@ -96,16 +97,17 @@ Chapters.register({
   id: 3,
   name: 'Cosmic',
   rule: 'Cosmic constants. Before each Big Bang, choose which laws of physics to break. Every broken law makes the next universe richer in Universes.',
-  // What Chapter 3 resets keep of Chapters 1 and 2 (Big Bang milestones).
+  // What Chapter 3 resets keep of Chapters 1 and 2 (Big Bang upgrades and milestones).
   keep(def) {
     const m = (n) => Layers.ms('bigbang', n);
-    if (def.chapter === 1) return { upgrades: m(1), flow: m(1), split: m(1) };
+    const u = (n) => hasUpg('bigbang', n);
+    if (def.chapter === 1) return { upgrades: u(101), flow: m(1), split: m(1) };
     switch (def.id) {
-      case 'supernova': return { upgrades: m(2) };
-      case 'collapse': return { upgrades: m(3), records: m(5) };
-      case 'singularity': return { upgrades: m(3), mass: m(5) };
-      case 'quasar': return { upgrades: m(3) };
-      case 'planck': return { upgrades: m(3), levels: m(10) };
+      case 'supernova': return { upgrades: u(102) };
+      case 'collapse': return { upgrades: u(103), records: m(5) };
+      case 'singularity': return { upgrades: u(103), mass: m(5) };
+      case 'quasar': return { upgrades: u(103) };
+      case 'planck': return { upgrades: u(103), levels: m(10) };
       default: return {};
     }
   },
@@ -113,7 +115,7 @@ Chapters.register({
     'The Planck limit is broken. There is nothing left inside this universe to burn.',
     'So you burn the universe itself.',
     'A Big Bang starts everything over with new laws of physics, and you get to choose them.',
-    'Every Chapter 3 reset wipes Chapters 1 and 2 clean, until Big Bang milestones teach you what to keep. The black hole now feeds without taking your Temperature.',
+    'Every Chapter 3 reset wipes Chapters 1 and 2 clean, until Big Bang upgrades and milestones teach you what to keep. The black hole now feeds without taking your Temperature.',
   ],
   goals: [
     { desc: 'Reach 1e70000 K.', check: () => player.bestT.gte('1e70000') },
@@ -133,23 +135,24 @@ Chapters.register({
   id: 4,
   name: 'Inversion',
   rule: 'Inversion. Your heat now pumps a second track, the Inverted Temperature: a negative temperature, hotter than any positive one. It pushes Heat Loss IV further away.',
-  // What Chapter 4 resets keep of Chapters 1 to 3 (Laser milestones).
+  // What Chapter 4 resets keep of Chapters 1 to 3 (Laser upgrades and milestones).
   keep(def) {
     const m = (n) => Layers.ms('laser', n);
-    if (def.chapter === 1) return { upgrades: m(1), flow: m(1), split: m(1) };
-    if (def.chapter === 2) return { upgrades: m(1), records: m(1), mass: m(1), levels: m(1) };
+    const up = hasUpg('laser', 101);
+    if (def.chapter === 1) return { upgrades: up, flow: m(1), split: m(1) };
+    if (def.chapter === 2) return { upgrades: up, records: m(1), mass: m(1), levels: m(1) };
     switch (def.id) {
-      case 'inflation': return { upgrades: m(1), stretch: m(2) };
-      case 'entropy': return { upgrades: m(1), engines: m(2) };
-      case 'heatdeath': return { upgrades: m(1), points: m(2), void: m(2) };
-      default: return { upgrades: m(1) };
+      case 'inflation': return { upgrades: up, stretch: m(2) };
+      case 'entropy': return { upgrades: up, engines: m(2) };
+      case 'heatdeath': return { upgrades: up, points: m(2), void: m(2) };
+      default: return { upgrades: up };
     }
   },
   intro: [
     'You have touched absolute zero from both sides. There is nothing colder.',
     'But there is something hotter than infinity: a negative temperature.',
     'A population inversion, where more of everything sits high than low.',
-    'Every Chapter 4 reset wipes Chapters 1 to 3 clean, until Laser milestones teach you what to keep.',
+    'Every Chapter 4 reset wipes Chapters 1 to 3 clean, until Laser upgrades and milestones teach you what to keep.',
   ],
   goals: [
     { desc: 'Reach 1e1,000,000 K.', check: () => player.bestT.gte('1e1000000') },

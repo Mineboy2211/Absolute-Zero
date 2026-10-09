@@ -1,7 +1,7 @@
 // Player state: default values and small shared helpers.
 
 const SAVE_KEY = 'absoluteZeroSave';
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 
 let player = null;
 

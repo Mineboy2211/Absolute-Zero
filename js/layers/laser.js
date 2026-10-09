@@ -68,8 +68,8 @@ Layers.register({
     return `Coherence multiplies Inverted Temperature gain by ${formatMult(this.invMult())} and raises the heat gain exponent ×${format(this.heatExp(), 3)}.`;
   },
   passive: () => (Layers.ms('laser', 25) ? 0.1 : Layers.ms('laser', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('spin', 1) }),
-  autoReset: () => Layers.ms('spin', 2),
+  keep: () => ({ upgrades: hasUpg('spin', 101) }),
+  autoReset: () => hasUpg('spin', 102),
   onResetBy() {
     if (Layers.ms('spin', 3)) Layers.addPoints('laser', D(100).sub(layerPts('laser')).max(0));
   },
@@ -85,8 +85,12 @@ Layers.register({
     { cost: D(1e7), desc: 'Beam power +0.5.' },
     { cost: D(5.2e7), desc: 'Heat gain exponent ×1.03.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(5), desc: 'Chapter 4 resets keep every upgrade of Chapters 1 to 3.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Chapter 4 resets keep every upgrade of Chapters 1 to 3, the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions.' },
+    { req: 1, desc: 'Chapter 4 resets keep the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions.' },
     { req: 2, desc: 'Chapter 4 resets keep Stretch levels, Heat Engines, Work, Void and Coolers.' },
     { req: 5, desc: 'A fifth beam. Gain 1% of pending Coherence every second.' },
     { req: 10, desc: 'Coherence gain ×2.' },

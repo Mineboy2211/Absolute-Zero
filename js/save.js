@@ -13,6 +13,22 @@ const migrations = {
     if (s.options && s.options.notation === 'standard') s.options.notation = 'short';
     return s;
   },
+  // v4: autobuyers and "keep lower upgrades" moved from milestones to upgrades (ids 101+). A save that had
+  // already reached such a milestone gets the matching upgrade, so nothing it had is taken away.
+  3: (s) => {
+    const was = {
+      meltdown: [1, 10], vaporize: [1, 2, 5], ionize: [1, 2, 2], fusion: [1, 2, 3],
+      supernova: [2, 3, 5, 10], collapse: [1, 2], singularity: [1, 2], quasar: [1, 2], planck: [1, 2, 10],
+      bigbang: [1, 2, 3], inflation: [1, 2], entropy: [1, 2, 3], heatdeath: [1, 2, 3], absolute: [1, 2],
+      laser: [1], spin: [1, 2], negkelvin: [1, 2], tachyon: [1, 2], beyond: [1, 2],
+    };
+    for (const [id, reqs] of Object.entries(was)) {
+      const d = s.layers && s.layers[id];
+      if (!d || !Array.isArray(d.upgrades)) continue;
+      reqs.forEach((req, i) => { if ((d.resets || 0) >= req && !d.upgrades.includes(101 + i)) d.upgrades.push(101 + i); });
+    }
+    return s;
+  },
 };
 
 function isBadDecimal(d) {

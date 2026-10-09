@@ -101,11 +101,11 @@ Layers.register({
     return `Universes raise the heat gain exponent to ×${format(Cosmos.heatExp(), 3)} and multiply Stardust, Neutronium and Hawking Heat gain by ${formatMult(Cosmos.chapter2Mult())}.`;
   },
   passive: () => (Layers.ms('bigbang', 25) ? 0.1 : Layers.ms('bigbang', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('inflation', 1) }),
+  keep: () => ({ upgrades: hasUpg('inflation', 101) }),
   onResetBy() {
     if (hasUpg('inflation', 3)) Layers.addPoints('bigbang', D(1e3).sub(layerPts('bigbang')).max(0));
   },
-  autoReset: () => Layers.ms('inflation', 2),
+  autoReset: () => hasUpg('inflation', 102),
   upgrades: [
     { cost: D(1), desc: 'Universes multiply Stardust and Hawking Heat gain again by (Universes + 1)².' },
     { cost: D(5), desc: 'Heat gain exponent ×1.02.' },
@@ -123,10 +123,15 @@ Layers.register({
     { cost: D(2e6), desc: 'Universes raise the heat gain exponent 50% more (0.03 → 0.045 per order of magnitude).' },
     { cost: D(2e7), desc: 'Heat Loss IV starts 10% later (in orders of magnitude).' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(3), desc: 'Chapter 3 resets keep every Chapter 1 upgrade and Element.' },
+    { cost: D(20), desc: 'Chapter 3 resets keep the Stardust tree.' },
+    { cost: D(50), desc: 'Chapter 3 resets keep Neutronium, Hawking Heat, Jet and Planck upgrades.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Stardust, Neutronium and Hawking Heat gain ×1e10. Chapter 3 resets keep every Chapter 1 upgrade and Element, your Magma flow, Plasma split and Chapter 1 challenge completions.' },
-    { req: 2, desc: 'Heat gain exponent ×1.01. Chapter 3 resets keep the Stardust tree and Stellar challenge completions.' },
-    { req: 3, desc: 'Chapter 3 resets keep Neutronium, Hawking Heat, Jet and Planck upgrades.' },
+    { req: 1, desc: 'Stardust, Neutronium and Hawking Heat gain ×1e10. Chapter 3 resets keep your Magma flow, Plasma split and Chapter 1 challenge completions.' },
+    { req: 2, desc: 'Heat gain exponent ×1.01. Chapter 3 resets keep Stellar challenge completions.' },
     { req: 5, desc: 'Gain 1% of pending Universes every second. Chapter 3 resets keep compressor records and the black hole mass.' },
     { req: 10, desc: 'Universe gain ×2. Chapter 3 resets keep Planck Levels.' },
     { req: 25, desc: 'Gain 10% of pending Universes every second.' },

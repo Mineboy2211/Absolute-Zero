@@ -80,9 +80,9 @@ Layers.register({
     return `Spin multiplies Coherence gain by ${formatMult(this.coherenceMult())} and Inverted Temperature gain by ${formatMult(this.invMult())}.`;
   },
   passive: () => (Layers.ms('spin', 25) ? 0.1 : Layers.ms('spin', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('negkelvin', 1) }),
-  onResetBy() { if (!Layers.ms('negkelvin', 1)) player.layers.spin.cells = []; },
-  autoReset: () => Layers.ms('negkelvin', 2),
+  keep: () => ({ upgrades: hasUpg('negkelvin', 101) }),
+  onResetBy() { if (!hasUpg('negkelvin', 101)) player.layers.spin.cells = []; },
+  autoReset: () => hasUpg('negkelvin', 102),
   upgrades: [
     { cost: D(10), desc: 'Lattice order raises the heat gain exponent (up to ×1.03).' },
     { cost: D(50), desc: 'Unlock Anneal: relax the lattice automatically (it finds a good arrangement, not always the best).' },
@@ -95,9 +95,12 @@ Layers.register({
     { cost: D(1e7), desc: 'Inverted Temperature delays Heat Loss IV more: strength +0.01.' },
     { cost: D(5.2e7), desc: 'Heat gain exponent ×1.03.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(30), desc: 'Spin Lattice resets keep Laser upgrades.' },
+    { cost: D(80), desc: 'Unlock the Laser autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Laser upgrades on Spin Lattice resets.' },
-    { req: 2, desc: 'Unlock the Laser autobuyer.' },
     { req: 3, desc: 'Start every Spin Lattice reset with 100 Coherence.' },
     { req: 5, desc: 'Gain 1% of pending Spin every second.' },
     { req: 10, desc: 'Spin gain ×2.' },

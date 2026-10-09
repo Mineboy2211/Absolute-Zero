@@ -106,7 +106,7 @@ Layers.register({
   req: () => D('1e15000'),
   gain: () => HeatDeath.pending(),
   tick: (dt) => HeatDeath.tick(dt),
-  keep: () => ({ points: Layers.ms('absolute', 3), upgrades: Layers.ms('absolute', 1) }),
+  keep: () => ({ points: Layers.ms('absolute', 3), upgrades: hasUpg('absolute', 101) }),
   onResetBy(by, keep) {
     const kept = by.chapter > 3 ? !!keep.void : Layers.ms('absolute', 3);
     if (!kept) player.layers.heatdeath.coolers = 0;
@@ -137,10 +137,14 @@ Layers.register({
     { cost: D(1e6), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
     { cost: D(1.1e7), desc: 'Heat gain exponent ×1.04.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(3), desc: 'Heat Death keeps Entropy upgrades.' },
+    { cost: D(10), desc: 'Unlock the Heat Engine autobuyer.' },
+    { cost: D(30), desc: 'Unlock the Entropy autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Entropy upgrades on Heat Death.' },
-    { req: 2, desc: 'Unlock the Heat Engine autobuyer.' },
-    { req: 3, desc: 'Unlock the Entropy autobuyer. Keep Heat Engines and Work on Heat Death.' },
+    { req: 3, desc: 'Keep Heat Engines and Work on Heat Death.' },
     { req: 5, desc: 'Disorder rises half as fast.' },
     { req: 10, desc: 'Void gain ×2.' },
   ],
@@ -151,6 +155,6 @@ Automation.register({
   name: 'Coolers',
   chapter: 3,
   group: 'heatdeath',
-  unlocked: () => Layers.ms('absolute', 2),
+  unlocked: () => hasUpg('absolute', 102),
   run: () => HeatDeath.buyMaxCoolers(),
 });

@@ -65,22 +65,24 @@ Layers.register({
   ],
   heatMult: () => (hasUpg('vaporize', 10) ? upgEff('vaporize', 10) : D(1)),
   passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('ionize', 10) ? 0.1 : 0),
-  autoReset: () => Layers.ms('ionize', 2),
+  autoReset: () => hasUpg('ionize', 102),
   keep(by) {
-    if (by.id === 'fusion') return { upgrades: Layers.ms('fusion', 1) };
-    if (Layers.ms('ionize', 5) || hasUpg('ionize', 4)) return { upgrades: true };
-    if (Layers.ms('ionize', 1)) return { upgrades: [1, 3, 5] };
+    if (by.id === 'fusion') return { upgrades: hasUpg('fusion', 101) };
+    if (hasUpg('ionize', 4)) return { upgrades: true };
+    if (hasUpg('ionize', 101)) return { upgrades: [1, 3, 5] };
     return {};
   },
   onResetBy() {
     if (Layers.ms('ionize', 1)) Layers.addPoints('vaporize', D(5).sub(layerPts('vaporize')).max(0));
   },
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(2), desc: 'Vaporize keeps every Ember upgrade.' },
+    { cost: D(6), desc: 'Unlock the Meltdown autobuyer.' },
+    { cost: D(20), desc: 'Vaporize keeps Magma upgrades.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep all Ember upgrades on Vaporize.' },
-    { req: 2, desc: 'Unlock the Meltdown autobuyer.' },
     { req: 3, desc: 'Start every run with 100 Embers.' },
-    { req: 5, desc: 'Keep Magma upgrades on Vaporize.' },
-    { req: 10, desc: 'Magma flow is never reset by Vaporize.' },
     { req: 20, desc: 'Gain 10% of pending Magma every second.' },
   ],
 });

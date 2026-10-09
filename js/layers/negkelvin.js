@@ -60,8 +60,8 @@ Layers.register({
     return `Inversions multiply Inverted Temperature gain by ${formatMult(this.invMult())} and raise the heat gain exponent ×${format(this.heatExp(), 3)}.`;
   },
   passive: () => (Layers.ms('negkelvin', 25) ? 0.1 : Layers.ms('negkelvin', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('tachyon', 1) }),
-  autoReset: () => Layers.ms('tachyon', 2),
+  keep: () => ({ upgrades: hasUpg('tachyon', 101) }),
+  autoReset: () => hasUpg('tachyon', 102),
   onResetBy() {
     const d = player.layers.negkelvin;
     if (!Layers.ms('tachyon', 3)) { d.pump = 0; d.cavity = 0; }
@@ -78,9 +78,12 @@ Layers.register({
     { cost: D(1e7), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
     { cost: D(5.2e7), desc: 'Heat gain exponent ×1.03.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(30), desc: 'Negative Kelvin resets keep Spin upgrades and your lattice.' },
+    { cost: D(60), desc: 'Unlock the Spin Lattice autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Spin upgrades and your lattice on Negative Kelvin resets.' },
-    { req: 2, desc: 'Unlock the Spin Lattice autobuyer.' },
     { req: 3, desc: 'Inverted Temperature gain ×10.' },
     { req: 5, desc: 'Gain 1% of pending Inversions every second.' },
     { req: 10, desc: 'Inversion gain ×2.' },

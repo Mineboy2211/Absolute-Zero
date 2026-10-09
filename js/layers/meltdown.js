@@ -54,22 +54,22 @@ Layers.register({
   passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('vaporize', 20) ? 0.1 : 0),
   keep(by) {
     switch (by.id) {
-      case 'vaporize': return { upgrades: Layers.ms('vaporize', 5) };
-      case 'ionize': return { upgrades: Layers.ms('ionize', 2) };
-      case 'fusion': return { upgrades: Layers.ms('fusion', 1) };
+      case 'vaporize': return { upgrades: hasUpg('vaporize', 103) };
+      case 'ionize': return { upgrades: hasUpg('ionize', 103) };
+      case 'fusion': return { upgrades: hasUpg('fusion', 101) };
       default: return {};
     }
   },
   onResetBy(by, keep) {
-    // Each reset needs its own keep: Vaporize (upgrade 1 or 10 resets), Ionize (2 resets), Fusion (1 reset).
+    // Each reset needs its own keep: Vaporize upgrade 1, and Ionize's and Fusion's keep upgrades.
     let keepFlow = false;
     if (by.chapter > 1) keepFlow = !!keep.flow;
-    else if (by.id === 'vaporize') keepFlow = hasUpg('vaporize', 1) || Layers.ms('vaporize', 10);
-    else if (by.id === 'ionize') keepFlow = Layers.ms('ionize', 2);
-    else if (by.id === 'fusion') keepFlow = Layers.ms('fusion', 1);
+    else if (by.id === 'vaporize') keepFlow = hasUpg('vaporize', 1);
+    else if (by.id === 'ionize') keepFlow = hasUpg('ionize', 103);
+    else if (by.id === 'fusion') keepFlow = hasUpg('fusion', 101);
     if (!keepFlow) player.layers.meltdown.flow = D(0);
   },
-  autoReset: () => Layers.ms('vaporize', 2),
+  autoReset: () => hasUpg('vaporize', 102),
   upgrades: [
     { cost: D(1), desc: 'Magma flow ×2.' },
     {
@@ -102,10 +102,13 @@ Layers.register({
       effectText: (e) => formatMult(e),
     },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(2), desc: 'Meltdown keeps the first 6 Ember upgrades.' },
+    { cost: D(1e6), desc: 'Meltdown keeps every Ember upgrade.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep the first 6 Ember upgrades on Meltdown.' },
     { req: 3, desc: 'Gain 10% of pending Embers every second.' },
-    { req: 10, desc: 'Keep all Ember upgrades on Meltdown.' },
     { req: 25, desc: 'Magma flow ×2.' },
   ],
 });

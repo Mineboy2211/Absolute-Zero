@@ -93,8 +93,8 @@ Layers.register({
     const kept = by.chapter > 3 ? !!keep.engines : Layers.ms('heatdeath', 3);
     if (!kept) { d.engines = 0; d.work = D(0); }
   },
-  keep: () => ({ upgrades: Layers.ms('heatdeath', 1) }),
-  autoReset: () => Layers.ms('heatdeath', 3),
+  keep: () => ({ upgrades: hasUpg('heatdeath', 101) }),
+  autoReset: () => hasUpg('heatdeath', 103),
   expansionMult: () => (hasUpg('entropy', 2) ? Thermo.work().add(1).pow(0.25) : D(1)),
   universeMult: () => (hasUpg('entropy', 8) ? Thermo.work().add(1).pow(0.2) : D(1)),
   effectText() {
@@ -123,10 +123,14 @@ Layers.register({
     { cost: D(3.2e10), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
     { cost: D(1e12), desc: 'Heat gain exponent ×1.04.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(10), desc: 'Entropy keeps Inflation upgrades.' },
+    { cost: D(50), desc: 'Unlock the Inflation autobuyer.' },
+    { cost: D(100), desc: 'Unlock the Stretch autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Disorder starts rising. Keep Inflation upgrades on Entropy.' },
-    { req: 2, desc: 'Unlock the Inflation autobuyer.' },
-    { req: 3, desc: 'Unlock the Stretch autobuyer.' },
+    { req: 1, desc: 'Disorder starts rising.' },
     { req: 5, desc: 'Gain 1% of pending Entropy every second. Keep Stretch levels on Entropy.' },
     { req: 10, desc: 'Entropy gain ×2 and Work ×2.' },
     { req: 25, desc: 'Gain 10% of pending Entropy every second.' },
@@ -138,6 +142,6 @@ Automation.register({
   name: 'Heat Engines',
   chapter: 3,
   group: 'entropy',
-  unlocked: () => Layers.ms('heatdeath', 2),
+  unlocked: () => hasUpg('heatdeath', 102),
   run: () => Thermo.buyMaxEngines(),
 });

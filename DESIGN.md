@@ -153,9 +153,11 @@ The game was made about 3× longer and harder (strict resets, steeper costs). Ti
 | **Chapter 4 complete** | `1e1,000,000` + goals | **~75d** (lattice goal by hand) |
 
 ### Reset rule (IMR style)
-Within a chapter, a keep only protects against the reset that grants it: "Keep Pressure upgrades on Ionize" does nothing on Fusion, and Magma flow kept by Vaporize upgrade 1 is still wiped by Ionize and Fusion. Higher layers have their own keep milestones (Ionize 2 resets: Ember and Magma upgrades and the Magma flow; Fusion 1 reset: every lower upgrade, the Magma flow and the Plasma split). `node tools/audit-resets.js` fills a save with everything, performs each Chapter 1 reset and prints what survived.
+Within a chapter, a keep only protects against the reset that grants it: "Keep Pressure upgrades on Ionize" does nothing on Fusion, and Magma flow kept by Vaporize upgrade 1 is still wiped by Ionize and Fusion. Higher layers have their own keep upgrades (Ionize: Ember and Magma upgrades and the Magma flow; Fusion: every lower upgrade, the Magma flow and the Plasma split). `node tools/audit-resets.js` fills a save with everything, performs each Chapter 1 reset and prints what survived.
 
-Every reset wipes **everything** below it: currencies, upgrades, Elements, buyables, ranks, Plasma split, Magma flow, challenge completions, compressor records, the black hole, Planck Levels, Stretch levels, Heat Engines, Work, Coolers and Void. A reset from a later chapter ignores the earlier chapter's own keep rules entirely. The only way to keep something is a milestone or upgrade of the layer doing the reset (Supernova milestones for Chapter 2 resets, Big Bang milestones for Chapter 3 resets, and so on). Finished chapters do **not** run on their own: their passive gain and autobuyers come only from milestones and upgrades, which a later reset can take away.
+Every reset wipes **everything** below it: currencies, upgrades, Elements, buyables, ranks, Plasma split, Magma flow, challenge completions, compressor records, the black hole, Planck Levels, Stretch levels, Heat Engines, Work, Coolers and Void. A reset from a later chapter ignores the earlier chapter's own keep rules entirely. The only way to keep something is a milestone or upgrade of the layer doing the reset (Supernova for Chapter 2 resets, Big Bang for Chapter 3 resets, and so on). Finished chapters do **not** run on their own: their passive gain and autobuyers come only from milestones and upgrades, which a later reset can take away.
+
+**Autobuyers and upgrade keeps are always upgrades, never milestones.** Each layer has a "Keeps and automation" card (`qol` in the layer definition, ids 101+) with the upgrades that unlock the autobuyer of the layer below and keep lower layers' upgrades (and Elements). Being upgrades, a higher reset takes them away like any other. Milestones keep the rest: passive gain, starting amounts, Magma flow, Plasma split, challenge completions, records and the like. Saves from before v4 get the upgrades whose old milestone they had already reached.
 
 ## 4. Chapter 1 — Combustion
 
@@ -193,7 +195,7 @@ Upgrade costs listed in the code are the source of truth: when the game was made
 - Effect: heat ×`(1 + Magma)^0.5`, Embers ×`(1+Magma)^0.25`.
 - Resets: everything of Ignition (Embers, Ember upgrades except those kept by milestones).
 - 10 upgrades (costs 1 → 1e7 Magma, spread so there is always one to save for): Flow ×2, Flow ×log(Embers), Furnace +0.006 power, Magma boosts Draft power, Heat Loss I power 0.5→0.55, Grade^0.5 boosts Flow, auto Order, Magma effect exponent 0.5→0.6, Ember upg 3 ^0.5→^0.55, Flow boosts Magma gain.
-- Milestones: 1 keep Ember upgrades 1–6 · 3 gain 10% of pending Embers/s · 10 keep all Ember upgrades · 25 Flow ×2.
+- Milestones: 3 gain 10% of pending Embers/s · 25 Flow ×2. Keep upgrades: keep Ember upgrades 1–6 (2 Magma) · keep all Ember upgrades (1e6).
 
 ### Layer 3 · Vaporize → Pressure
 - Unlock: best T ≥ `1e42`. Reset at `T ≥ 1e48`.
@@ -212,7 +214,7 @@ Upgrade costs listed in the code are the source of truth: when the game was made
 (Ch 5–6 unlock with Pressure upgrades. Goals per tier are listed in `js/challenges.js`.)
 
 - 10 upgrades: keep Magma Flow, Pressure boosts Flow, unlock Ch5, Heat Loss I start ×(1+P)^5, unlock Ch6, Grade/Order req −1, buyable scaling +50 levels, Order boosts Pressure, buyables stop spending T, heat ×2^(challenge completions).
-- Milestones: 1 keep all Ember upgrades · 2 auto Meltdown · 3 start with 100 Embers · 5 keep Magma upgrades · 10 Flow kept · 20 gain 10% pending Magma/s.
+- Milestones: 3 start with 100 Embers · 20 gain 10% pending Magma/s. Keep/automation upgrades: keep Ember upgrades (2) · Meltdown autobuyer (6) · keep Magma upgrades (20).
 
 ### Layer 4 · Ionize → Plasma
 - Unlock: best T ≥ `1e76`. Reset at `T ≥ 1e84`.
@@ -222,14 +224,14 @@ Upgrade costs listed in the code are the source of truth: when the game was made
   - Ions `i`: Magma flow ×`(1+i)`, Pressure ×`(1 + log(1+i))`
   - Photons `γ`: Heat Loss I and II start ×`(1+γ)^2`, Draft power `+0.005 × log(1+γ)`
 - 10 upgrades (1 → 5e4 Plasma): Pressure ×3, Electrons boost Embers, Heat Loss II +0.05, keep Pressure upgrades, Ions boost Plasma, Plasma ×1.1^completions, Electron exponent 1.75, Bellows +0.1, Draft scaling +50, total Plasma boosts heat.
-- Milestones: 1 keep Pressure upgrades 1/3/5 and start with 5 Pressure · 2 Vaporize autobuyer · 5 keep all Pressure upgrades · 10 gain 10% pending Pressure/s · 25 respec without reset.
+- Milestones: 1 start with 5 Pressure · 3 keep challenge completions · 10 gain 10% pending Pressure/s · 25 respec without reset. Keep/automation upgrades: keep Pressure upgrades 1/3/5 (1) · Vaporize autobuyer (3) · keep Ember and Magma upgrades and the flow (5).
 
 ### Layer 5 · Fusion → Nucleons (spent on Elements)
 - Unlock: best T ≥ `1e110`. Reset at `T ≥ 1e125`.
 - Gain: `N = floor( 10^((log(T) − 125)/30) × (1 + log(1+totalPlasma))^1.5 × nucleonMul )`.
 - **Elements**: 26 one-time upgrades from H to Fe, bought in order, shown as a periodic table (compact grid on phones). Element k (0-based) costs `3 × 10^(0.35k + 0.008k²)` Nucleons, from 1 (H) to ~6e13 (Fe).
   - Highlights: H heat ×total Nucleons · Ne 100% passive Embers/Magma/Pressure · Na/S unlock challenges 7/8 · C, Al weaken Heat Loss I/II · Ca delays Heat Loss III · Fe raw heat gain ^1.05.
-- Milestones: 1 keep Plasma upgrades and split · 2 Ionize autobuyer · 3 Plasma auto-split (last ratio) · 5 start with 10 Plasma · 10 gain 10% pending Plasma/s · 25 Nucleons ×2.
+- Milestones: 4 keep challenge completions · 5 start with 10 Plasma · 10 gain 10% pending Plasma/s · 25 Nucleons ×2. Keep/automation upgrades: keep every lower upgrade, the flow and the split (5) · Ionize autobuyer (15) · Plasma auto-split (30).
 - Challenges 7 (Thin Air: Bellows stuck at ×1.1 → Bellows power +0.05/completion) and 8 (Plasma Storm: pools do nothing → Plasma ×(1+c)²) reset at the Ionize level.
 
 ### Chapter 1 goals (complete all → Chapter 1 complete screen; Chapter 2 unlocks once it exists)
@@ -246,7 +248,7 @@ Upgrade costs listed in the code are the source of truth: when the game was made
 
 **Starting Chapter 2:**
 - Grade and Order no longer reset anything (with the rank autobuyers on, they used to wipe Temperature every tick).
-- Every Chapter 2 reset wipes Chapter 1 completely, except what Supernova milestones keep: 2 resets keep Ember and Magma upgrades, 3 keep Pressure and Plasma upgrades, the Plasma split and Chapter 1 challenge completions, 5 keep the Magma flow and the first 10 Elements, 10 keep every Element.
+- Every Chapter 2 reset wipes Chapter 1 completely, except what Supernova keeps. Upgrades: Ember and Magma upgrades (30 Stardust), Pressure and Plasma upgrades (60), the first 10 Elements (90), every Element (400). Milestones: 3 resets keep the Plasma split and Chapter 1 challenge completions, 5 keep the Magma flow.
 - The header only shows the newest chapter's currencies.
 
 ### New rule — Gravity
@@ -291,7 +293,7 @@ See section 3.
 
 ## 6. Chapter 3 — Cosmic (implemented in v3.0)
 
-**Unlock:** complete the 6 Chapter 2 goals. Feeding the black hole no longer costs Temperature. Every Chapter 3 reset wipes Chapters 1 and 2 except what Big Bang milestones keep (1: all of Chapter 1; 2: the Stardust tree and Stellar challenges; 3: Neutronium, Hawking, Jet and Planck upgrades; 5: compressor records and the black hole; 10: Planck Levels).
+**Unlock:** complete the 6 Chapter 2 goals. Feeding the black hole no longer costs Temperature. Every Chapter 3 reset wipes Chapters 1 and 2 except what Big Bang keeps. Upgrades: every Chapter 1 upgrade and Element (3 Universes), the Stardust tree (20), Neutronium, Hawking, Jet and Planck upgrades (50). Milestones: 1 the Magma flow, Plasma split and Chapter 1 challenges; 2 Stellar challenges; 5 compressor records and the black hole; 10 Planck Levels.
 
 ### New rule — cosmic constants
 Before each Big Bang you *arm* constants (laws you break). Armed constants become active at the next Big Bang and stay until the one after. Each active constant multiplies Universe gain:
@@ -331,7 +333,7 @@ See section 3.
 
 ## 6b. Chapter 4 — Inversion (implemented in v4.0)
 
-**Unlock:** complete the 6 Chapter 3 goals. Every Chapter 4 reset wipes Chapters 1–3 except what Laser milestones keep (1 reset: every upgrade of Chapters 1–3, the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions; 2 resets: Stretch levels, Heat Engines, Work, Void and Coolers). Cosmic constants are never wiped.
+**Unlock:** complete the 6 Chapter 3 goals. Every Chapter 4 reset wipes Chapters 1–3 except what Laser keeps (upgrade, 5 Coherence: every upgrade of Chapters 1–3; milestone 1: the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions; milestone 2: Stretch levels, Heat Engines, Work, Void and Coolers). Cosmic constants are never wiped.
 
 ### New rule — Inversion
 - A second track, the **Inverted Temperature** (shown as −K: a negative temperature, hotter than any positive one). It grows on its own from your heat: `((log T − 50000)/5000 + 1)³ × mults` per second, polynomial so it cannot run away.
@@ -371,7 +373,7 @@ Tested with shorter, approximate runs (a few simulated days from a Chapter 3 com
 
 - **Achievements:** 15 per chapter (45 total + secret ones). Each gives ×1.05 heat (Ch1), ×1.1 a Ch2 currency, etc. Achievement bonus total shown in Stats.
 - **Old currencies stay relevant:** every chapter adds upgrades priced in earlier currencies (Stardust nodes cost Pressure, Neutronium eats Embers/Magma/Plasma, Absolutes cost everything) and effects that scale with them.
-- **Automation per layer:** each layer's milestones/upgrades automate the layer below. Starting a new chapter does not automate the previous one (removed when the game was made harder).
+- **Automation per layer:** each layer's upgrades (never its milestones) automate the layer below. Starting a new chapter does not automate the previous one (removed when the game was made harder).
 - **Accent color** = function of `log(T)`: blue (< 1e3), red (1e3–1e40), orange (1e40–1e400), white (1e400–ee6), violet (≥ ee6), smoothly interpolated.
 - **Chapter unlock screen:** full-screen overlay with 3–4 lines of text and the new rule.
 

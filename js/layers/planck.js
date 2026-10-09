@@ -60,12 +60,16 @@ Layers.register({
     { cost: D(1e5), desc: 'Jet power +2.' },
     { cost: D(2e5), desc: 'Planck time: heat gain ^1.05.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(2), desc: 'Planck Break keeps Jet upgrades.' },
+    { cost: D(10), desc: 'Unlock the Quasar autobuyer.' },
+    { cost: D(300), desc: 'Unlock the Planck Level autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Jet upgrades on Planck Break.' },
-    { req: 2, desc: 'Unlock the Quasar autobuyer.' },
     { req: 3, desc: 'Start every Planck Break with 10 Jets.' },
     { req: 5, desc: 'Gain 10% of pending Jets every second.' },
-    { req: 10, desc: 'Unlock the Planck Level autobuyer. Planck Break keeps your Stellar challenge completions.' },
+    { req: 10, desc: 'Planck Break keeps your Stellar challenge completions.' },
     { req: 25, desc: 'Planck Shard gain ×2.' },
   ],
 });
@@ -75,6 +79,6 @@ Automation.register({
   name: 'Planck Levels',
   chapter: 2,
   group: 'planck',
-  unlocked: () => Layers.ms('planck', 10),
+  unlocked: () => hasUpg('planck', 103),
   run: () => Planck.buyMax(),
 });

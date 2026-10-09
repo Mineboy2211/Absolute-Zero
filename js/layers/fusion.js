@@ -31,7 +31,7 @@ const ELEMENT_DATA = [
 ];
 
 const Elements = {
-  count() { return player.layers.fusion.upgrades.length; },
+  count() { return player.layers.fusion.upgrades.filter((u) => u < 100).length; },
   eff(n) { return Layers.map.fusion.upgMap[n].effect(); },
 };
 
@@ -68,10 +68,13 @@ Layers.register({
     effect,
     effectText: effect ? (e) => formatMult(e) : undefined,
   })),
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(5), desc: 'Fusion keeps every Ember, Magma, Pressure and Plasma upgrade, the Magma flow and your Plasma split.' },
+    { cost: D(15), desc: 'Unlock the Ionize autobuyer.' },
+    { cost: D(30), desc: 'Unlock the Plasma auto-split (uses your last split ratio).' },
+  ],
   milestones: [
-    { req: 1, desc: 'Fusion keeps every Ember, Magma, Pressure and Plasma upgrade, the Magma flow and your Plasma split.' },
-    { req: 2, desc: 'Unlock the Ionize autobuyer.' },
-    { req: 3, desc: 'Unlock the Plasma auto-split (uses your last split ratio).' },
     { req: 4, desc: 'Fusion keeps your challenge completions.' },
     { req: 5, desc: 'Start every run with 10 Plasma.' },
     { req: 10, desc: 'Gain 10% of pending Plasma every second.' },

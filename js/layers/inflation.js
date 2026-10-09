@@ -71,12 +71,12 @@ Layers.register({
     return `Expansion speeds up Jet recharge and Hawking radiation by ${formatMult(this.speed())}.`;
   },
   passive: () => (Layers.ms('inflation', 25) ? 0.1 : Layers.ms('inflation', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('entropy', 1) }),
+  keep: () => ({ upgrades: hasUpg('entropy', 101) }),
   onResetBy(by, keep) {
     const kept = by.chapter > 3 ? !!keep.stretch : Layers.ms('entropy', 5);
     if (!kept) player.layers.inflation.stretch = { fire: 0, ash: 0, stars: 0 };
   },
-  autoReset: () => Layers.ms('entropy', 2),
+  autoReset: () => hasUpg('entropy', 102),
   upgrades: [
     {
       cost: D(3),
@@ -99,9 +99,12 @@ Layers.register({
     { cost: D(1e6), desc: 'Heat Loss IV starts 5% later (in orders of magnitude).' },
     { cost: D(1.1e7), desc: 'Heat gain exponent ×1.04.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(2), desc: 'Inflation keeps Big Bang upgrades.' },
+    { cost: D(5), desc: 'Unlock the Big Bang autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Big Bang upgrades on Inflation.' },
-    { req: 2, desc: 'Unlock the Big Bang autobuyer.' },
     { req: 3, desc: 'Universe gain ×3.' },
     { req: 5, desc: 'Gain 1% of pending Expansion every second.' },
     { req: 10, desc: 'Expansion gain ×2.' },
@@ -114,6 +117,6 @@ Automation.register({
   name: 'Stretch',
   chapter: 3,
   group: 'inflation',
-  unlocked: () => Layers.ms('entropy', 3),
+  unlocked: () => hasUpg('entropy', 103),
   run: () => { for (const k of Object.keys(STRETCH_GROUPS)) Stretch.buyMax(k); },
 });

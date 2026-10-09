@@ -32,7 +32,7 @@ const Achievements = {
     { id: 41, chapter: 2, name: 'Planck Scale', desc: 'Break the Planck limit for the first time.', check: () => Layers.ms('planck', 1) },
     { id: 42, chapter: 2, name: 'Limit Breaker', desc: 'Break all three Heat Losses.', check: () => [1, 2, 3].every((n) => hasUpg('planck', n)) },
     { id: 43, chapter: 2, name: 'Four Digits', desc: 'Reach 1e1000 K.', check: () => player.bestT.gte('1e1000') },
-    { id: 44, chapter: 2, name: 'Full Tree', desc: 'Own all 20 Stardust nodes.', check: () => !!player.layers.supernova && player.layers.supernova.upgrades.length >= 20 },
+    { id: 44, chapter: 2, name: 'Full Tree', desc: 'Own all 20 Stardust nodes.', check: () => !!player.layers.supernova && player.layers.supernova.upgrades.filter((u) => u < 100).length >= 20 },
     { id: 45, chapter: 2, name: 'Stellar Perfection', desc: 'Max every Stellar challenge.', check: () => Challenges.list.filter((c) => c.chapter === 2).every((c) => chalComps(c.id) >= Challenges.maxComps) },
     // Chapter 3 — each gives Universes, Expansion, Entropy, Absolutes and cooling speed ×1.1
     { id: 51, chapter: 3, name: 'Let There Be Heat', desc: 'Start a new universe.', check: () => Layers.ms('bigbang', 1) },

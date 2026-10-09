@@ -74,8 +74,8 @@ Layers.register({
   onResetBy() {
     if (Layers.ms('collapse', 3)) Layers.addPoints('supernova', D(1e4).sub(layerPts('supernova')).max(0));
   },
-  autoReset: () => Layers.ms('collapse', 2),
-  keep: () => ({ upgrades: Layers.ms('collapse', 1) }),
+  autoReset: () => hasUpg('collapse', 102),
+  keep: () => ({ upgrades: hasUpg('collapse', 101) }),
   upgrades: STARDUST_TREE.map((n, idx) => ({
     name: n.name,
     branch: n.branch,
@@ -88,12 +88,18 @@ Layers.register({
     effectText: n.effect ? (e) => formatMult(e) : undefined,
     unlocked: () => (n.req || []).every((r) => hasUpg('supernova', r)),
   })),
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(30), desc: 'Chapter 2 resets keep Ember and Magma upgrades.' },
+    { cost: D(60), desc: 'Chapter 2 resets keep Pressure and Plasma upgrades.' },
+    { cost: D(90), desc: 'Chapter 2 resets keep the first 10 Elements.' },
+    { cost: D(400), desc: 'Chapter 2 resets keep every Element.' },
+  ],
   milestones: [
     { req: 1, desc: 'Every Chapter 1 currency gain ×10.' },
-    { req: 2, desc: 'Chapter 2 resets keep Ember and Magma upgrades.' },
-    { req: 3, desc: 'Chapter 2 resets keep Pressure and Plasma upgrades, your Plasma split and Chapter 1 challenge completions, and leave you with at least Grade 5 and Order 3.' },
-    { req: 5, desc: 'Chapter 2 resets keep your Magma flow and the first 10 Elements.' },
-    { req: 10, desc: 'Stardust gain ×2. Chapter 2 resets keep every Element.' },
+    { req: 3, desc: 'Chapter 2 resets keep your Plasma split and Chapter 1 challenge completions, and leave you with at least Grade 5 and Order 3.' },
+    { req: 5, desc: 'Chapter 2 resets keep your Magma flow.' },
+    { req: 10, desc: 'Stardust gain ×2.' },
     { req: 25, desc: 'Gain 10% of pending Stardust every second.' },
   ],
 });

@@ -55,9 +55,12 @@ Layers.register({
     { name: 'Eternal Flame', cost: D(9e7), extra: [['ignition', D('1e2500')], ['inv', D(1e23)]], desc: 'Every Chapter 4 currency gain ×10.' },
     { name: 'Beyond', cost: D(2.7e8), extra: [['inv', D(1e25)], ['laser', D(1e10)], ['spin', D(1e8)], ['negkelvin', D(1e8)], ['tachyon', D(1e6)]], desc: 'Heat Loss IV starts 25% later. There is no hotter.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(40), desc: 'Beyond resets keep Tachyon upgrades.' },
+    { cost: D(100), desc: 'Unlock the Tachyon autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Tachyon upgrades on Beyond resets.' },
-    { req: 2, desc: 'Unlock the Tachyon autobuyer.' },
     { req: 5, desc: 'Gain 1% of pending Hyperheat every second.' },
     { req: 10, desc: 'Hyperheat gain ×2.' },
     { req: 25, desc: 'Gain 10% of pending Hyperheat every second.' },

@@ -65,8 +65,8 @@ Layers.register({
     return `Tachyons multiply Spin and Inversion gain by ${formatMult(this.boost())} and Inverted Temperature gain by ${formatMult(this.invMult())}.`;
   },
   passive: () => (Layers.ms('tachyon', 5) ? 0.01 : 0),
-  keep: () => ({ upgrades: Layers.ms('beyond', 1) }),
-  autoReset: () => Layers.ms('beyond', 2),
+  keep: () => ({ upgrades: hasUpg('beyond', 101) }),
+  autoReset: () => hasUpg('beyond', 102),
   upgrades: [
     { cost: D(10), desc: 'Heat gain exponent ×1.02.' },
     { cost: D(50), desc: 'Bank time twice as fast.' },
@@ -79,9 +79,12 @@ Layers.register({
     { cost: D(1e7), desc: 'Warps are 50% more efficient again.' },
     { cost: D(5.2e7), desc: 'Heat gain exponent ×1.03.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(8), desc: 'Tachyon resets keep Negative Kelvin upgrades.' },
+    { cost: D(15), desc: 'Unlock the Negative Kelvin autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Negative Kelvin upgrades on Tachyon resets.' },
-    { req: 2, desc: 'Unlock the Negative Kelvin autobuyer.' },
     { req: 3, desc: 'Keep Pumps and Cavities on Tachyon resets.' },
     { req: 5, desc: 'Gain 1% of pending Tachyons every second.' },
     { req: 10, desc: 'The bank holds twice as much.' },

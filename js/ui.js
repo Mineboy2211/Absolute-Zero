@@ -657,9 +657,9 @@ function renderLayerTab(def) {
 
   if (def.card) root.append(def.card());
 
-  if (def.upgrades.length && def.upgradeGrid !== false) {
+  const upgGrid = (list) => {
     const grid = h('div', { class: 'upg-grid' });
-    for (const u of def.upgrades) {
+    for (const u of list) {
       const btn = h('button', { class: 'upg', onclick: () => Layers.buyUpg(def.id, u.id) },
         u.name ? h('span', { class: 'node-name', text: u.name }) : null,
         h('span', { class: 'upg-desc', text: u.desc }),
@@ -672,7 +672,13 @@ function renderLayerTab(def) {
       });
       grid.append(u.unlocked ? UI.showIf(btn, u.unlocked) : btn);
     }
-    root.append(card('Upgrades', grid));
+    return grid;
+  };
+  if (def.upgrades.length && def.upgradeGrid !== false) root.append(card('Upgrades', upgGrid(def.upgrades)));
+  if (def.qol.length) {
+    root.append(card('Keeps and automation',
+      h('p', { class: 'muted small', text: `Autobuyers and what ${def.name} keeps. These are ${def.name} upgrades, so a higher reset takes them away like any other.` }),
+      upgGrid(def.qol)));
   }
 
   if (def.milestones.length) {

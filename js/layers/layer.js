@@ -14,6 +14,8 @@
 //   passive()          fraction of pending gain earned per second
 //   tick(dt)           per-tick logic
 //   upgrades[]         { cost, extra?: [[layerId, amount]], desc, effect?, effectText?, unlocked? }
+//   qol[]              upgrades that unlock autobuyers or keep lower layers' upgrades; same shape as upgrades,
+//                      ids start at 101 and they are shown in their own card (milestones never grant these)
 //   milestones[]       { req (number of resets), desc }
 //   autoReset()        when the "auto reset" automation is unlocked
 //   panel(el)          optional custom UI block for the layer tab
@@ -27,6 +29,8 @@ const Layers = {
     def.milestones = def.milestones || [];
     def.upgMap = {};
     def.upgrades.forEach((u, i) => { u.id = i + 1; def.upgMap[u.id] = u; });
+    def.qol = def.qol || [];
+    def.qol.forEach((u, i) => { u.id = 101 + i; u.qol = true; def.upgMap[u.id] = u; });
     this.list.push(def);
     this.list.sort((a, b) => a.chapter - b.chapter || a.order - b.order);
     this.map[def.id] = def;
@@ -157,7 +161,7 @@ const Layers = {
   // Buy every affordable upgrade of a layer, cheapest first.
   buyAllUpgs(id) {
     const def = this.map[id];
-    for (const u of [...def.upgrades].sort((a, b) => a.cost.cmp(b.cost))) this.buyUpg(id, u.id);
+    for (const u of [...def.upgrades, ...def.qol].sort((a, b) => a.cost.cmp(b.cost))) this.buyUpg(id, u.id);
   },
 
   tick(dt) {

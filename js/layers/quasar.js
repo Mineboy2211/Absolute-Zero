@@ -84,8 +84,8 @@ Layers.register({
     d.cooling = 0;
     if (Layers.ms('planck', 3)) Layers.addPoints('quasar', D(10).sub(layerPts('quasar')).max(0));
   },
-  autoReset: () => Layers.ms('planck', 2),
-  keep: () => ({ upgrades: Layers.ms('planck', 1) }),
+  autoReset: () => hasUpg('planck', 102),
+  keep: () => ({ upgrades: hasUpg('planck', 101) }),
   upgrades: [
     { cost: D(2), desc: 'Jet power +1 (each power is ×10 on the target).' },
     { cost: D(5), desc: 'Jets last 30 seconds longer.' },
@@ -103,9 +103,12 @@ Layers.register({
     { cost: D(3e3), desc: 'Jet power +2.' },
     { cost: D(1e4), desc: 'Quasar light: heat gain ^1.02.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(3), desc: 'Quasar keeps Hawking upgrades.' },
+    { cost: D(5), desc: 'Unlock the Singularity autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Hawking upgrades on Quasar.' },
-    { req: 2, desc: 'Unlock the Singularity autobuyer.' },
     { req: 3, desc: 'The black hole keeps its mass on Quasar.' },
     { req: 5, desc: 'Gain 10% of pending Hawking Heat every second.' },
     { req: 10, desc: 'Jets recharge twice as fast. Quasar keeps your Stellar challenge completions.' },

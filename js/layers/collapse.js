@@ -75,8 +75,8 @@ Layers.register({
     if (by.chapter > 2 && !keep.records) for (const k of Object.keys(COMPRESSORS)) player.layers.collapse.compressed[k] = D(0);
     if (Layers.ms('singularity', 3)) Layers.addPoints('collapse', D(100).sub(layerPts('collapse')).max(0));
   },
-  autoReset: () => Layers.ms('singularity', 2),
-  keep: () => ({ upgrades: Layers.ms('singularity', 1) }),
+  autoReset: () => hasUpg('singularity', 102),
+  keep: () => ({ upgrades: hasUpg('singularity', 101) }),
   upgrades: [
     { cost: D(1), desc: 'Compressed Embers use ^0.65 instead of ^0.6.' },
     {
@@ -94,9 +94,12 @@ Layers.register({
     { cost: D(6.3e4), desc: 'Neutron Star: heat gain ^1.02.' },
     { cost: D(2.4e5), desc: 'Every compression record counts 10% more.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(5), desc: 'Collapse keeps the Stardust tree.' },
+    { cost: D(10), desc: 'Unlock the Supernova autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep the Stardust tree on Collapse.' },
-    { req: 2, desc: 'Unlock the Supernova autobuyer.' },
     { req: 3, desc: 'Start every Collapse with 10 Thousand Stardust.' },
     { req: 5, desc: 'Gain 10% of pending Stardust every second.' },
     { req: 10, desc: 'Collapse keeps your Stellar challenge completions.' },

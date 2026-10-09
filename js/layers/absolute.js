@@ -52,9 +52,12 @@ Layers.register({
     { name: 'Absolute Void', cost: D(2e6), extra: [['heatdeath', D(1e4)], ['entropy', D(1e8)]], desc: 'Cooling ×10.' },
     { name: 'Absolute Zero', cost: D(5e6), extra: [['ignition', D('1e2500')], ['supernova', D('1e160')], ['bigbang', D(1e18)], ['heatdeath', D(1e5)]], desc: 'Heat Loss IV is weaker: power +0.01. You have touched absolute zero.' },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(2), desc: 'Absolute keeps Heat Death upgrades.' },
+    { cost: D(5), desc: 'Unlock the Cooler autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Heat Death upgrades on Absolute.' },
-    { req: 2, desc: 'Unlock the Cooler autobuyer.' },
     { req: 3, desc: 'Keep Void and Coolers on Absolute.' },
     { req: 5, desc: 'Gain 1% of pending Absolutes every second.' },
     { req: 10, desc: 'Absolute gain ×2.' },

@@ -31,7 +31,7 @@ function fill(milestones) {
   for (const id of CH1) {
     const d = player.layers[id];
     d.unlocked = true; d.points = D(1e6); d.resets = milestones ? 100 : 0;
-    d.upgrades = Layers.map[id].upgrades.map((u) => u.id);
+    d.upgrades = [...Layers.map[id].upgrades, ...(milestones ? Layers.map[id].qol : [])].map((u) => u.id);
   }
   player.layers.meltdown.flow = D(1e5);
   for (const k of Object.keys(PLASMA_POOLS)) player.layers.ionize.alloc[k] = D(1e3);

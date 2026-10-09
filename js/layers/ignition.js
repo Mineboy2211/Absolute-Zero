@@ -40,11 +40,11 @@ Layers.register({
   keep(by) {
     switch (by.id) {
       case 'meltdown':
-        if (Layers.ms('meltdown', 10)) return { upgrades: true };
-        return Layers.ms('meltdown', 1) ? { upgrades: [1, 2, 3, 4, 5, 6] } : {};
-      case 'vaporize': return { upgrades: Layers.ms('vaporize', 1) };
-      case 'ionize': return { upgrades: Layers.ms('ionize', 2) };
-      case 'fusion': return { upgrades: Layers.ms('fusion', 1) };
+        if (hasUpg('meltdown', 102)) return { upgrades: true };
+        return hasUpg('meltdown', 101) ? { upgrades: [1, 2, 3, 4, 5, 6] } : {};
+      case 'vaporize': return { upgrades: hasUpg('vaporize', 101) };
+      case 'ionize': return { upgrades: hasUpg('ionize', 103) };
+      case 'fusion': return { upgrades: hasUpg('fusion', 101) };
       default: return {};
     }
   },

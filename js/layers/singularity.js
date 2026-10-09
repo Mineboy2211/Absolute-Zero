@@ -82,8 +82,8 @@ Layers.register({
     const keepMass = by.chapter > 2 ? !!keep.mass : Layers.ms('quasar', 3);
     if (!keepMass) player.layers.singularity.mass = D(0);
   },
-  autoReset: () => Layers.ms('quasar', 2),
-  keep: () => ({ upgrades: Layers.ms('quasar', 1) }),
+  autoReset: () => hasUpg('quasar', 102),
+  keep: () => ({ upgrades: hasUpg('quasar', 101) }),
   upgrades: [
     { cost: D(16), desc: 'Each feed adds twice the mass.' },
     { cost: D(110), desc: 'Hawking radiation ×3.' },
@@ -111,9 +111,12 @@ Layers.register({
       effectText: (e) => formatMult(e),
     },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(20), desc: 'Singularity keeps Neutronium upgrades.' },
+    { cost: D(100), desc: 'Unlock the Collapse autobuyer.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Neutronium upgrades on Singularity.' },
-    { req: 2, desc: 'Unlock the Collapse autobuyer.' },
     { req: 3, desc: 'Start every Singularity with 100 Neutronium.' },
     { req: 5, desc: 'Gain 10% of pending Neutronium every second.' },
     { req: 10, desc: 'Singularity keeps your Stellar challenge completions.' },

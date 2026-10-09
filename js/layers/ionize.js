@@ -83,18 +83,18 @@ Layers.register({
   passive: () => (Layers.ms('fusion', 10) ? 0.1 : 0),
   keep() {
     return {
-      upgrades: Layers.ms('fusion', 1),
+      upgrades: hasUpg('fusion', 101),
       points: false,
     };
   },
   onResetBy(by, keep) {
-    const keepSplit = by.chapter > 1 ? !!keep.split : Layers.ms('fusion', 1);
+    const keepSplit = by.chapter > 1 ? !!keep.split : hasUpg('fusion', 101);
     if (!keepSplit) {
       for (const k of Object.keys(PLASMA_POOLS)) player.layers.ionize.alloc[k] = D(0);
     }
     if (Layers.ms('fusion', 5)) Layers.addPoints('ionize', D(10));
   },
-  autoReset: () => Layers.ms('fusion', 2),
+  autoReset: () => hasUpg('fusion', 102),
   upgrades: [
     { cost: D(1), desc: 'Pressure gain ×3.' },
     {
@@ -127,11 +127,15 @@ Layers.register({
       effectText: (e) => formatMult(e),
     },
   ],
+  // Autobuyers and keeps are upgrades, never milestones.
+  qol: [
+    { cost: D(1), desc: 'Ionize keeps Pressure upgrades 1, 3 and 5.' },
+    { cost: D(3), desc: 'Unlock the Vaporize autobuyer.' },
+    { cost: D(5), desc: 'Ionize keeps Ember and Magma upgrades and the Magma flow.' },
+  ],
   milestones: [
-    { req: 1, desc: 'Keep Pressure upgrades 1, 3 and 5 on Ionize, and start every run with 5 Pressure.' },
-    { req: 2, desc: 'Unlock the Vaporize autobuyer. Ionize keeps Ember and Magma upgrades and the Magma flow.' },
+    { req: 1, desc: 'Start every run with 5 Pressure.' },
     { req: 3, desc: 'Ionize keeps your challenge completions.' },
-    { req: 5, desc: 'Keep all Pressure upgrades on Ionize.' },
     { req: 10, desc: 'Gain 10% of pending Pressure every second.' },
     { req: 25, desc: 'Respec no longer forces an Ionize reset.' },
   ],
@@ -141,6 +145,6 @@ Automation.register({
   id: 'split_plasma',
   name: 'Plasma split',
   group: 'ionize',
-  unlocked: () => Layers.ms('fusion', 3),
+  unlocked: () => hasUpg('fusion', 103),
   run: () => Layers.map.ionize.autoSplit(),
 });
