@@ -104,14 +104,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------- layout ---------- */
 #layout { position: fixed; top: var(--header-h); bottom: 0; left: 0; right: 0; display: flex; z-index: 1; }
 #sidebar {
-  width: var(--sidebar-w); flex-shrink: 0; overflow-y: auto;
+  position: relative; width: var(--sidebar-w); flex-shrink: 0; overflow-y: auto;
   background: #0e0b0bcc; border-right: 1px solid var(--line); padding: 10px 10px 28px;
 }
 .nav-group { padding: 16px 10px 6px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; color: var(--faint); }
 .nav-btn {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0;
   padding: 8px 10px; margin: 1px 0; cursor: pointer; border-radius: 9px; color: var(--muted);
-  font-size: 14px; transition: background .15s, color .15s;
+  font-size: 14px; transition: background .15s, color .15s; position: relative; z-index: 1;
 }
 /* Layer tabs carry their colour (--tab) as a small dot. */
 .nav-btn[style*="--tab"]::before {
@@ -119,15 +119,26 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--tab); box-shadow: 0 0 8px color-mix(in srgb, var(--tab) 60%, transparent);
 }
 .nav-btn:hover { background: #ffffff0a; color: var(--text); }
-.nav-btn.active {
-  background: color-mix(in srgb, var(--tab, var(--accent)) 14%, #ffffff06);
-  color: var(--text); font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--tab, var(--accent));
+.nav-btn.active { color: var(--text); font-weight: 600; }
+.nav-btn.active:hover { background: none; }
+/* The highlight behind the active tab slides from tab to tab. */
+.nav-pill {
+  position: absolute; left: 10px; right: 10px; top: 0; height: 0; z-index: 0; opacity: 0; pointer-events: none;
+  border-radius: 9px; background: color-mix(in srgb, var(--tab, var(--accent)) 16%, #ffffff06);
+  box-shadow: inset 2px 0 0 var(--tab, var(--accent)), 0 0 18px -8px var(--tab, var(--accent));
+  transition: top .34s cubic-bezier(.3, 1.3, .4, 1), height .34s cubic-bezier(.3, 1.3, .4, 1), background .3s, box-shadow .3s, opacity .2s;
 }
 #content { flex: 1; overflow-y: auto; padding: 24px; }
 
-.tab { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; animation: tab-in .22s ease-out; }
-@keyframes tab-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tab { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+/* Tab change: the old page slips away, the new page's cards arrive one by one (--dir: 1 down the menu, -1 up). */
+.tab.leave { animation: tab-out .12s ease-in forwards; pointer-events: none; }
+@keyframes tab-out { to { opacity: 0; transform: translateY(calc(var(--dir, 1) * -10px)) scale(.99); } }
+.tab.enter > * { animation: card-in .42s cubic-bezier(.2, .9, .3, 1.15) backwards; animation-delay: calc(var(--i, 0) * 50ms); }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(calc(var(--dir, 1) * 22px)) scale(.97); }
+  60% { opacity: 1; }
+}
 
 /* ---------- generic ---------- */
 .card {

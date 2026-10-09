@@ -137,6 +137,9 @@ const UI = {
     this.sidebarKey = key;
     const nav = document.getElementById('sidebar');
     nav.textContent = '';
+    // The highlight behind the active tab is one element kept across rebuilds, so it can slide between tabs.
+    if (!this.navPill) this.navPill = h('div', { class: 'nav-pill', 'aria-hidden': 'true' });
+    nav.append(this.navPill);
     let group = null;
     for (const t of tabs) {
       if (t.group !== group) {
@@ -148,24 +151,61 @@ const UI = {
       if (t.color) b.style.setProperty('--tab', t.color);
       nav.append(b);
     }
+    this.placeNavPill();
+  },
+  placeNavPill() {
+    const pill = this.navPill;
+    const active = document.querySelector('#sidebar .nav-btn.active');
+    if (!pill || !active) { if (pill) pill.style.opacity = '0'; return; }
+    pill.style.setProperty('--tab', active.style.getPropertyValue('--tab') || 'var(--accent)');
+    pill.style.top = active.offsetTop + 'px';
+    pill.style.height = active.offsetHeight + 'px';
+    pill.style.opacity = '1';
   },
 
   // Rebuild the current tab (e.g. after a display setting changed).
   refresh() { this.switchTab(this.currentTab); },
 
+  // Changing tab: the old page fades out, then the new one's cards slide in one after another, from below when
+  // moving down the menu and from above when moving up. Rebuilding the same tab (refresh) is instant.
+  switchToken: 0,
   switchTab(id) {
-    if (!this.tabs().some((t) => t.id === id)) id = 'main';
+    const tabs = this.tabs();
+    if (!tabs.some((t) => t.id === id)) id = 'main';
+    const content = document.getElementById('content');
+    const old = content.firstElementChild;
+    const order = tabs.map((t) => t.id);
+    const dir = order.indexOf(id) >= order.indexOf(this.currentTab) ? 1 : -1;
+    const changed = id !== this.currentTab;
+    const fx = changed && player.options.effects && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const token = ++this.switchToken;
     this.currentTab = id;
     player.options.tab = id;
+    document.body.classList.remove('nav-open');
+    this.updateSidebar(true);
+    if (fx && old) {
+      this.updaters = [];
+      old.style.setProperty('--dir', dir);
+      old.classList.add('leave');
+      setTimeout(() => { if (token === this.switchToken) this.renderTab(id, dir, true); }, 120);
+    } else {
+      this.renderTab(id, dir, fx);
+    }
+  },
+  renderTab(id, dir, fx) {
     this.updaters = [];
     const content = document.getElementById('content');
     content.textContent = '';
     const render = Tabs[id] || (Layers.map[id] ? () => renderLayerTab(Layers.map[id]) : Tabs.main);
-    content.append(render());
+    const el = render();
+    if (fx) {
+      el.classList.add('enter');
+      el.style.setProperty('--dir', dir);
+      Array.from(el.children).forEach((c, i) => c.style.setProperty('--i', Math.min(i, 7)));
+    }
+    content.append(el);
     content.scrollTop = 0;
     if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
-    document.body.classList.remove('nav-open');
-    this.updateSidebar(true);
     this.update();
   },
 
