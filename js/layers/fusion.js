@@ -69,7 +69,7 @@ Layers.register({
     effectText: effect ? (e) => formatMult(e) : undefined,
   })),
   milestones: [
-    { req: 1, desc: 'Keep Plasma upgrades and your Plasma split on Fusion.' },
+    { req: 1, desc: 'Fusion keeps every Ember, Magma, Pressure and Plasma upgrade, the Magma flow and your Plasma split.' },
     { req: 2, desc: 'Unlock the Ionize autobuyer.' },
     { req: 3, desc: 'Unlock the Plasma auto-split (uses your last split ratio).' },
     { req: 4, desc: 'Fusion keeps your challenge completions.' },

@@ -66,7 +66,8 @@ Layers.register({
   heatMult: () => (hasUpg('vaporize', 10) ? upgEff('vaporize', 10) : D(1)),
   passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('ionize', 10) ? 0.1 : 0),
   autoReset: () => Layers.ms('ionize', 2),
-  keep() {
+  keep(by) {
+    if (by.id === 'fusion') return { upgrades: Layers.ms('fusion', 1) };
     if (Layers.ms('ionize', 5) || hasUpg('ionize', 4)) return { upgrades: true };
     if (Layers.ms('ionize', 1)) return { upgrades: [1, 3, 5] };
     return {};
@@ -75,10 +76,10 @@ Layers.register({
     if (Layers.ms('ionize', 1)) Layers.addPoints('vaporize', D(5).sub(layerPts('vaporize')).max(0));
   },
   milestones: [
-    { req: 1, desc: 'Keep all Ember upgrades.' },
+    { req: 1, desc: 'Keep all Ember upgrades on Vaporize.' },
     { req: 2, desc: 'Unlock the Meltdown autobuyer.' },
     { req: 3, desc: 'Start every run with 100 Embers.' },
-    { req: 5, desc: 'Keep Magma upgrades.' },
+    { req: 5, desc: 'Keep Magma upgrades on Vaporize.' },
     { req: 10, desc: 'Magma flow is never reset by Vaporize.' },
     { req: 20, desc: 'Gain 10% of pending Magma every second.' },
   ],

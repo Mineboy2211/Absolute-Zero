@@ -61,7 +61,7 @@ const Ranks = {
       rewards: [
         [1, 'Heat gain ×3.'],
         [2, 'Grade no longer resets Kindling.'],
-        [3, 'Unlock the Kindling autobuyer.'],
+        [3, 'Kindling power +1.'],
         [5, 'Draft power +0.02.'],
         [8, () => `Heat gain ×Grade². Currently ${formatMult(player.ranks.grade.pow(2).max(1))}.`],
         [12, 'Furnace effect ×1.25.'],

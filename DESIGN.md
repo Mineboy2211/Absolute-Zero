@@ -70,7 +70,7 @@ Formula for a power softcap at start `S` with power `p`: `x > S ? S × (x/S)^p :
 Milestone rewards (listed in the Ranks tab, greyed until reached):
 
 - **Degree 1** unlock Bellows, heat ×2 · **2** unlock Draft · **3** unlock Furnace, heat ×2 · **4** Kindling power ×2 · **6** heat ×(Degree+1) · **10** Bellows cost ÷ 10 · **15** Draft power +0.01 · **25** Kindling scaling starts 25 levels later
-- **Grade 1** heat ×3 · **2** Grade no longer resets Kindling · **3** Kindling autobuyer · **5** Draft power +0.02 · **8** heat ×(Grade²) · **12** Furnace exponent +0.05
+- **Grade 1** heat ×3 · **2** Grade no longer resets Kindling · **3** Kindling power +1 · **5** Draft power +0.02 · **8** heat ×(Grade²) · **12** Furnace exponent +0.05
 - **Order 1** heat ×10 · **2** Degree req exponent 1.2 → 1.15 · **4** Order no longer resets Degree · **6** Bellows power +0.05 · **10** heat ×1.5^Order
 
 ## 2. Architecture (data-driven)
@@ -136,7 +136,7 @@ The game was made about 3× longer and harder (strict resets, steeper costs). Ti
 | First Vaporize | `1e48 K` | 11h |
 | First Ionize | `1e84 K` | 1d 12h |
 | First Fusion | `1e125 K` | 2d 15h |
-| **Chapter 1 complete** | `1e500 K` + goals | **8d 11h** |
+| **Chapter 1 complete** | `1e500 K` + goals | **9d 5h** |
 | First Supernova | `1e480` | 7d 21h |
 | First Collapse | `1e556` | 16d 8h |
 | First Quasar | `1e690` | 21d 22h |
@@ -153,6 +153,8 @@ The game was made about 3× longer and harder (strict resets, steeper costs). Ti
 | **Chapter 4 complete** | `1e1,000,000` + goals | **~75d** (lattice goal by hand) |
 
 ### Reset rule (IMR style)
+Within a chapter, a keep only protects against the reset that grants it: "Keep Pressure upgrades on Ionize" does nothing on Fusion, and Magma flow kept by Vaporize upgrade 1 is still wiped by Ionize and Fusion. Higher layers have their own keep milestones (Ionize 2 resets: Ember and Magma upgrades and the Magma flow; Fusion 1 reset: every lower upgrade, the Magma flow and the Plasma split). `node tools/audit-resets.js` fills a save with everything, performs each Chapter 1 reset and prints what survived.
+
 Every reset wipes **everything** below it: currencies, upgrades, Elements, buyables, ranks, Plasma split, Magma flow, challenge completions, compressor records, the black hole, Planck Levels, Stretch levels, Heat Engines, Work, Coolers and Void. A reset from a later chapter ignores the earlier chapter's own keep rules entirely. The only way to keep something is a milestone or upgrade of the layer doing the reset (Supernova milestones for Chapter 2 resets, Big Bang milestones for Chapter 3 resets, and so on). Finished chapters do **not** run on their own: their passive gain and autobuyers come only from milestones and upgrades, which a later reset can take away.
 
 ## 4. Chapter 1 — Combustion

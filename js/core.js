@@ -114,7 +114,7 @@ for (const id of Buyables.order) {
     name: Buyables.defs[id].name,
     group: 'buyables',
     unlocked: () => ({
-      kindling: hasUpg('ignition', 2) || rankReward('grade', 3),
+      kindling: hasUpg('ignition', 2),
       bellows: hasUpg('ignition', 5),
       furnace: hasUpg('ignition', 8),
       tickspeed: hasUpg('ignition', 8),
@@ -128,6 +128,7 @@ for (const id of Buyables.order) {
 function kindlingPower() {
   let p = D(1);
   if (hasUpg('ignition', 4)) p = p.add(1);
+  if (rankReward('grade', 3)) p = p.add(1);
   if (rankReward('degree', 4)) p = p.mul(2);
   p = p.mul(Challenges.reward(1));
   return p;

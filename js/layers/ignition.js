@@ -36,10 +36,17 @@ Layers.register({
   },
   effectText: () => `Your Ember upgrades multiply heat gain by ${formatMult(Layers.map.ignition.heatMult())}.`,
   passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('meltdown', 3) ? 0.1 : 0),
+  // Each keep only protects against the reset that grants it.
   keep(by) {
-    if (Layers.ms('vaporize', 1) || Layers.ms('meltdown', 10)) return { upgrades: true };
-    if (Layers.ms('meltdown', 1)) return { upgrades: [1, 2, 3, 4, 5, 6] };
-    return {};
+    switch (by.id) {
+      case 'meltdown':
+        if (Layers.ms('meltdown', 10)) return { upgrades: true };
+        return Layers.ms('meltdown', 1) ? { upgrades: [1, 2, 3, 4, 5, 6] } : {};
+      case 'vaporize': return { upgrades: Layers.ms('vaporize', 1) };
+      case 'ionize': return { upgrades: Layers.ms('ionize', 2) };
+      case 'fusion': return { upgrades: Layers.ms('fusion', 1) };
+      default: return {};
+    }
   },
   onResetBy() {
     if (Layers.ms('vaporize', 3)) Layers.addPoints('ignition', D(100).sub(layerPts('ignition')).max(0));

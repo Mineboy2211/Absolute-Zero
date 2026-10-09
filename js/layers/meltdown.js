@@ -52,12 +52,21 @@ Layers.register({
     return `Magma multiplies heat gain by ${formatMult(this.heatMult())} and Ember gain by ${formatMult(this.emberMult())}.`;
   },
   passive: () => (hasUpg('fusion', 10) ? 1 : Layers.ms('vaporize', 20) ? 0.1 : 0),
-  keep() {
-    if (Layers.ms('vaporize', 5)) return { upgrades: true };
-    return {};
+  keep(by) {
+    switch (by.id) {
+      case 'vaporize': return { upgrades: Layers.ms('vaporize', 5) };
+      case 'ionize': return { upgrades: Layers.ms('ionize', 2) };
+      case 'fusion': return { upgrades: Layers.ms('fusion', 1) };
+      default: return {};
+    }
   },
   onResetBy(by, keep) {
-    const keepFlow = by.chapter > 1 ? !!keep.flow : hasUpg('vaporize', 1) || Layers.ms('vaporize', 10);
+    // Each reset needs its own keep: Vaporize (upgrade 1 or 10 resets), Ionize (2 resets), Fusion (1 reset).
+    let keepFlow = false;
+    if (by.chapter > 1) keepFlow = !!keep.flow;
+    else if (by.id === 'vaporize') keepFlow = hasUpg('vaporize', 1) || Layers.ms('vaporize', 10);
+    else if (by.id === 'ionize') keepFlow = Layers.ms('ionize', 2);
+    else if (by.id === 'fusion') keepFlow = Layers.ms('fusion', 1);
     if (!keepFlow) player.layers.meltdown.flow = D(0);
   },
   autoReset: () => Layers.ms('vaporize', 2),
