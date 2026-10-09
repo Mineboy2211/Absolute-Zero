@@ -125,7 +125,8 @@ Layers.register({
   ],
   // Autobuyers and keeps are upgrades, never milestones.
   qol: [
-    { cost: D(3), desc: 'Chapter 3 resets keep every Chapter 1 upgrade and Element.' },
+    // Paid with Planck Shards so it can be bought before the first Big Bang.
+    { cost: D(0), extra: [['planck', D(5000)]], desc: 'Chapter 3 resets keep every Chapter 1 upgrade and Element. Can be bought before your first Big Bang.' },
     { cost: D(20), desc: 'Chapter 3 resets keep the Stardust tree.' },
     { cost: D(50), desc: 'Chapter 3 resets keep Neutronium, Hawking Heat, Jet and Planck upgrades.' },
   ],

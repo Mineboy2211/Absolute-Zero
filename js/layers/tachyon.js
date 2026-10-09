@@ -81,7 +81,7 @@ Layers.register({
   ],
   // Autobuyers and keeps are upgrades, never milestones.
   qol: [
-    { cost: D(8), desc: 'Tachyon resets keep Negative Kelvin upgrades.' },
+    { cost: D(5), desc: 'Tachyon resets keep Negative Kelvin upgrades.' },
     { cost: D(15), desc: 'Unlock the Negative Kelvin autobuyer.' },
   ],
   milestones: [

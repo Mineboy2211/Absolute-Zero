@@ -293,7 +293,7 @@ See section 3.
 
 ## 6. Chapter 3 — Cosmic (implemented in v3.0)
 
-**Unlock:** complete the 6 Chapter 2 goals. Feeding the black hole no longer costs Temperature. Every Chapter 3 reset wipes Chapters 1 and 2 except what Big Bang keeps. Upgrades: every Chapter 1 upgrade and Element (3 Universes), the Stardust tree (20), Neutronium, Hawking, Jet and Planck upgrades (50). Milestones: 1 the Magma flow, Plasma split and Chapter 1 challenges; 2 Stellar challenges; 5 compressor records and the black hole; 10 Planck Levels.
+**Unlock:** complete the 6 Chapter 2 goals. Feeding the black hole no longer costs Temperature. Every Chapter 3 reset wipes Chapters 1 and 2 except what Big Bang keeps. Upgrades: every Chapter 1 upgrade and Element (5,000 Planck Shards, buyable before the first Big Bang), the Stardust tree (20), Neutronium, Hawking, Jet and Planck upgrades (50). Milestones: 1 the Magma flow, Plasma split and Chapter 1 challenges; 2 Stellar challenges; 5 compressor records and the black hole; 10 Planck Levels.
 
 ### New rule — cosmic constants
 Before each Big Bang you *arm* constants (laws you break). Armed constants become active at the next Big Bang and stay until the one after. Each active constant multiplies Universe gain:
@@ -333,7 +333,7 @@ See section 3.
 
 ## 6b. Chapter 4 — Inversion (implemented in v4.0)
 
-**Unlock:** complete the 6 Chapter 3 goals. Every Chapter 4 reset wipes Chapters 1–3 except what Laser keeps (upgrade, 5 Coherence: every upgrade of Chapters 1–3; milestone 1: the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions; milestone 2: Stretch levels, Heat Engines, Work, Void and Coolers). Cosmic constants are never wiped.
+**Unlock:** complete the 6 Chapter 3 goals. Every Chapter 4 reset wipes Chapters 1–3 except what Laser keeps (upgrade, 300,000 Absolutes, buyable before the first Laser: every upgrade of Chapters 1–3; milestone 1: the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions; milestone 2: Stretch levels, Heat Engines, Work, Void and Coolers). Cosmic constants are never wiped.
 
 ### New rule — Inversion
 - A second track, the **Inverted Temperature** (shown as −K: a negative temperature, hotter than any positive one). It grows on its own from your heat: `((log T − 50000)/5000 + 1)³ × mults` per second, polynomial so it cannot run away.

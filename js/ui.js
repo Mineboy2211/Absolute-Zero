@@ -664,8 +664,8 @@ function renderLayerTab(def) {
         u.name ? h('span', { class: 'node-name', text: u.name }) : null,
         h('span', { class: 'upg-desc', text: u.desc }),
         u.effect ? UI.dyn(() => 'Currently: ' + u.effectText(u.effect()), 'span', 'upg-eff') : null,
-        h('span', { class: 'upg-cost', text: `Cost: ${formatWhole(u.cost)} ${def.currency}` +
-          (u.extra ? u.extra.map(([lid, amt]) => ` + ${formatWhole(amt)} ${extraName(lid)}`).join('') : '') }));
+        h('span', { class: 'upg-cost', text: 'Cost: ' + [...(u.cost.gt(0) || !u.extra ? [`${formatWhole(u.cost)} ${def.currency}`] : []),
+          ...(u.extra || []).map(([lid, amt]) => `${formatWhole(amt)} ${extraName(lid)}`)].join(' + ') }));
       UI.bind(() => {
         btn.classList.toggle('bought', hasUpg(def.id, u.id));
         btn.classList.toggle('can', Layers.canBuyUpg(def.id, u.id));

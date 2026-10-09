@@ -87,7 +87,8 @@ Layers.register({
   ],
   // Autobuyers and keeps are upgrades, never milestones.
   qol: [
-    { cost: D(5), desc: 'Chapter 4 resets keep every upgrade of Chapters 1 to 3.' },
+    // Paid with Absolutes so it can be bought before the first Laser.
+    { cost: D(0), extra: [['absolute', D(3e5)]], desc: 'Chapter 4 resets keep every upgrade of Chapters 1 to 3. Can be bought before your first Laser.' },
   ],
   milestones: [
     { req: 1, desc: 'Chapter 4 resets keep the Magma flow, Plasma split, compressor records, black hole, Planck Levels and challenge completions.' },

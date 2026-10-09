@@ -153,7 +153,7 @@ botHooks.push(() => {
     if (d.time > hours * 3600) { mark('first Heat Death ended (depth ' + format(d.depth) + ')'); HeatDeath.end(); }
   } else if (HeatDeath.canStart() && (botState.hdNext || 0) <= player.stats.timePlayed) {
     HeatDeath.start();
-    botState.hdNext = player.stats.timePlayed + (player.chapters.unlocked >= 4 ? 12 : 3) * 3600;
+    botState.hdNext = player.stats.timePlayed + (typeof HD_EVERY !== "undefined" ? HD_EVERY : 12) * 3600;
   }
 });
 // Start a new universe whenever the armed constants differ from the active ones.
